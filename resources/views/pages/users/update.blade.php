@@ -4,7 +4,7 @@
     <nav class="page-breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/users">Users</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Create user</li>
+            <li class="breadcrumb-item active" aria-current="page">Update user</li>
         </ol>
     </nav>
 
@@ -12,7 +12,7 @@
         <div class="col-md-12 grid-margin stretch-card">
             <div class="card">
                 <div class="card-body">
-                    <h6 class="card-title">Create new user</h6>
+                    <h6 class="card-title">Update user</h6>
                     <form>
                         <div class="form-group">
                             <label>Name</label>
