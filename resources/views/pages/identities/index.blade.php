@@ -10,8 +10,8 @@
     <div class="row">
         <div class="card-body">
             <h6 class="card-title d-flex justify-content-md-between align-items-center">
-                <div>Manage users</div>
-                <a href="{{ route('users.create') }}" class="btn btn-primary">Create new</a>
+                <div>Manage identities</div>
+                <a href="{{ route('identities.create') }}" class="btn btn-primary">Create new</a>
             </h6>
 
             <div class="table-responsive">
@@ -19,25 +19,25 @@
                     <thead>
                     <tr>
                         <th>#</th>
+                        <th>Image</th>
                         <th>Name</th>
-                        <th>Email</th>
                         <th>Created at</th>
                         <th>Options</th>
                     </tr>
                     </thead>
                     <tbody>
                     @php
-                        $index = $users->perPage() * ($users->currentPage() - 1);
+                        $index = $identities->perPage() * ($identities->currentPage() - 1);
                     @endphp
 
-                    @foreach ($users as $user)
+                    @foreach ($identities as $identity)
                         <tr>
                             <th>{{ ++$index }}</th>
-                            <td>{{ $user->name }}</td>
-                            <td>{{ $user->email }}</td>
-                            <td>{{ $user->created_at }}</td>
+                            <td><img src="{{ $identity->images[0] }}" alt=""></td>
+                            <td>{{ $identity->name }}</td>
+                            <td>{{ $identity->created_at }}</td>
                             <td>
-                                <form action="{{ route('users.delete', $user->id) }}" method="POST">
+                                <form action="{{ route('identities.delete', $identity->id) }}" method="POST">
                                     @csrf
                                     @method('DELETE')
 
@@ -54,5 +54,5 @@
         </div>
     </div>
 
-    {{ $users->links('vendor.pagination.bootstrap-4') }}
+    {{ $identities->links('vendor.pagination.bootstrap-4') }}
 @endsection
