@@ -34,11 +34,11 @@
                 <div class="collapse {{ show_class(['users', 'users/*']) }}" id="users">
                     <ul class="nav sub-menu">
                         <li class="nav-item">
-                            <a href="{{ url('/users') }}" class="nav-link {{ active_class(['users']) }}">List</a>
+                            <a href="{{ route('users') }}" class="nav-link {{ active_class(['users']) }}">List</a>
                         </li>
 
                         <li class="nav-item">
-                            <a href="{{ url('/users/create') }}" class="nav-link {{ active_class(['users/create']) }}">Create</a>
+                            <a href="{{ route('users.create') }}" class="nav-link {{ active_class(['users/create']) }}">Create</a>
                         </li>
                     </ul>
                 </div>

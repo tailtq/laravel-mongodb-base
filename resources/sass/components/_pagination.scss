@@ -1,13 +1,23 @@
 .pagination {
   .page-item {
     .page-link {
-      min-width: 36px;
+      min-width: 32px;
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 0.5rem 0.5rem;
+      line-height: 1;
+      color: #727cf5;
       svg {
         width: 17px;
         height: 17px;
+      }
+    }
+    &.active {
+      .page-link {
+        background-color: #727cf5;
+        border-color: #727cf5;
+        color: #ffffff;
       }
     }
   }

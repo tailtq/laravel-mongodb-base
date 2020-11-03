@@ -37119,8 +37119,8 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /Users/nobleui/Projects/ui-laravel/template/light/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /Users/nobleui/Projects/ui-laravel/template/light/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! /Users/tailtq/Code/php/ai-application/resources/js/app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! /Users/tailtq/Code/php/ai-application/resources/sass/app.scss */"./resources/sass/app.scss");
 
 
 /***/ })
