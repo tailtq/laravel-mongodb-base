@@ -17,10 +17,12 @@ Route::get('/', function () {
 
 // Application layer
 
-Route::group(['prefix' => 'auth'], function() {
-    Route::get('login', function () { return view('pages.auth.login'); });
-    Route::get('register', function () { return view('pages.auth.register'); });
-});
+Auth::routes();
+
+//Route::group(['prefix' => 'auth'], function() {
+//    Route::get('login', function () { return view('pages.auth.login'); });
+//    Route::get('register', function () { return view('pages.auth.register'); });
+//});
 
 Route::group(['prefix' => 'users'], function () {
     Route::get('/', function () { return view('pages.users.index'); });
@@ -125,3 +127,7 @@ Route::get('/clear-cache', function() {
 Route::any('/{page?}',function(){
     return View::make('pages.template.error.404');
 })->where('page','.*');
+
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');
