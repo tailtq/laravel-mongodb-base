@@ -24,7 +24,7 @@ services:
     phpmyadmin:
         image: phpmyadmin/phpmyadmin
         ports:
-            - 9021:80
+            - 9022:80
         depends_on:
             - db
         environment:
