@@ -27,23 +27,58 @@
                 <a class="nav-link" data-toggle="collapse" href="#users" role="button"
                    aria-expanded="{{ is_active_route(['users', 'users/*']) }}" aria-controls="users">
                     <i class="link-icon" data-feather="users"></i>
-                    <span class="link-title">Users</span>
+                    <span class="link-title">Quản lý người dùng</span>
                     <i class="link-arrow" data-feather="chevron-down"></i>
                 </a>
 
                 <div class="collapse {{ show_class(['users', 'users/*']) }}" id="users">
                     <ul class="nav sub-menu">
                         <li class="nav-item">
-                            <a href="{{ route('users') }}" class="nav-link {{ active_class(['users']) }}">List</a>
+                            <a href="{{ route('users') }}" class="nav-link {{ active_class(['users']) }}">Danh sách</a>
                         </li>
 
                         <li class="nav-item">
-                            <a href="{{ route('users.create') }}" class="nav-link {{ active_class(['users/create']) }}">Create</a>
+                            <a href="{{ route('users.create') }}" class="nav-link {{ active_class(['users/create']) }}">Tạo mới</a>
                         </li>
                     </ul>
                 </div>
             </li>
 
+            <li class="nav-item {{ active_class(['identity', 'identity/*']) }}">
+                <a class="nav-link" data-toggle="collapse" href="#identity" role="button"
+                   aria-expanded="{{ is_active_route(['identity', 'identity/*']) }}" aria-controls="identity">
+                    <i class="link-icon" data-feather="identity"></i>
+                    <span class="link-title">Quản lý dánh sách theo dõi</span>
+                    <i class="link-arrow" data-feather="chevron-down"></i>
+                </a>
+
+                <div class="collapse {{ show_class(['identity', 'identity/*']) }}" id="identity">
+                    <ul class="nav sub-menu">
+                        <li class="nav-item">
+                            <a href="" class="nav-link {{ active_class(['identity']) }}">Reset hệ thống</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
+            <li class="nav-item {{ active_class(['settings', 'settings/*']) }}">
+                <a class="nav-link" data-toggle="collapse" href="#settings" role="button"
+                   aria-expanded="{{ is_active_route(['settings', 'settings/*']) }}" aria-controls="settings">
+                    <i class="link-icon" data-feather="settings"></i>
+                    <span class="link-title">Cấu hình hệ thống</span>
+                    <i class="link-arrow" data-feather="chevron-down"></i>
+                </a>
+
+                <div class="collapse {{ show_class(['settings', 'settings/*']) }}" id="settings">
+                    <ul class="nav sub-menu">
+                        <li class="nav-item">
+                            <a href="" class="nav-link {{ active_class(['settings']) }}">Reset hệ thống</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
+            {{--COMPONENT NOBLEUI--}}
             <li class="nav-item nav-category">web apps</li>
             <li class="nav-item {{ active_class(['email/*']) }}">
                 <a class="nav-link" data-toggle="collapse" href="#email" role="button"
@@ -388,39 +423,5 @@
                 </a>
             </li>
         </ul>
-    </div>
-</nav>
-<nav class="settings-sidebar">
-    <div class="sidebar-body">
-        <a href="#" class="settings-sidebar-toggler">
-            <i data-feather="settings"></i>
-        </a>
-        <h6 class="text-muted">Sidebar:</h6>
-        <div class="form-group border-bottom">
-            <div class="form-check form-check-inline">
-                <label class="form-check-label">
-                    <input type="radio" class="form-check-input" name="sidebarThemeSettings" id="sidebarLight"
-                           value="sidebar-light" checked>
-                    Light
-                </label>
-            </div>
-            <div class="form-check form-check-inline">
-                <label class="form-check-label">
-                    <input type="radio" class="form-check-input" name="sidebarThemeSettings" id="sidebarDark"
-                           value="sidebar-dark">
-                    Dark
-                </label>
-            </div>
-        </div>
-        <div class="theme-wrapper">
-            <h6 class="text-muted mb-2">Light Version:</h6>
-            <a class="theme-item active" href="https://www.nobleui.com/laravel/template/light/">
-                <img src="{{ url('assets/images/screenshots/light.jpg') }}" alt="light version">
-            </a>
-            <h6 class="text-muted mb-2">Dark Version:</h6>
-            <a class="theme-item" href="https://www.nobleui.com/laravel/template/dark">
-                <img src="{{ url('assets/images/screenshots/dark.jpg') }}" alt="light version">
-            </a>
-        </div>
     </div>
 </nav>
