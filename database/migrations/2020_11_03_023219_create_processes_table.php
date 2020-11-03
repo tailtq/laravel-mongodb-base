@@ -17,7 +17,7 @@ class CreateProcessesTable extends Migration
             $table->integerIncrements('id');
             $table->string('name');
             $table->string('video_url');
-            $table->longText('description')->nullable();
+            $table->text('description')->nullable();
             $table->string('status')->default('ready'); // ready, running, paused, stopped
             $table->timestamps();
         });
