@@ -15,10 +15,10 @@ class CreateIdentitiesTable extends Migration
     {
         Schema::create('identities', function (Blueprint $table) {
             $table->integerIncrements('id');
-            $table->integerIncrements('name');
+            $table->string('name');
             $table->json('images');
             $table->string('status')->default('tracking'); // tracking, untracking
-            $table->string('info')->nullable();
+            $table->text('info')->nullable();
             $table->string('mongo_id')->nullable();
             $table->timestamps();
         });

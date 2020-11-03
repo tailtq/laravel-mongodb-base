@@ -21,6 +21,8 @@ services:
             MYSQL_DATABASE: db
             MYSQL_USER: dbuser
             MYSQL_PASSWORD: user123
+        volumes:
+            - ./storage/mysql:/var/lib/mysql
     phpmyadmin:
         image: phpmyadmin/phpmyadmin
         ports:
