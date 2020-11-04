@@ -16,8 +16,8 @@ class CreateIdentitiesTable extends Migration
         Schema::create('identities', function (Blueprint $table) {
             $table->integerIncrements('id');
             $table->string('name');
-            $table->string('identity_number', 20);
-            $table->json('images');
+            $table->string('card_number', 20);
+            $table->json('images')->nullable();
             $table->string('status')->default('tracking'); // tracking, untracking
             $table->text('info')->nullable();
             $table->string('mongo_id')->nullable();

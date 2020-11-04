@@ -23,8 +23,8 @@
                         <div class="row">
                             <div class="col-md-7">
                                 <div class="form-group">
-                                    <label>Name</label>
-                                    <input type="text" class="form-control" placeholder="Enter Name" name="name">
+                                    <label>Tên:</label>
+                                    <input type="text" class="form-control" placeholder="Nhập tên" name="name">
 
                                     @error('name')
                                     <label class="error mt-2 text-danger">
@@ -34,7 +34,7 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label>Info</label>
+                                    <label>Thông tin:</label>
                                     <textarea name="info" id="" class="form-control" rows="20"></textarea>
 
                                     @error('info')
@@ -47,12 +47,22 @@
 
                             <div class="col-md-5">
                                 <div class="form-group">
-                                    <label>File upload</label>
+                                    <label>Số CMND</label>
+                                    <input type="text" class="form-control" placeholder="Nhập số CMND" name="card_number">
+
+                                    @error('name')
+                                    <label class="error mt-2 text-danger">
+                                        {{ $message }}
+                                    </label>
+                                    @enderror
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Upload:</label>
 
                                     <div class="stretch-card grid-margin grid-margin-md-0">
                                         <div class="card">
                                             <div class="card-body">
-                                                <h6 class="card-title">Dropzone</h6>
                                                 <div class="dropzone" id="dropzone"></div>
                                             </div>
                                         </div>
@@ -70,7 +80,7 @@
                             </div>
                         </div>
 
-                        <button class="btn btn-primary" type="submit">Submit form</button>
+                        <button class="btn btn-primary" type="submit">Lưu</button>
                     </form>
                 </div>
             </div>

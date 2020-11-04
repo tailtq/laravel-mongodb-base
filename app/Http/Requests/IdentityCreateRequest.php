@@ -27,6 +27,7 @@ class IdentityCreateRequest extends FormRequest
             'name' => 'required|string|max:255',
             'info' => 'nullable',
             'status' => 'nullable',
+            'card_number' => 'required',
         ];
     }
 }

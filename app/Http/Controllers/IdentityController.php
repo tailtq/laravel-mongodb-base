@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\IdentityCreateRequest;
 use App\Models\Identity;
+use App\Traits\RequestAPI;
 
 class IdentityController extends Controller
 {
+    use RequestAPI;
+
     public function list()
     {
         $identities = Identity::orderBy('created_at', 'desc')->paginate(10);
@@ -34,19 +37,22 @@ class IdentityController extends Controller
         $files = $request->file('files');
         $pathFiles = [];
 
+        $identity = Identity::create([
+            'name' => $data['name'],
+            'status' => $data['status'] ? 'tracking' : 'untracking',
+            'info' => $data['info'],
+            'card_number' => $data['card_number'],
+        ]);
+
+
         foreach ($files as $key => $file) {
             $extension  = pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION );
             $name = $this->generateFileName($file);
-            $pathFiles[$key] = $this->uploadFile($file, $name);
+            $pathFiles[$key] = $this->uploadFile($file, $name, $identity->id);
         }
 
-        Identity::create([
-            'name' => $data['name'],
-            'images' => json_encode($pathFiles),
-            'status' => $data['status'],
-            'info' => $data['info'],
-            'identity_number' => $data['identity_number'],
-        ]);
+        $identity->images = json_encode($pathFiles);
+        $identity->save();
 
         return redirect()->route('identities');
     }
@@ -82,7 +88,28 @@ class IdentityController extends Controller
      */
     public function delete($id)
     {
-        Identity::where('id', $id)->delete();
+        $identity = Identity::where('id', $id);
+
+//        $fileName = $object->name;
+//        $fileNameOriginal = $object->file_name_original;
+//        $diskName = config('constants-fileMedia.disk_name');
+//        $existFile = $this->existFileInStorage($diskName, $fileName);
+//        if (!$existFile) {
+//            $existFile = $this->existFileInStorage($diskName, $fileNameOriginal);
+//        }
+//
+//        if ($existFile) {
+//            if ($type === FileMedia::DOWNLOAD) {
+//                return Storage::disk($diskName)->download(env('FOLDER_SAVE') .'/' . $fileName);
+//            }
+//
+//            if ($type === FileMedia::DELETE) {
+//                $this->fileMediaRepository->delete($id);
+//                return Storage::disk($diskName)->delete(env('FOLDER_SAVE') .'/' . $fileName);
+//            }
+//        }
+
+        $identity->delete();
 
         return redirect()->route('identities');
     }

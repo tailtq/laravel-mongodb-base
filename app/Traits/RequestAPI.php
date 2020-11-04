@@ -2,26 +2,54 @@
 
 namespace App\Traits;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Exception\RequestException;
+use Illuminate\Support\Facades\Http;
 
 trait RequestAPI
 {
-    public function getResponseAPI() //Retrieve
+    public function sendGETRequest($url, $params = [], $headers = [])
     {
-        $client = new Client();
-        $response = $client->get('https://5fa119bf2541640016b6a6d8.mockapi.io/Tet');
-        $body = json_decode($response->getBody(), true);
-        dd($body);
-        return $body;
+        $response = Http::withHeaders($headers)->get($url, $params);
+
+        return $this->getResponse($response);
     }
 
-    public function postResponseAPI()
+    public function sendPOSTRequest($url, $body, $headers = [])
     {
-        $client = new Client();
-        $response = $client->post('http://api.example.com/v1/retrieve');
-        $body = json_decode($response->getBody(), true);
-        return $body;
+        $response = Http::withHeaders($headers)->post($url, $body);
+
+        return $this->getResponse($response);
+    }
+
+    public function sendPUTRequest($url, $body, $headers = [])
+    {
+        $response = Http::withHeaders($headers)->put($url, $body);
+
+        return $this->getResponse($response);
+    }
+
+    public function sendDELETERequest($url, $body = [], $headers = [])
+    {
+        $response = Http::withHeaders($headers)->delete($url, $body);
+
+        return $this->getResponse($response);
+    }
+
+    /**
+     * @param \Illuminate\Http\Client\Response $response
+     * @return array
+     */
+    private function getResponse($response)
+    {
+        $result = [
+            'status' => $response->ok(),
+            'statusCode' => $response->status(),
+            'data' => $response->object(),
+            'message' => 'Ok'
+        ];
+        if ($response->failed()) {
+            $result['message'] = 'HTTP Request: ' . $response->toPsrResponse()->getReasonPhrase();
+        }
+
+        return $result;
     }
 }

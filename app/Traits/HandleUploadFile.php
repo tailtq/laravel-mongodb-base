@@ -9,9 +9,10 @@ trait HandleUploadFile
      * Upload file
      * @param $file
      * @param $name
+     * @param $id
      * @return mixed
      */
-    public function uploadFile($file, $name)
+    public function uploadFile($file, $name, $id = null)
     {
         $disk = Storage::disk('minio');
 

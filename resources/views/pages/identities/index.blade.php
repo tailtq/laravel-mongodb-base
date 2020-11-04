@@ -10,8 +10,8 @@
     <div class="row">
         <div class="card-body">
             <h6 class="card-title d-flex justify-content-md-between align-items-center">
-                <div>Manage identities</div>
-                <a href="{{ route('identities.create') }}" class="btn btn-primary">Create new</a>
+                <div>Danh sách theo dõi</div>
+                <a href="{{ route('identities.create') }}" class="btn btn-primary">Tạo mới</a>
             </h6>
 
             <div class="table-responsive">
@@ -33,7 +33,7 @@
                     @foreach ($identities as $identity)
                         <tr>
                             <th>{{ ++$index }}</th>
-                            <td><img src="{{ $identity->images[0] }}" alt=""></td>
+                            <td><img src="{{ json_decode($identity->images)[0] }}" alt=""></td>
                             <td>{{ $identity->name }}</td>
                             <td>{{ $identity->created_at }}</td>
                             <td>
