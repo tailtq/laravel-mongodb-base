@@ -17,7 +17,7 @@ class Identity extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'images', 'status', 'info', 'mongo_id', 'identity_number'
+        'name', 'images', 'status', 'info', 'mongo_id', 'card_number'
     ];
 
     protected $casts = [

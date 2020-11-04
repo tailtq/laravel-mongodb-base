@@ -24,58 +24,24 @@
             <li class="nav-item nav-category">Application</li>
 
             <li class="nav-item {{ active_class(['users', 'users/*']) }}">
-                <a class="nav-link" data-toggle="collapse" href="#users" role="button"
-                   aria-expanded="{{ is_active_route(['users', 'users/*']) }}" aria-controls="users">
+                <a class="nav-link" href="{{ route('users') }}">
                     <i class="link-icon" data-feather="users"></i>
                     <span class="link-title">Quản lý người dùng</span>
-                    <i class="link-arrow" data-feather="chevron-down"></i>
                 </a>
-
-                <div class="collapse {{ show_class(['users', 'users/*']) }}" id="users">
-                    <ul class="nav sub-menu">
-                        <li class="nav-item">
-                            <a href="{{ route('users') }}" class="nav-link {{ active_class(['users']) }}">Danh sách</a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a href="{{ route('users.create') }}" class="nav-link {{ active_class(['users/create']) }}">Tạo mới</a>
-                        </li>
-                    </ul>
-                </div>
             </li>
 
-            <li class="nav-item {{ active_class(['identity', 'identity/*']) }}">
-                <a class="nav-link" data-toggle="collapse" href="#identity" role="button"
-                   aria-expanded="{{ is_active_route(['identity', 'identity/*']) }}" aria-controls="identity">
-                    <i class="link-icon" data-feather="identity"></i>
-                    <span class="link-title">Quản lý dánh sách theo dõi</span>
-                    <i class="link-arrow" data-feather="chevron-down"></i>
+            <li class="nav-item {{ active_class(['identities', 'identities/*']) }}">
+                <a class="nav-link" href="{{ route('identities') }}">
+                    <i class="link-icon" data-feather="user"></i>
+                    <span class="link-title">Quản lý định danh</span>
                 </a>
-
-                <div class="collapse {{ show_class(['identity', 'identity/*']) }}" id="identity">
-                    <ul class="nav sub-menu">
-                        <li class="nav-item">
-                            <a href="" class="nav-link {{ active_class(['identity']) }}">Reset hệ thống</a>
-                        </li>
-                    </ul>
-                </div>
             </li>
 
             <li class="nav-item {{ active_class(['settings', 'settings/*']) }}">
-                <a class="nav-link" data-toggle="collapse" href="#settings" role="button"
-                   aria-expanded="{{ is_active_route(['settings', 'settings/*']) }}" aria-controls="settings">
+                <a class="nav-link" href="#">
                     <i class="link-icon" data-feather="settings"></i>
                     <span class="link-title">Cấu hình hệ thống</span>
-                    <i class="link-arrow" data-feather="chevron-down"></i>
                 </a>
-
-                <div class="collapse {{ show_class(['settings', 'settings/*']) }}" id="settings">
-                    <ul class="nav sub-menu">
-                        <li class="nav-item">
-                            <a href="" class="nav-link {{ active_class(['settings']) }}">Reset hệ thống</a>
-                        </li>
-                    </ul>
-                </div>
             </li>
 
             {{--COMPONENT NOBLEUI--}}
