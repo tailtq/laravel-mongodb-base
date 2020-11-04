@@ -40,7 +40,7 @@ class IdentityController extends Controller
             'images' => $data['images'],
             'status' => $data['status'],
             'info' => $data['info'],
-            'identity_number' => $data['identity_number'],
+            'card_number' => $data['card_number'],
         ]);
 
         return redirect()->route('identities');
