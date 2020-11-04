@@ -34,14 +34,25 @@ class IdentityController extends Controller
     public function store(IdentityCreateRequest $request)
     {
         $data = $request->validated();
+        $files = $request->file('files');
+        $pathFiles = [];
 
-        Identity::create([
+        $identity = Identity::create([
             'name' => $data['name'],
-            'images' => $data['images'],
-            'status' => $data['status'],
+            'status' => $data['status'] ? 'tracking' : 'untracking',
             'info' => $data['info'],
             'card_number' => $data['card_number'],
         ]);
+
+
+        foreach ($files as $key => $file) {
+            $extension  = pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION );
+            $name = $this->generateFileName($file);
+            $pathFiles[$key] = $this->uploadFile($file, $name, $identity->id);
+        }
+
+        $identity->images = json_encode($pathFiles);
+        $identity->save();
 
         return redirect()->route('identities');
     }
@@ -77,8 +88,41 @@ class IdentityController extends Controller
      */
     public function delete($id)
     {
-        Identity::where('id', $id)->delete();
+        $identity = Identity::where('id', $id);
+
+//        $fileName = $object->name;
+//        $fileNameOriginal = $object->file_name_original;
+//        $diskName = config('constants-fileMedia.disk_name');
+//        $existFile = $this->existFileInStorage($diskName, $fileName);
+//        if (!$existFile) {
+//            $existFile = $this->existFileInStorage($diskName, $fileNameOriginal);
+//        }
+//
+//        if ($existFile) {
+//            if ($type === FileMedia::DOWNLOAD) {
+//                return Storage::disk($diskName)->download(env('FOLDER_SAVE') .'/' . $fileName);
+//            }
+//
+//            if ($type === FileMedia::DELETE) {
+//                $this->fileMediaRepository->delete($id);
+//                return Storage::disk($diskName)->delete(env('FOLDER_SAVE') .'/' . $fileName);
+//            }
+//        }
+
+        $identity->delete();
 
         return redirect()->route('identities');
+    }
+
+    /**
+     * Generate file name
+     * @param $file
+     * @return string
+     */
+    private function generateFileName($file) {
+        $filename   = uniqid() . "-" . time() . "-" . md5(time());
+        $extension  = pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION );
+        $basename   = $filename . "." . $extension;
+        return $basename;
     }
 }

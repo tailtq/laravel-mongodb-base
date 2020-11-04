@@ -39,20 +39,20 @@
     </div>
   </div>
 
-    <!-- base js -->
-    <script src="{{ asset('js/app.js') }}"></script>
-    <script src="{{ asset('assets/plugins/feather-icons/feather.min.js') }}"></script>
-    <script src="{{ asset('assets/plugins/perfect-scrollbar/perfect-scrollbar.min.js') }}"></script>
-    <!-- end base js -->
+  <!-- base js -->
+  <script src="{{ asset('js/app.js') }}"></script>
+  <script src="{{ asset('assets/plugins/feather-icons/feather.min.js') }}"></script>
+  <script src="{{ asset('assets/plugins/perfect-scrollbar/perfect-scrollbar.min.js') }}"></script>
+  <!-- end base js -->
 
-    <!-- plugin js -->
-    @stack('plugin-scripts')
-    <!-- end plugin js -->
+  <!-- plugin js -->
+  @stack('plugin-scripts')
+  <!-- end plugin js -->
 
-    <!-- common js -->
-    <script src="{{ asset('assets/js/template.js') }}"></script>
-    <!-- end common js -->
+  <!-- common js -->
+  <script src="{{ asset('assets/js/template.js') }}"></script>
+  <!-- end common js -->
 
-    @stack('custom-scripts')
+  @stack('custom-scripts')
 </body>
 </html>

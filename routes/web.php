@@ -36,7 +36,7 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::get('/create', 'IdentityController@create')->name('identities.create');
 
-        Route::post('/create', 'IdentityController@store')->name('identities.create');
+        Route::post('/create', 'IdentityController@store')->name('identities.store');
 
         Route::get('/{id}', 'IdentityController@edit')->name('identities.edit');
 
