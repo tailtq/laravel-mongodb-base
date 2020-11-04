@@ -31,10 +31,18 @@ class IdentityController extends Controller
     public function store(IdentityCreateRequest $request)
     {
         $data = $request->validated();
+        $files = $request->file('files');
+        $pathFiles = [];
+
+        foreach ($files as $key => $file) {
+            $extension  = pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION );
+            $name = $this->generateFileName($file);
+            $pathFiles[$key] = $this->uploadFile($file, $name);
+        }
 
         Identity::create([
             'name' => $data['name'],
-            'images' => $data['images'],
+            'images' => json_encode($pathFiles),
             'status' => $data['status'],
             'info' => $data['info'],
             'identity_number' => $data['identity_number'],
@@ -77,5 +85,17 @@ class IdentityController extends Controller
         Identity::where('id', $id)->delete();
 
         return redirect()->route('identities');
+    }
+
+    /**
+     * Generate file name
+     * @param $file
+     * @return string
+     */
+    private function generateFileName($file) {
+        $filename   = uniqid() . "-" . time() . "-" . md5(time());
+        $extension  = pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION );
+        $basename   = $filename . "." . $extension;
+        return $basename;
     }
 }
