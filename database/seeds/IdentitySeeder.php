@@ -34,12 +34,18 @@ class IdentitySeeder extends Seeder
             return [
                 'name' => $faker->name,
                 'info' => $faker->text(200),
-                'images' => json_encode([$card]),
+                'card_number' => $this->randomCardNumber($faker),
+                'images' => json_encode([['id' => '1', 'url' => $card]]),
                 'status' => array_rand(Identity::STATUS),
                 'created_at' => \Carbon\Carbon::now(),
             ];
         }, $identityCards);
 
         Identity::insert($data);
+    }
+
+    private function randomCardNumber($faker)
+    {
+        return implode('', $faker->randomElements(['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'], 9, true));
     }
 }

@@ -33,9 +33,3 @@ services:
             PMA_HOSTS: db
             PMA_USER: dbuser
             PMA_PASSWORD: user123
-    composer:
-        restart: 'no'
-        image: composer
-        command: install
-        volumes:
-            - .:/var/www/app
