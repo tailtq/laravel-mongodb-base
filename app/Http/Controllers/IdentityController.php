@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\IdentityCreateRequest;
 use App\Models\Identity;
+use App\Traits\RequestAPI;
 
 class IdentityController extends Controller
 {
+    use RequestAPI;
+
     public function list()
     {
         $identities = Identity::orderBy('created_at', 'desc')->paginate(10);
