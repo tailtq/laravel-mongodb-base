@@ -11,15 +11,14 @@
 |
 */
 
-Route::get('/', function () {
-    return view('dashboard');
-});
-
 // Application layer
 
 Auth::routes(['register' => false]);
 
 Route::group(['middleware' => ['auth']], function () {
+    Route::get('/', function () {
+        return view('dashboard');
+    });
 
     Route::group(['prefix' => 'users'], function () {
         Route::get('/', 'UserController@list')->name('users');

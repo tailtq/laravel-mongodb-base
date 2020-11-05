@@ -4,10 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UserCreateRequest;
 use App\Models\User;
+use App\Traits\RequestAPI;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\MessageBag;
 
 class UserController extends Controller
 {
+    use RequestAPI;
+
     /**
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
@@ -34,13 +38,21 @@ class UserController extends Controller
      */
     public function store(UserCreateRequest $request)
     {
-        $data = $request->validated();
+        $data = $request->only(['name', 'email', 'password']);
 
-        User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
+        $response = $this->sendPOSTRequest(config('app.ai_server') . '/users/register', $data, [
+            'X-API-KEY' => config('app.ai_api_key')
         ]);
+        if (!$response->status) {
+            $messageBag = new MessageBag();
+            $messageBag->add('email', $response->body->message);
+
+            return redirect()->back()->withErrors($messageBag)->withInput($request->all());
+        }
+        $data['mongo_id'] = $response->body->data->_id;
+        $data['password'] = Hash::make($data['password']);
+
+        User::create($data);
 
         return redirect()->route('users');
     }
