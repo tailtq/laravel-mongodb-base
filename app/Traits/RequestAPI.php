@@ -36,18 +36,18 @@ trait RequestAPI
 
     /**
      * @param \Illuminate\Http\Client\Response $response
-     * @return array
+     * @return \stdClass
      */
     private function getResponse($response)
     {
-        $result = [
-            'status' => $response->ok(),
-            'statusCode' => $response->status(),
-            'data' => $response->object(),
-            'message' => 'Ok'
-        ];
+        $result = new \stdClass();
+        $result->status = $response->ok();
+        $result->statusCode = $response->status();
+        $result->message = 'Ok';
+        $result->body = $response->object();
+
         if ($response->failed()) {
-            $result['message'] = 'HTTP Request: ' . $response->toPsrResponse()->getReasonPhrase();
+            $result->message = 'HTTP Request: ' . $response->toPsrResponse()->getReasonPhrase();
         }
 
         return $result;

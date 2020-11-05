@@ -23,7 +23,8 @@
                                     <div class="form-group">
                                         <label for="exampleInputEmail1">Email address</label>
                                         <input type="email" class="form-control" name="email"
-                                               placeholder="Email">
+                                               placeholder="Email"
+                                               value="{{ old('email') }}">
 
                                         @error('email')
                                             <label class="error mt-2 text-danger">
@@ -35,7 +36,8 @@
                                     <div class="form-group">
                                         <label>Password</label>
                                         <input type="password" class="form-control" name="password"
-                                               autocomplete="current-password" placeholder="Password">
+                                               autocomplete="current-password" placeholder="Password"
+                                               value="{{ old('password') }}">
 
                                         @error('password')
                                             <label class="error mt-2 text-danger">
