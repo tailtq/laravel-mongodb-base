@@ -21,10 +21,21 @@
                         @csrf
 
                         <div class="row">
-                            <div class="col-md-7">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Tên:</label>
-                                    <input type="text" class="form-control" placeholder="Nhập tên" name="name">
+                                    <input type="text" class="form-control" placeholder="Nhập tên" name="name" >
+
+                                    @error('name')
+                                    <label class="error mt-2 text-danger">
+                                        {{ $message }}
+                                    </label>
+                                    @enderror
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Số CMND</label>
+                                    <input type="text" class="form-control" placeholder="Nhập số CMND" name="card_number" onkeypress="return isNumberKey(event)" maxlength="9">
 
                                     @error('name')
                                     <label class="error mt-2 text-danger">
@@ -35,7 +46,7 @@
 
                                 <div class="form-group">
                                     <label>Thông tin:</label>
-                                    <textarea name="info" id="" class="form-control" rows="20"></textarea>
+                                    <textarea name="info" id="" class="form-control" rows="10"></textarea>
 
                                     @error('info')
                                     <label class="error mt-2 text-danger">
@@ -45,18 +56,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-5">
-                                <div class="form-group">
-                                    <label>Số CMND</label>
-                                    <input type="text" class="form-control" placeholder="Nhập số CMND" name="card_number">
-
-                                    @error('name')
-                                    <label class="error mt-2 text-danger">
-                                        {{ $message }}
-                                    </label>
-                                    @enderror
-                                </div>
-
+                            <div class="col-md-8">
                                 <div class="form-group">
                                     <label>Upload:</label>
 
@@ -68,9 +68,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="fallback">
-                                    <input type="file" name="files[]" multiple>
-                                </div>
+
                                 <div class="form-check form-check-flat form-check-primary">
                                     <label class="form-check-label">
                                         <input type="checkbox" class="form-check-input" name="status">
@@ -94,23 +92,34 @@
 
 @push('custom-scripts')
     <script>
+
+        function isNumberKey(evt){
+            var charCode = (evt.which) ? evt.which : evt.keyCode
+            if (charCode > 31 && (charCode < 48 || charCode > 57))
+                return false;
+            return true;
+        }
+
         Dropzone.autoDiscover = false;
 
         $(function() {
             'use strict';
 
-            {{--$('.dropzone').dropzone({--}}
-                {{--url: '/identities/create',--}}
-                {{--paramName: 'files',--}}
-                {{--maxFiles: 999999999999,--}}
-                {{--headers: {--}}
-                    {{--'X-CSRF-TOKEN': "{{ csrf_token() }}"--}}
-                {{--},--}}
-                {{--uploadMultiple: true,--}}
-                {{--init: function () {--}}
-                    {{--console.log('hello world');--}}
-                {{--},--}}
-            {{--});--}}
+            $('.dropzone').dropzone({
+                autoProcessQueue: false,
+                addRemoveLinks: true,
+                dictRemoveFile: 'Xóa hình',
+                url: '/identities/create',
+                paramName: 'files',
+                maxFiles: 999999999999,
+                headers: {
+                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                },
+                uploadMultiple: true,
+                init: function () {
+                    console.log('hello world');
+                },
+            });
         });
     </script>
 {{--    <script src="{{ asset('assets/js/dropzone.js') }}"></script>--}}

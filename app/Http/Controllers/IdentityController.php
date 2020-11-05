@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\IdentityCreateRequest;
 use App\Models\Identity;
 use App\Traits\RequestAPI;
+use Illuminate\Support\Facades\Storage;
 
 class IdentityController extends Controller
 {
@@ -46,8 +47,9 @@ class IdentityController extends Controller
 
 
         foreach ($files as $key => $file) {
+            $filename   = uniqid() . '-' . time() . '-' . md5(time());
             $extension  = pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION );
-            $name = $this->generateFileName($file);
+            $name = $filename . '.' . $extension;
             $pathFiles[$key] = $this->uploadFile($file, $name, $identity->id);
         }
 
@@ -90,39 +92,13 @@ class IdentityController extends Controller
     {
         $identity = Identity::where('id', $id);
 
-//        $fileName = $object->name;
-//        $fileNameOriginal = $object->file_name_original;
-//        $diskName = config('constants-fileMedia.disk_name');
-//        $existFile = $this->existFileInStorage($diskName, $fileName);
-//        if (!$existFile) {
-//            $existFile = $this->existFileInStorage($diskName, $fileNameOriginal);
-//        }
-//
-//        if ($existFile) {
-//            if ($type === FileMedia::DOWNLOAD) {
-//                return Storage::disk($diskName)->download(env('FOLDER_SAVE') .'/' . $fileName);
-//            }
-//
-//            if ($type === FileMedia::DELETE) {
-//                $this->fileMediaRepository->delete($id);
-//                return Storage::disk($diskName)->delete(env('FOLDER_SAVE') .'/' . $fileName);
-//            }
-//        }
+        $location = config('constants.minio_folder') . '/' . $id ;
+        if(Storage::disk('minio')->exists($location)){
+            Storage::disk('minio')->deleteDir($location);
+        }
 
         $identity->delete();
 
         return redirect()->route('identities');
-    }
-
-    /**
-     * Generate file name
-     * @param $file
-     * @return string
-     */
-    private function generateFileName($file) {
-        $filename   = uniqid() . "-" . time() . "-" . md5(time());
-        $extension  = pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION );
-        $basename   = $filename . "." . $extension;
-        return $basename;
     }
 }

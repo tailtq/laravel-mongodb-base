@@ -1,9 +1,9 @@
 <?php
 
 return [
-    'MINIO_ACCESS_KEY' => env('MINIO_ACCESS_KEY', 'AKIAIOSFODNN7EXAMPLE'),
-    'MINIO_SECRET_KEY' => env('MINIO_SECRET_KEY', 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'),
-    'MINIO_MINIO_ENDPOINT' => env('MINIO_MINIO_ENDPOINT', 'http://minio.core.greenlabs.ai'),
-    'MINIO_BUCKET' => env('MINIO_BUCKET', 'local'),
-    'MINIO_FOLDER' => env('MINIO_FOLDER', 'face_reg'),
+    'minio_access_key' => env('MINIO_ACCESS_KEY', 'AKIAIOSFODNN7EXAMPLE'),
+    'minio_secret_key' => env('MINIO_SECRET_KEY', 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'),
+    'minio_endpoint' => env('MINIO_ENDPOINT', 'http://minio.core.greenlabs.ai'),
+    'minio_bucket' => env('MINIO_BUCKET', 'local'),
+    'minio_folder' => env('MINIO_FOLDER', 'face_reg'),
 ];
