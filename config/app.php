@@ -228,4 +228,7 @@ return [
 
     ],
 
+    'ai_server' => env('API_SERVER', 'http://14.241.120.239:12003/api'),
+
+    'ai_api_key' => env('API_X_API_KEY', '7mM9NvYR7SfmIjejJQFcpw'),
 ];

@@ -18,7 +18,9 @@
 
                         <div class="form-group">
                             <label>Name</label>
-                            <input type="text" class="form-control" placeholder="Enter Name" name="name">
+                            <input type="text" class="form-control" placeholder="Enter Name"
+                                   name="name"
+                                   value="{{ old('name') }}">
 
                             @error('name')
                                 <label class="error mt-2 text-danger">
@@ -28,7 +30,9 @@
                         </div>
                         <div class="form-group">
                             <label>Email</label>
-                            <input type="email" class="form-control" placeholder="Enter Email" name="email">
+                            <input type="email" class="form-control" placeholder="Enter Email"
+                                   name="email"
+                                   value="{{ old('email') }}">
 
                             @error('email')
                                 <label class="error mt-2 text-danger">
@@ -38,7 +42,9 @@
                         </div>
                         <div class="form-group">
                             <label>Password</label>
-                            <input type="password" class="form-control" placeholder="Enter Password" name="password">
+                            <input type="password" class="form-control" placeholder="Enter Password"
+                                   name="password"
+                                   value="{{ old('password') }}">
 
                             @error('password')
                                 <label class="error mt-2 text-danger">
@@ -48,7 +54,9 @@
                         </div>
                         <div class="form-group">
                             <label>Password Confirmation</label>
-                            <input type="password" class="form-control" placeholder="Confirm Password" name="password_confirmation">
+                            <input type="password" class="form-control" placeholder="Confirm Password"
+                                   name="password_confirmation"
+                                   value="{{ old('password_confirmation') }}">
 
                             @error('password_confirmation')
                             <label class="error mt-2 text-danger">
