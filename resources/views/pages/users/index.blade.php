@@ -1,28 +1,22 @@
 @extends('layout.master')
 
 @section('content')
-    <nav class="page-breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item active" aria-current="page">Users</li>
-        </ol>
-    </nav>
-
     <div class="row">
         <div class="card-body">
             <h6 class="card-title d-flex justify-content-md-between align-items-center">
-                <div>Manage users</div>
-                <a href="{{ route('users.create') }}" class="btn btn-primary">Create new</a>
+                <div>Quản lý người dùng</div>
+                <a href="{{ route('users.create') }}" class="btn btn-success">Tạo mới</a>
             </h6>
 
             <div class="table-responsive">
                 <table class="table">
                     <thead>
                     <tr>
-                        <th>#</th>
-                        <th>Name</th>
+                        <th>STT</th>
+                        <th>Tên</th>
                         <th>Email</th>
-                        <th>Created at</th>
-                        <th>Options</th>
+                        <th>Ngày tạo</th>
+                        <th>Tùy chọn</th>
                     </tr>
                     </thead>
                     <tbody>

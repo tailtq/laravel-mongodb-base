@@ -16,8 +16,9 @@ trait HandleUploadFile
     {
         $disk = Storage::disk('minio');
 
-        $filePath = config('constants.MINIO_FOLDER') . '/' . $name;
-        $disk->putFileAs(config('constants.MINIO_FOLDER'), $file, $name);
+        $filePath = config('constants.minio_folder') . '/' . $id .'/'. $name;
+
+        $disk->putFileAs(config('constants.minio_folder') . '/' . $id, $file, $name);
         $disk->setVisibility($filePath, 'public');
         return $disk->url($filePath);
     }
