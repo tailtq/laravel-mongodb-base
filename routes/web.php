@@ -43,6 +43,14 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::delete('/{id}', 'IdentityController@delete')->name('identities.delete');
     });
+
+    Route::group(['prefix' => 'processes'], function () {
+        Route::get('/', 'ProcessController@index')->name('processes');
+
+        Route::get('/{id}', 'ProcessController@show')->name('processes.detail');
+
+        Route::post('/create', 'ProcessController@store')->name('processes.create');
+    });
 });
 
 

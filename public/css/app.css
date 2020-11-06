@@ -31850,11 +31850,16 @@ div.tagsinput span.tag a {
 }
 
 .wizard > .content {
-  min-height: 20rem;
+  min-height: 25rem;
   overflow: auto;
   background: #ffffff;
   border: 1px solid #e8ebf1;
   margin-left: 0;
+  width: 100%;
+}
+
+.wizard > .content > .body {
+  width: 100%;
 }
 
 .wizard > .steps ul li a {
