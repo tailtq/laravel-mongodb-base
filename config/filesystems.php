@@ -66,14 +66,18 @@ return [
 
         'minio' => [
             'driver' => 's3',
-            'key' => config('constants.MINIO_ACCESS_KEY'),
-            'secret' => config('constants.MINIO_SECRET_KEY'),
+            'key' => config('constants.minio_access_key'),
+            'secret' => config('constants.minio_secret_key'),
             'region' => '',
-            'bucket' => config('constants.MINIO_BUCKET'),
-            'endpoint' => config('constants.MINIO_MINIO_ENDPOINT'),
+            'bucket' => config('constants.minio_bucket'),
+            'endpoint' => config('constants.minio_endpoint'),
             'use_path_style_endpoint' => true,
         ],
 
+    ],
+
+    'links' => [
+        public_path('storage') => storage_path('app/public'),
     ],
 
 ];

@@ -3,8 +3,8 @@
 @section('content')
     <nav class="page-breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/users">Users</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Create user</li>
+            <li class="breadcrumb-item"><a href="/users">Người dùng</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Tạo người dùng</li>
         </ol>
     </nav>
 
@@ -65,7 +65,7 @@
                             @enderror
                         </div>
 
-                        <button class="btn btn-primary" type="submit">Submit form</button>
+                        <button class="btn btn-success" type="submit">Lưu</button>
                     </form>
                 </div>
             </div>
