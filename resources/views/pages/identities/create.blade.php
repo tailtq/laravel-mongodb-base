@@ -7,8 +7,8 @@
 @section('content')
     <nav class="page-breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/identities">Identities</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Create identity</li>
+            <li class="breadcrumb-item"><a href="/identities">Đối tượng</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Tạo đối tượng</li>
         </ol>
     </nav>
 
@@ -17,7 +17,7 @@
             <div class="card">
                 <div class="card-body">
                     <h6 class="card-title">Create new identity</h6>
-                    <form action="{{ route('identities.store') }}" method="POST" enctype="multipart/form-data" >
+                    <form action="{{ route('identities.store') }}" method="POST" enctype="multipart/form-data" id="form_objects">
                         @csrf
 
                         <div class="row">
@@ -35,9 +35,9 @@
 
                                 <div class="form-group">
                                     <label>Số CMND</label>
-                                    <input type="text" class="form-control" placeholder="Nhập số CMND" name="card_number" onkeypress="return isNumberKey(event)" maxlength="9">
+                                    <input type="text" class="form-control" placeholder="Nhập số CMND" name="card_number" maxlength="9">
 
-                                    @error('name')
+                                    @error('card_number')
                                     <label class="error mt-2 text-danger">
                                         {{ $message }}
                                     </label>
@@ -68,7 +68,14 @@
                                         </div>
                                     </div>
                                 </div>
-
+                                <div class="fallback">
+                                    <input type="file" name="files[]" multiple>
+                                </div>
+                                @error('files')
+                                <label class="error mt-2 text-danger">
+                                    {{ $message }}
+                                </label>
+                                @enderror
                                 <div class="form-check form-check-flat form-check-primary">
                                     <label class="form-check-label">
                                         <input type="checkbox" class="form-check-input" name="status">
@@ -78,7 +85,7 @@
                             </div>
                         </div>
 
-                        <button class="btn btn-primary" type="submit">Lưu</button>
+                        <button class="btn btn-success" type="submit" id="form_submit">Lưu</button>
                     </form>
                 </div>
             </div>
@@ -91,36 +98,62 @@
 @endpush
 
 @push('custom-scripts')
-    <script>
+    {{--<script>--}}
 
-        function isNumberKey(evt){
-            var charCode = (evt.which) ? evt.which : evt.keyCode
-            if (charCode > 31 && (charCode < 48 || charCode > 57))
-                return false;
-            return true;
-        }
+        {{--Dropzone.autoDiscover = false;--}}
 
-        Dropzone.autoDiscover = false;
+        {{--$(function() {--}}
 
-        $(function() {
-            'use strict';
+            {{--// var myDropzone = new Dropzone(".dropzone");--}}
+            {{--// myDropzone.on("addedfile", function(file) {--}}
+            {{--//     /* Maybe display some more file information on your page */--}}
+            {{--// });--}}
 
-            $('.dropzone').dropzone({
-                autoProcessQueue: false,
-                addRemoveLinks: true,
-                dictRemoveFile: 'Xóa hình',
-                url: '/identities/create',
-                paramName: 'files',
-                maxFiles: 999999999999,
-                headers: {
-                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
-                },
-                uploadMultiple: true,
-                init: function () {
-                    console.log('hello world');
-                },
-            });
-        });
-    </script>
+            {{--$('.dropzone').dropzone({--}}
+                {{--autoProcessQueue: false,--}}
+                {{--addRemoveLinks: true,--}}
+                {{--dictRemoveFile: 'Xóa hình',--}}
+                {{--url: '/identities/create',--}}
+                {{--paramName: 'files',--}}
+                {{--maxFiles: 999999999999,--}}
+                {{--headers: {--}}
+                    {{--'X-CSRF-TOKEN': "{{ csrf_token() }}"--}}
+                {{--},--}}
+                {{--uploadMultiple: true,--}}
+                {{--init: function () {--}}
+                    {{--// this.on("addedfile", function(file) {--}}
+                    {{--//     var myDropzone = this;--}}
+                    {{--//     console.log(myDropzone.getAcceptedFiles());--}}
+                    {{--// });--}}
+                    {{--//--}}
+                    {{--// $("#form-submit").click(function (e) {--}}
+                    {{--//     e.preventDefault();--}}
+                    {{--//     // myDropzone.processQueue();--}}
+                    {{--//--}}
+                    {{--// });--}}
+
+                    {{--let myDropzone = this;--}}
+                    {{--$("#form_submit").click(function (e) {--}}
+                        {{--e.preventDefault();--}}
+                        {{--myDropzone.processQueue();--}}
+                    {{--});--}}
+
+                    {{--this.on('sending', function(file, xhr, formData) {--}}
+                        {{--// console.log(myDropzone.getUploadingFiles());--}}
+                        {{--// return true;--}}
+                        {{--let data = $('#form_objects').serializeArray();--}}
+                        {{--$.each(data, function(key, el) {--}}
+                            {{--formData.append(el.name, el.value);--}}
+                        {{--});--}}
+                    {{--});--}}
+
+                {{--},--}}
+                {{--success: function (response) {--}}
+                    {{--console.log(response);--}}
+                {{--}--}}
+            {{--});--}}
+            {{----}}
+        {{--});--}}
+    {{--</script>--}}
 {{--    <script src="{{ asset('assets/js/dropzone.js') }}"></script>--}}
 @endpush

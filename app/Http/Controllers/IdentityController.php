@@ -38,22 +38,27 @@ class IdentityController extends Controller
         $files = $request->file('files');
         $pathFiles = [];
 
-        $identity = Identity::create([
-            'name' => $data['name'],
-            'status' => $data['status'] ? 'tracking' : 'untracking',
-            'info' => $data['info'],
-            'card_number' => $data['card_number'],
-        ]);
+        try {
+            $identity = Identity::create([
+                'name'        => $data['name'],
+                'status'      => !empty($data['status']) ? 'tracking' : 'untracking',
+                'info'        => $data['info'],
+                'card_number' => $data['card_number'],
+            ]);
 
-
-        foreach ($files as $key => $file) {
-            $filename   = uniqid() . '-' . time() . '-' . md5(time());
-            $extension  = pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION );
-            $name = $filename . '.' . $extension;
-            $pathFiles[$key] = $this->uploadFile($file, $name, $identity->id);
+            foreach ($files as $key => $file) {
+                $filename = uniqid() . '-' . time() . '-' . md5(time());
+                $extension = pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
+                $name = $filename . '.' . $extension;
+                $pathFiles[$key] = ['mongo_id' => rand(1, 999), 'url' => $this->uploadFile($file, $name, $identity->id)];
+            }
+        }
+        catch (\Exception $e) {
+            return $e->getMessage();
         }
 
-        $identity->images = json_encode($pathFiles);
+
+        $identity->images = $pathFiles;
         $identity->save();
 
         return redirect()->route('identities');
@@ -92,8 +97,8 @@ class IdentityController extends Controller
     {
         $identity = Identity::where('id', $id);
 
-        $location = config('constants.minio_folder') . '/' . $id ;
-        if(Storage::disk('minio')->exists($location)){
+        $location = config('constants.minio_folder') . '/' . $id;
+        if (Storage::disk('minio')->exists($location)) {
             Storage::disk('minio')->deleteDir($location);
         }
 
