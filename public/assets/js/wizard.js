@@ -43,6 +43,8 @@ $(function () {
       return validRequiredInputs($($processForm.find('section')[currentIndex]));
     },
     onFinished: function (event, currentIndex) {
+      $('#process-form a[href="#finish"]').attr('disabled', true);
+
       $.ajax({
         url: '/processes/create',
         type: 'POST',
@@ -53,10 +55,16 @@ $(function () {
           ...serializeObject($processForm.serializeArray())
         }),
         success: function (res) {
-          console.log(res);
+          window.location.href = `/processes/${res.data.id}`;
         },
         error: function (res) {
-          console.log(res);
+          $('#process-form a[href="#finish"]').attr('disabled', false);
+
+          Swal.fire({
+            icon: 'error',
+            title: 'Đã có lỗi xảy ra',
+            text: res.responseJSON.message,
+          });
         }
       });
     }
