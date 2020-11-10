@@ -51,6 +51,10 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::post('/create', 'ProcessController@store')->name('processes.create');
     });
+
+    Route::group(['prefix' => '/medias'], function () {
+        Route::post('/', 'MediaController@create')->name('medias.create');
+    });
 });
 
 

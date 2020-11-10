@@ -24937,7 +24937,7 @@ address p {
 }
 
 .badge {
-  padding: 6px 5px 3px;
+  padding: 3px 5px 3px;
 }
 
 .alert-fill-primary {
@@ -31233,7 +31233,7 @@ select.border-danger-muted:focus,
 
 @media (min-width: 1400px) {
   .dropzone {
-    min-height: 200px;
+    min-height: 150px;
   }
 }
 

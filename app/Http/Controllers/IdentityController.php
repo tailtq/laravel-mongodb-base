@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\CommonHelper;
 use App\Http\Requests\IdentityCreateRequest;
 use App\Models\Identity;
 use App\Traits\RequestAPI;
@@ -47,10 +48,8 @@ class IdentityController extends Controller
             ]);
 
             foreach ($files as $key => $file) {
-                $filename = uniqid() . '-' . time() . '-' . md5(time());
-                $extension = pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
-                $name = $filename . '.' . $extension;
-                $pathFiles[$key] = ['mongo_id' => rand(1, 999), 'url' => $this->uploadFile($file, $name, $identity->id)];
+                $filename = CommonHelper::generateFileName($file);
+                $pathFiles[$key] = ['mongo_id' => rand(1, 999), 'url' => $this->uploadFile($file, $filename, $identity->id)];
             }
         }
         catch (\Exception $e) {

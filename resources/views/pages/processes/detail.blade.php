@@ -50,14 +50,22 @@
                             <section>
                                 <div class="form-group">
                                     <label>Tên video *</label>
-                                    <input type="text" class="form-control required" placeholder="Nhập tên" name="name"
-                                           required>
+                                    <input type="text"
+                                           class="form-control"
+                                           placeholder="Nhập tên"
+                                           name="name"
+                                           disabled
+                                           value="{{ old('name', $process->name) }}">
                                 </div>
 
                                 <div class="form-group">
                                     <label>Đường dẫn *</label>
-                                    <input type="text" class="form-control required" placeholder="Nhập video"
-                                           name="video_url" required>
+                                    <input type="text"
+                                           class="form-control"
+                                           placeholder="Nhập video"
+                                           name="video_url"
+                                           disabled
+                                           value="{{ old('video_url', $process->video_url) }}">
                                 </div>
 
                                 <div class="form-group">
@@ -65,7 +73,8 @@
                                     <textarea name="description"
                                               cols="30"
                                               rows="10"
-                                              class="form-control mb-0">{{ old('description') }}</textarea>
+                                              disabled
+                                              class="form-control mb-0">{{ old('description', $process->description) }}</textarea>
                                 </div>
                             </section>
 
@@ -77,10 +86,10 @@
                                             <label>Detection scale</label>
                                             <input type="text"
                                                    class="form-control"
-                                                   required
                                                    placeholder="Nhập thông số"
                                                    name="detection_scale"
-                                                   value="{{ old('detection_scale', 0.25) }}">
+                                                   disabled
+                                                   value="{{ old('detection_scale', object_get($process->mongoData, 'detection_scale')) }}">
                                         </div>
                                     </div>
 
@@ -89,10 +98,10 @@
                                             <label>Frame drop</label>
                                             <input type="text"
                                                    class="form-control"
-                                                   required
                                                    placeholder="Nhập thông số"
                                                    name="frame_drop"
-                                                   value="{{ old('frame_drop', 2) }}">
+                                                   disabled
+                                                   value="{{ old('frame_drop', object_get($process->mongoData, 'frame_drop')) }}">
                                         </div>
                                     </div>
 
@@ -101,10 +110,10 @@
                                             <label>Frame step</label>
                                             <input type="text"
                                                    class="form-control"
-                                                   required
                                                    placeholder="Nhập thông số"
                                                    name="frame_step"
-                                                   value="{{ old('frame_step', 2) }}">
+                                                   disabled
+                                                   value="{{ old('frame_step', object_get($process->mongoData, 'frame_step')) }}">
                                         </div>
                                     </div>
                                 </div>
@@ -115,10 +124,10 @@
                                             <label>Max pitch</label>
                                             <input type="text"
                                                    class="form-control"
-                                                   required
                                                    placeholder="Nhập thông số"
                                                    name="max_pitch"
-                                                   value="{{ old('max_pitch', 30) }}">
+                                                   disabled
+                                                   value="{{ old('max_pitch', object_get($process->mongoData, 'max_pitch')) }}">
                                         </div>
                                     </div>
 
@@ -127,10 +136,10 @@
                                             <label>Max roll</label>
                                             <input type="text"
                                                    class="form-control"
-                                                   required
                                                    placeholder="Nhập thông số"
                                                    name="max_roll"
-                                                   value="{{ old('max_roll', 30) }}">
+                                                   disabled
+                                                   value="{{ old('max_roll', object_get($process->mongoData, 'max_roll')) }}">
                                         </div>
                                     </div>
 
@@ -139,10 +148,10 @@
                                             <label>Max yaw</label>
                                             <input type="text"
                                                    class="form-control"
-                                                   required
                                                    placeholder="Nhập thông số"
                                                    name="max_yaw"
-                                                   value="{{ old('max_yaw', 30) }}">
+                                                   disabled
+                                                   value="{{ old('max_yaw', object_get($process->mongoData, 'max_yaw')) }}">
                                         </div>
                                     </div>
                                 </div>
@@ -153,10 +162,10 @@
                                             <label>Kích thước khuôn mặt tối thiểu</label>
                                             <input type="text"
                                                    class="form-control"
-                                                   required
                                                    placeholder="Nhập thông số"
                                                    name="min_face_size"
-                                                   value="{{ old('min_face_size', 50) }}">
+                                                   disabled
+                                                   value="{{ old('min_face_size', object_get($process->mongoData, 'min_face_size')) }}">
                                         </div>
                                     </div>
 
@@ -165,10 +174,10 @@
                                             <label>Tỉ lệ theo dõi</label>
                                             <input type="text"
                                                    class="form-control"
-                                                   required
                                                    placeholder="Nhập thông số"
                                                    name="tracking_scale"
-                                                   value="{{ old('tracking_scale', 0.5) }}">
+                                                   disabled
+                                                   value="{{ old('tracking_scale', object_get($process->mongoData, 'tracking_scale')) }}">
                                         </div>
                                     </div>
 
@@ -177,10 +186,51 @@
                                             <label>Ngưỡng so sánh sinh trắc</label>
                                             <input type="text"
                                                    class="form-control"
-                                                   required
                                                    placeholder="Nhập thông số"
                                                    name="biometric_threshold"
-                                                   value="{{ old('biometric_threshold', 50) }}">
+                                                   disabled
+                                                   value="{{ old('biometric_threshold', object_get($process->mongoData, 'biometric_threshold')) }}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Tỉ lệ chính xác đầu tối thiểu</label>
+                                            <input type="number"
+                                                   class="form-control"
+                                                   required
+                                                   placeholder="Nhập thông số"
+                                                   name="min_head_accuracy"
+                                                   disabled
+                                                   value="{{ old('min_head_accuracy', object_get($process->mongoData, 'min_head_accuracy')) }}">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Tỉ lệ chính xác khuôn mặt tối thiểu</label>
+                                            <input type="number"
+                                                   class="form-control"
+                                                   required
+                                                   placeholder="Nhập thông số"
+                                                   name="min_face_accuracy"
+                                                   disabled
+                                                   value="{{ old('min_face_accuracy', object_get($process->mongoData, 'min_face_accuracy')) }}">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Tỉ lệ chính xác thân hình tối thiểu</label>
+                                            <input type="number"
+                                                   class="form-control"
+                                                   required
+                                                   placeholder="Nhập thông số"
+                                                   name="min_body_accuracy"
+                                                   disabled
+                                                   value="{{ old('min_body_accuracy', object_get($process->mongoData, 'min_body_accuracy')) }}">
                                         </div>
                                     </div>
                                 </div>

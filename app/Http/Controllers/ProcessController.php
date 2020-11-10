@@ -23,10 +23,13 @@ class ProcessController extends Controller
     public function show($id)
     {
         $process = Process::where('id', $id)->first();
-
         if (!$process) {
             abort(404);
         }
+        $processData = $this->sendGETRequest(
+            config('app.ai_server') . "/processes/$process->mongo_id", [], $this->getDefaultHeaders()
+        );
+        $process->mongoData = $processData->status ? $processData->body->data : null;
 
         return view('pages.processes.detail', [
             'process' => $process,
@@ -62,7 +65,7 @@ class ProcessController extends Controller
             'min_head_accuracy' => $data['min_head_accuracy'],
             'min_face_accuracy' => $data['min_face_accuracy'],
             'min_body_accuracy' => $data['min_body_accuracy'],
-        ]);
+        ], $this->getDefaultHeaders());
         if (!$processData->status) {
             return $this->error($processData->message, $processData->statusCode);
         }
