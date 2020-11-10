@@ -35,24 +35,11 @@
                 </a>
             </li>
 
-            <li class="nav-item {{ active_class(['settings', 'settings/*']) }}">
-                <a class="nav-link" data-toggle="collapse" href="#email" role="button"
-                   aria-expanded="{{ is_active_route(['email/*']) }}" aria-controls="email">
+            <li class="nav-item {{ active_class(['processes', 'processes/*']) }}">
+                <a class="nav-link" href="{{ route('processes') }}">
                     <i class="link-icon" data-feather="activity"></i>
                     <span class="link-title">Thực thi nhận diện</span>
-                    <i class="link-arrow" data-feather="chevron-down"></i>
                 </a>
-                <div class="collapse {{ show_class(['email/*']) }}" id="email">
-                    <ul class="nav sub-menu">
-                        <li class="nav-item">
-                            <a href="{{ url('/email/inbox') }}" class="nav-link {{ active_class(['email/inbox']) }}">Tạo mới</a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ url('/email/read') }}"
-                               class="nav-link {{ active_class(['email/read']) }}">Danh sách</a>
-                        </li>
-                    </ul>
-                </div>
             </li>
 
             <li class="nav-item {{ active_class(['settings', 'settings/*']) }}">

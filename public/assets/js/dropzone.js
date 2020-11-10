@@ -1,13 +1,13 @@
 Dropzone.autoDiscover = false;
 
-$(function() {
+$(function () {
   'use strict';
 
   $('.dropzone').dropzone({
-    url: '/identities/create',
+    url: '/medias',
     paramName: 'files',
     headers: {
-      'X-CSRF-TOKEN': "{{ csrf_token() }}"
+      _token: $('meta[name="_token"]').attr('content'),
     },
     uploadMultiple: true,
     init: function () {
@@ -16,7 +16,7 @@ $(function() {
   });
 });
 
-// Dropzone.options.imageUpload = {
-//   maxFilesize         :       1,
-//   acceptedFiles: ".jpeg,.jpg,.png,.gif"
-// };
+Dropzone.options.imageUpload = {
+  // maxFilesize: 1,
+  acceptedFiles: ".jpeg,.jpg,.png,.gif"
+};

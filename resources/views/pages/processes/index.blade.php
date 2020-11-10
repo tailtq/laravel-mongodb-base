@@ -3,6 +3,7 @@
 @push('plugin-styles')
     <link href="{{ asset('assets/plugins/jquery-steps/jquery.steps.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/plugins/sweetalert2/sweetalert2.min.css') }}" rel="stylesheet" />
+    <link href="{{ asset('assets/plugins/dropzone/dropzone.min.css') }}" rel="stylesheet" />
 @endpush
 
 @section('content')
@@ -31,7 +32,11 @@
                                     <img src="{{ $process->thumbnail }}" class="wd-100p wd-sm-200 mb-3 mb-sm-0 mr-3" alt="Thumbnail">
                                 </a>
                                 <div class="media-body">
-                                    <h5 class="mt-1"><a href="{{ route('processes.detail', $process->id) }}">{{ $process->name }}</a></h5>
+                                    <h5 class="mt-1">
+                                        <a href="{{ route('processes.detail', $process->id) }}">{{ $process->name }}</a>
+                                        &nbsp;
+                                        <span class="badge badge-success text-uppercase">{{ $process->status }}</span>
+                                    </h5>
                                     <p class="mt-1">{{ $process->description }}</p>
                                 </div>
                             </div>
@@ -67,7 +72,31 @@
 
                                 <div class="form-group">
                                     <label>Đường dẫn *</label>
-                                    <input type="text" class="form-control required" placeholder="Nhập video" name="video_url" required>
+
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control dropzone-field required" placeholder="Nhập video" name="video_url" required>
+
+                                        <div class="input-group-append">
+                                            <a class="btn btn-primary"
+                                               data-toggle="collapse"
+                                               href="#collapseDropzone"
+                                               role="button"
+                                               aria-expanded="false"
+                                               aria-controls="collapseDropzone">
+                                                <i class="link-icon" data-feather="upload" style="width: 16px; height: 16px"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="collapse form-group" id="collapseDropzone">
+                                    <div class="card card-body">
+                                        <div class="dropzone"></div>
+                                    </div>
+
+                                    <div class="text-center mt-3">
+                                        <button class="btn btn-primary dropzone-submit">Tải lên</button>
+                                    </div>
                                 </div>
 
                                 <div class="form-group">
@@ -244,8 +273,9 @@
 @push('plugin-scripts')
     <script src="{{ asset('assets/plugins/jquery-steps/jquery.steps.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/sweetalert2/sweetalert2.min.js') }}"></script>
+    <script src="{{ asset('assets/plugins/dropzone/dropzone.min.js') }}"></script>
 @endpush
 
 @push('custom-scripts')
-    <script src="{{ asset('assets/js/wizard.js') }}"></script>
+    <script src="{{ asset('assets/js/custom.js') }}"></script>
 @endpush

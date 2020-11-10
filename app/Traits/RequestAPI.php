@@ -52,4 +52,12 @@ trait RequestAPI
 
         return $result;
     }
+
+    private function getDefaultHeaders()
+    {
+        return [
+            'X-API-KEY' => config('app.ai_api_key'),
+            'Authorization' => 'Bearer ' . session('ai_token'),
+        ];
+    }
 }
