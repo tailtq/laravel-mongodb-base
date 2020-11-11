@@ -1,0 +1,138 @@
+
+   RedisException 
+
+  read error on connection to core.greenlabs.ai:11032
+
+  at vendor/laravel/framework/src/Illuminate/Redis/Connections/PhpRedisConnection.php:463
+    459|     public function subscribe($channels, Closure $callback)
+    460|     {
+    461|         $this->client->subscribe((array) $channels, function ($redis, $channel, $message) use ($callback) {
+    462|             $callback($message, $channel);
+  > 463|         });
+    464|     }
+    465| 
+    466|     /**
+    467|      * Subscribe to a set of given channels with wildcards.
+
+      [2m+3 vendor frames [22m
+  4   app/Console/Commands/GetDataFromAI.php:44
+      Illuminate\Support\Facades\Facade::__callStatic("subscribe")
+
+      [2m+13 vendor frames [22m
+  18  artisan:37
+      Illuminate\Foundation\Console\Kernel::handle(Object(Symfony\Component\Console\Input\ArgvInput), Object(Symfony\Component\Console\Output\ConsoleOutput))
+
+   RedisException 
+
+  read error on connection to core.greenlabs.ai:11032
+
+  at vendor/laravel/framework/src/Illuminate/Redis/Connections/PhpRedisConnection.php:463
+    459|     public function subscribe($channels, Closure $callback)
+    460|     {
+    461|         $this->client->subscribe((array) $channels, function ($redis, $channel, $message) use ($callback) {
+    462|             $callback($message, $channel);
+  > 463|         });
+    464|     }
+    465| 
+    466|     /**
+    467|      * Subscribe to a set of given channels with wildcards.
+
+      [2m+3 vendor frames [22m
+  4   app/Console/Commands/GetDataFromAI.php:44
+      Illuminate\Support\Facades\Facade::__callStatic("subscribe")
+
+      [2m+13 vendor frames [22m
+  18  artisan:37
+      Illuminate\Foundation\Console\Kernel::handle(Object(Symfony\Component\Console\Input\ArgvInput), Object(Symfony\Component\Console\Output\ConsoleOutput))
+
+   RedisException 
+
+  read error on connection to core.greenlabs.ai:11032
+
+  at vendor/laravel/framework/src/Illuminate/Redis/Connections/PhpRedisConnection.php:463
+    459|     public function subscribe($channels, Closure $callback)
+    460|     {
+    461|         $this->client->subscribe((array) $channels, function ($redis, $channel, $message) use ($callback) {
+    462|             $callback($message, $channel);
+  > 463|         });
+    464|     }
+    465| 
+    466|     /**
+    467|      * Subscribe to a set of given channels with wildcards.
+
+      [2m+3 vendor frames [22m
+  4   app/Console/Commands/GetDataFromAI.php:44
+      Illuminate\Support\Facades\Facade::__callStatic("subscribe")
+
+      [2m+13 vendor frames [22m
+  18  artisan:37
+      Illuminate\Foundation\Console\Kernel::handle(Object(Symfony\Component\Console\Input\ArgvInput), Object(Symfony\Component\Console\Output\ConsoleOutput))
+
+   RedisException 
+
+  read error on connection to core.greenlabs.ai:11032
+
+  at vendor/laravel/framework/src/Illuminate/Redis/Connections/PhpRedisConnection.php:463
+    459|     public function subscribe($channels, Closure $callback)
+    460|     {
+    461|         $this->client->subscribe((array) $channels, function ($redis, $channel, $message) use ($callback) {
+    462|             $callback($message, $channel);
+  > 463|         });
+    464|     }
+    465| 
+    466|     /**
+    467|      * Subscribe to a set of given channels with wildcards.
+
+      [2m+3 vendor frames [22m
+  4   app/Console/Commands/GetDataFromAI.php:44
+      Illuminate\Support\Facades\Facade::__callStatic("subscribe")
+
+      [2m+13 vendor frames [22m
+  18  artisan:37
+      Illuminate\Foundation\Console\Kernel::handle(Object(Symfony\Component\Console\Input\ArgvInput), Object(Symfony\Component\Console\Output\ConsoleOutput))
+
+   RedisException 
+
+  read error on connection to core.greenlabs.ai:11032
+
+  at vendor/laravel/framework/src/Illuminate/Redis/Connections/PhpRedisConnection.php:463
+    459|     public function subscribe($channels, Closure $callback)
+    460|     {
+    461|         $this->client->subscribe((array) $channels, function ($redis, $channel, $message) use ($callback) {
+    462|             $callback($message, $channel);
+  > 463|         });
+    464|     }
+    465| 
+    466|     /**
+    467|      * Subscribe to a set of given channels with wildcards.
+
+      [2m+3 vendor frames [22m
+  4   app/Console/Commands/GetDataFromAI.php:44
+      Illuminate\Support\Facades\Facade::__callStatic("subscribe")
+
+      [2m+13 vendor frames [22m
+  18  artisan:37
+      Illuminate\Foundation\Console\Kernel::handle(Object(Symfony\Component\Console\Input\ArgvInput), Object(Symfony\Component\Console\Output\ConsoleOutput))
+
+   RedisException 
+
+  read error on connection to core.greenlabs.ai:11032
+
+  at vendor/laravel/framework/src/Illuminate/Redis/Connections/PhpRedisConnection.php:463
+    459|     public function subscribe($channels, Closure $callback)
+    460|     {
+    461|         $this->client->subscribe((array) $channels, function ($redis, $channel, $message) use ($callback) {
+    462|             $callback($message, $channel);
+  > 463|         });
+    464|     }
+    465| 
+    466|     /**
+    467|      * Subscribe to a set of given channels with wildcards.
+
+      [2m+3 vendor frames [22m
+  4   app/Console/Commands/GetDataFromAI.php:44
+      Illuminate\Support\Facades\Facade::__callStatic("subscribe")
+
+      [2m+13 vendor frames [22m
+  18  artisan:37
+      Illuminate\Foundation\Console\Kernel::handle(Object(Symfony\Component\Console\Input\ArgvInput), Object(Symfony\Component\Console\Output\ConsoleOutput))
