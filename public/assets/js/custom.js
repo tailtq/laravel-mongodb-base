@@ -1,4 +1,6 @@
-Dropzone.autoDiscover = false;
+if (typeof Dropzone !== 'undefined') {
+  Dropzone.autoDiscover = false;
+}
 
 function initWizardForProcess() {
   if (!$.fn.steps) return;
@@ -55,7 +57,7 @@ function initWizardForProcess() {
       $('#process-form a[href="#finish"]').attr('disabled', true);
       const serializableData = $processForm.serializeArray();
 
-      if (serializableData.length === 0) {
+      if (serializableData.length === 0 || !$processForm.hasClass('editable')) {
         return true;
       }
 
@@ -86,7 +88,8 @@ function initWizardForProcess() {
 }
 
 function initDropzone() {
-  if (!$.fn.dropzone) return;
+  if (!$.fn.dropzone || typeof Dropzone == 'undefined') return;
+
   const dropzoneVideo = new Dropzone('.dropzone', {
     url: '/medias',
     paramName: 'files',

@@ -41,12 +41,14 @@ trait RequestAPI
     private function getResponse($response)
     {
         $result = new \stdClass();
-        $result->status = $response->ok();
+        $result->status = $response->successful();
         $result->statusCode = $response->status();
         $result->message = 'Ok';
         $result->body = $response->object();
 
-        if ($response->failed()) {
+        if ($result->status) {
+            $result->body = $result->body->data;
+        } else {
             $result->message = 'HTTP Request: ' . $response->toPsrResponse()->getReasonPhrase();
         }
 

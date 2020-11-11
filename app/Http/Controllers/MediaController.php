@@ -17,8 +17,7 @@ class MediaController extends Controller
             $files = [$files];
         }
         foreach ($files as $file) {
-            $filename = CommonHelper::generateFileName($file);
-            array_push($urls, $this->uploadFile($file, $filename));
+            array_push($urls, $this->uploadFile($file));
         }
 
         return $this->success($urls);

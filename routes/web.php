@@ -17,8 +17,6 @@ Auth::routes(['register' => false]);
 
 Route::group(['middleware' => ['auth']], function () {
     Route::get('/', function () {
-//dd(\Illuminate\Support\Facades\Redis::connection());
-        \Illuminate\Support\Facades\Redis::publish('AI-test', json_encode(['foo' => 'bar']));
 
         return view('dashboard');
     });
@@ -152,7 +150,6 @@ Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
     return "Cache is cleared";
 });
-
 
 // 404 for undefined routes
 Route::any('/{page?}',function(){

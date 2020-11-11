@@ -13,14 +13,14 @@ class GetDataFromAI extends Command
      *
      * @var string
      */
-    protected $signature = 'redis:getDataAI';
+    protected $signature = 'redis:get-ai-data';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Get data from server AI   ';
+    protected $description = 'Get data from server AI';
 
     /**
      * Create a new command instance.
@@ -39,10 +39,6 @@ class GetDataFromAI extends Command
      */
     public function handle()
     {
-        Redis::subscribe(['AI-test'], function ($message) {
-            Log::info($message);
-        });
-
         Redis::subscribe(['redisChat'], function ($message) {
             Log::info($message);
         });
