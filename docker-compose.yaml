@@ -1,4 +1,5 @@
 version: "3"
+
 services:
     # container for API
     api:
@@ -11,7 +12,8 @@ services:
             - .:/var/www/app
         environment:
             - PHP_MEM_LIMIT=2048M
-    # container for database
+#        extra_hosts:
+#            - localbox:192.168.1.162
     db:
         image: mysql:5.7
         ports:

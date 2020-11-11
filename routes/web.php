@@ -150,7 +150,6 @@ Route::get('/clear-cache', function() {
     return "Cache is cleared";
 });
 
-
 // 404 for undefined routes
 Route::any('/{page?}',function(){
     return View::make('pages.template.error.404');
