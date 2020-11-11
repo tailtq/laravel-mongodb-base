@@ -1,5 +1,3 @@
-Dropzone.autoDiscover = false;
-
 function initWizardForProcess() {
   if (!$.fn.steps) return;
 
@@ -55,7 +53,10 @@ function initWizardForProcess() {
       $('#process-form a[href="#finish"]').attr('disabled', true);
       const serializableData = $processForm.serializeArray();
 
-      if (serializableData.length === 0) {
+      console.log($processForm.hasClass('editable'), serializableData.length);
+
+      if (serializableData.length === 0 || !$processForm.hasClass('editable')) {
+
         return true;
       }
 
@@ -86,7 +87,10 @@ function initWizardForProcess() {
 }
 
 function initDropzone() {
-  if (!$.fn.dropzone) return;
+  if (!$.fn.dropzone || typeof Dropzone == 'undefined') return;
+
+  Dropzone.autoDiscover = false;
+
   const dropzoneVideo = new Dropzone('.dropzone', {
     url: '/medias',
     paramName: 'files',

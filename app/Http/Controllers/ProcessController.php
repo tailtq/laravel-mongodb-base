@@ -29,7 +29,7 @@ class ProcessController extends Controller
         $processData = $this->sendGETRequest(
             config('app.ai_server') . "/processes/$process->mongo_id", [], $this->getDefaultHeaders()
         );
-        $process->mongoData = $processData->status ? $processData->body->data : null;
+        $process->mongoData = $processData->status ? $processData->body : null;
 
         return view('pages.processes.detail', [
             'process' => $process,
@@ -46,7 +46,7 @@ class ProcessController extends Controller
         ]);
         if (!$thumbnailData->status) {
             return $this->error($thumbnailData->message, $thumbnailData->statusCode);
-        } else if (!$thumbnailData->body->data->url) {
+        } else if (!$thumbnailData->body->url) {
             return $this->error('Đường dẫn không hợp lệ', 400);
         }
 
@@ -73,11 +73,11 @@ class ProcessController extends Controller
         $process = Process::create([
             'user_id' => Auth::id(),
             'name' => $data['name'],
-            'thumbnail' => $thumbnailData->body->data->url,
+            'thumbnail' => $thumbnailData->body->url,
             'video_url' => $data['video_url'],
             'description' => $data['description'],
             'status' => Process::STATUS['ready'],
-            'mongo_id' => $processData->body->data->_id,
+            'mongo_id' => $processData->body->_id,
         ]);
 
         return $this->success($process);

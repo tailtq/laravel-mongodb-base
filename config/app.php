@@ -225,7 +225,6 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
-
     ],
 
     'ai_server' => env('API_SERVER', 'http://14.241.120.239:12003/api'),

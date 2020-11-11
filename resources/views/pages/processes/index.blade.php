@@ -62,7 +62,7 @@
 
                 <div class="modal-body">
                     <div class="row">
-                        <form action="" id="process-form">
+                        <form action="" id="process-form" class="editable">
                             <h2>Thông tin</h2>
                             <section>
                                 <div class="form-group">

@@ -249,7 +249,7 @@
 @endpush
 
 @push('custom-scripts')
-    <script src="{{ asset('assets/js/wizard.js') }}"></script>
+    <script src="{{ asset('assets/js/custom.js') }}"></script>
     <script>
       function init() {
         var video,
