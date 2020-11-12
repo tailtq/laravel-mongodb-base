@@ -35,7 +35,10 @@
                                     <i data-feather="edit"></i>
                                 </a>
 
-                                <form action="{{ route('identities.delete', $identity->id) }}" method="POST" class="d-inline">
+                                <form onsubmit="return confirm('Bạn có chắc chắn không?');"
+                                      action="{{ route('identities.delete', $identity->id) }}"
+                                      method="POST"
+                                      class="d-inline">
                                     @csrf
                                     @method('DELETE')
 
