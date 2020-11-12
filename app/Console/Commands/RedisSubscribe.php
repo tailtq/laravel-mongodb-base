@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 
 class RedisSubscribe extends Command
@@ -28,7 +29,7 @@ class RedisSubscribe extends Command
      */
     public function handle()
     {
-        Redis::subscribe('objects', function ($message) {
+        Redis::subscribe('process', function ($message) {
             // save objects to database
             // send to client via socket io
         });

@@ -4,7 +4,7 @@
     <div class="row">
         <div class="card-body">
             <h6 class="card-title d-flex justify-content-md-between align-items-center">
-                <div>Danh sách đối tượng</div>
+                <div>Danh sách định danh</div>
                 <a href="{{ route('identities.create') }}" class="btn btn-success">Tạo mới</a>
             </h6>
 
@@ -31,7 +31,11 @@
                             <td>{{ $identity->name }}</td>
                             <td>{{ $identity->created_at }}</td>
                             <td>
-                                <form action="{{ route('identities.delete', $identity->id) }}" method="POST">
+                                <a class="btn btn-warning btn-icon" href="{{ route('identities.edit', $identity->id) }}" style="line-height: 2">
+                                    <i data-feather="edit"></i>
+                                </a>
+
+                                <form action="{{ route('identities.delete', $identity->id) }}" method="POST" class="d-inline">
                                     @csrf
                                     @method('DELETE')
 

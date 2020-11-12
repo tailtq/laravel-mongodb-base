@@ -17,7 +17,7 @@ class CreateObjectAppearancesTable extends Migration
             $table->integerIncrements('id');
             $table->unsignedInteger('object_id');
             $table->unsignedInteger('frame_from');
-            $table->unsignedInteger('frame_to');
+            $table->unsignedInteger('frame_to')->nullable();
             $table->dateTime('time_from')->nullable();
             $table->dateTime('time_to')->nullable();
             $table->timestamps();

@@ -45,7 +45,7 @@ class UserController extends Controller
         ]);
         if (!$response->status) {
             $messageBag = new MessageBag();
-            $messageBag->add('email', $response->body->message);
+            $messageBag->add('email', $response->message);
 
             return redirect()->back()->withErrors($messageBag)->withInput($request->all());
         }
