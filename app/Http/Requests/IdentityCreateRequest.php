@@ -29,7 +29,7 @@ class IdentityCreateRequest extends FormRequest
             'status' => 'nullable',
             'card_number' => 'required',
             'images' => 'required',
-            'images.*' => 'required|image',
+            'images.*.url' => 'required|string',
         ];
     }
 }

@@ -6,6 +6,7 @@ use App\Helpers\CommonHelper;
 use App\Http\Requests\IdentityCreateRequest;
 use App\Models\Identity;
 use App\Traits\RequestAPI;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\MessageBag;
 
@@ -37,22 +38,17 @@ class IdentityController extends Controller
     public function store(IdentityCreateRequest $request)
     {
         $data = $request->validated();
-        $images = $request->file('images');
-        $pathFiles = [];
 
-        foreach ($images as $image) {
-            array_push($pathFiles, $this->uploadFile($image));
-        }
         $response = $this->sendPOSTRequest(config('app.ai_server') . '/identities', [
             'name' => $data['name'],
             'status' => !empty($data['status']) ? 'tracking' : 'untracking',
             'card_number' => $data['card_number'],
-            'images' => $pathFiles,
+            'images' => Arr::pluck($data['images'], 'url'),
         ], $this->getDefaultHeaders());
 
         if (!$response->status) {
             $messageBag = new MessageBag();
-            $messageBag->add('name', $response->body->message);
+            $messageBag->add('name', $response->message);
 
             return redirect()->back()->withErrors($messageBag)->withInput($request->all());
         }
@@ -63,12 +59,12 @@ class IdentityController extends Controller
             'card_number' => $data['card_number'],
             'info' => $data['info'],
             'mongo_id' => $response->body->_id,
-            'images' => array_map(function ($index, $url) use ($response) {
+            'images' => array_map(function ($index, $element) use ($response) {
                 return [
-                    'url' => $url,
+                    'url' => $element['url'],
                     'mongo_id' => $response->body->facial_data[$index]
                 ];
-            }, array_keys($pathFiles), $pathFiles),
+            }, array_keys($data['images']), $data['images']),
         ]);
 
         return redirect()->route('identities');
@@ -79,7 +75,14 @@ class IdentityController extends Controller
      */
     public function edit($id)
     {
-        return view('pages.identities.create');
+        $identity = Identity::find($id);
+
+        if (!$identity) {
+            abort(404);
+        }
+        return view('pages.identities.edit', [
+            'identity' => $identity,
+        ]);
     }
 
     /**
@@ -88,15 +91,45 @@ class IdentityController extends Controller
      */
     public function update(IdentityCreateRequest $request, $id)
     {
-//        $data = $request->validated();
-//
-//        User::create([
-//            'name' => $data['name'],
-//            'email' => $data['email'],
-//            'password' => Hash::make($data['password']),
-//        ]);
-//
-//        return redirect()->route('identities');
+        $identity = Identity::find($id);
+
+        if (!$identity) {
+            abort(404);
+        }
+        $data = $request->validated();
+        $oldImages = $identity->images;
+        $newImages = Arr::where($data['images'], function ($image) {
+            return empty($image['mongo_id']);
+        });
+        $response = $this->sendPUTRequest(config('app.ai_server') . '/identities/' . $identity->mongo_id, [
+            'name' => $data['name'],
+            'status' => !empty($data['status']) ? 'tracking' : 'untracking',
+            'card_number' => $data['card_number'],
+            'images' => Arr::pluck($newImages, 'url'),
+        ], $this->getDefaultHeaders());
+
+        if (!$response->status) {
+            $messageBag = new MessageBag();
+            $messageBag->add('name', $response->message);
+
+            return redirect()->back()->withErrors($messageBag)->withInput($request->all());
+        }
+        foreach ($newImages as $index => $image) {
+            array_push($oldImages, [
+                'mongo_id' => $response->body->facial_data[$index],
+                'url' => $image['url']
+            ]);
+        }
+
+        Identity::where('id', $id)->update([
+            'name' => $data['name'],
+            'status' => !empty($data['status']) ? 'tracking' : 'untracking',
+            'info' => $data['info'],
+            'card_number' => $data['card_number'],
+            'images' => $oldImages,
+        ]);
+
+        return redirect()->route('identities.edit', $identity->id);
     }
 
     /**
