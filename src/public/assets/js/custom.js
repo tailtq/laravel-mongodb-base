@@ -97,6 +97,8 @@ function initDropzone() {
     paramName: 'files',
     uploadMultiple: uploadImg,
     autoProcessQueue: false,
+    maxFilesize: 3000,
+    timeout: 360000,
     // addRemoveLinks: true,
     // dictRemoveFile: 'Xóa hình',
     // dictCancelUpload: 'Huỷ',

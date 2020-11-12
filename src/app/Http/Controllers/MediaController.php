@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\CommonHelper;
 use App\Http\Requests\MediaCreateRequest;
 use Illuminate\Http\UploadedFile;
 
