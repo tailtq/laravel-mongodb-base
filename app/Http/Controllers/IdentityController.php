@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\CommonHelper;
 use App\Http\Requests\IdentityCreateRequest;
 use App\Models\Identity;
 use App\Traits\RequestAPI;
@@ -39,7 +38,7 @@ class IdentityController extends Controller
     {
         $data = $request->validated();
 
-        $response = $this->sendPOSTRequest(config('app.ai_server') . '/identities', [
+        $response = $this->sendPOSTRequest($this->getIdentityUrl(), [
             'name' => $data['name'],
             'status' => !empty($data['status']) ? 'tracking' : 'untracking',
             'card_number' => $data['card_number'],
@@ -86,7 +85,8 @@ class IdentityController extends Controller
     }
 
     /**
-     * @param \App\Http\Requests\UserCreateRequest $request
+     * @param \App\Http\Requests\IdentityCreateRequest $request
+     * @param $id
      * @return \Illuminate\Http\RedirectResponse
      */
     public function update(IdentityCreateRequest $request, $id)
@@ -101,7 +101,7 @@ class IdentityController extends Controller
         $newImages = Arr::where($data['images'], function ($image) {
             return empty($image['mongo_id']);
         });
-        $response = $this->sendPUTRequest(config('app.ai_server') . '/identities/' . $identity->mongo_id, [
+        $response = $this->sendPUTRequest($this->getIdentityUrl($identity->mongo_id), [
             'name' => $data['name'],
             'status' => !empty($data['status']) ? 'tracking' : 'untracking',
             'card_number' => $data['card_number'],
@@ -138,7 +138,12 @@ class IdentityController extends Controller
      */
     public function delete($id)
     {
-        $identity = Identity::where('id', $id);
+        $identity = Identity::find($id);
+
+        if (!$identity) {
+            abort(404);
+        }
+        $this->sendDELETERequest($this->getIdentityUrl($identity->mongo_id), [], $this->getDefaultHeaders());
 
         $location = config('constants.minio_folder') . '/' . $id;
         if (Storage::disk('minio')->exists($location)) {
@@ -148,5 +153,10 @@ class IdentityController extends Controller
         $identity->delete();
 
         return redirect()->route('identities');
+    }
+
+    protected function getIdentityUrl($mongoId = '')
+    {
+        return config('app.ai_server') . '/identities' . ($mongoId ? "/$mongoId" : '');
     }
 }
