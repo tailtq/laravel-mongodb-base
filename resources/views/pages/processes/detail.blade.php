@@ -23,10 +23,10 @@
             </h6>
 
             <div class="table-responsive d-flex">
-                <video controls="true" class="w-60"></video>
+                <video controls="true" class="w-60" preload="auto"></video>
 
                 <div class="w-100 ml-4">
-                    <h4 class="mb-2">Cấu hình</h4>
+                    <h6 class="mb-2">Cấu hình</h6>
 
                     <table class="table table-bordered">
                         <tr>
@@ -46,6 +46,44 @@
                             <td>{{ object_get($process->mongoData, 'min_body_accuracy', 0) }}%</td>
                         </tr>
                     </table>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <h6 class="mb-2">Danh sách đối tượng</h6>
+
+                <div class="mb-4">
+                    @for ($i = 0; $i < 3; $i++)
+                        <div class="media d-block mb-2 d-sm-flex">
+                            <img src="https://www.nobleui.com/laravel/template/light/assets/images/placeholder.jpg" class="wd-100p wd-sm-200 mb-3 mb-sm-0 mr-3" alt="...">
+                            <div class="media-body">
+                                <p class="mt-1 mb-2"><b>{{ $i + 1 }}. Nicolas Tesla</b></p>
+
+                                <div class="progress ht-10">
+                                    <div class="progress-bar bg-success" role="progressbar"
+                                         data-toggle="tooltip"
+                                         style="width: 15%"
+                                         aria-valuenow="15"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100" title="hello"></div>
+
+                                    <div class="progress-bar bg-transparent" role="progressbar"
+                                         data-toggle="tooltip"
+                                         style="width: 30%"
+                                         aria-valuenow="30"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100" title="hello"></div>
+
+                                    <div class="progress-bar bg-success" role="progressbar"
+                                         data-toggle="tooltip"
+                                         style="width: 20%"
+                                         aria-valuenow="20"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100" title="hello"></div>
+                                </div>
+                            </div>
+                        </div>
+                    @endfor
                 </div>
             </div>
         </div>
@@ -274,7 +312,7 @@
       function init() {
         var video,
           player,
-          url = "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd";
+          url = 'http://192.168.1.252:9994/app/streaming/5fabbf4d8fbd6a237198cd58/dash_out.mpd';
 
         video = document.querySelector("video");
         player = dashjs.MediaPlayer().create();

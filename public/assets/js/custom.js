@@ -90,25 +90,47 @@ function initWizardForProcess() {
 function initDropzone() {
   if (!$.fn.dropzone || typeof Dropzone == 'undefined') return;
 
-  const dropzoneVideo = new Dropzone('.dropzone', {
+  const uploadImg = $('.dropzone').data('type') === 'image';
+
+  const dropzone = new Dropzone('.dropzone', {
     url: '/medias',
     paramName: 'files',
-    uploadMultiple: false,
+    uploadMultiple: uploadImg,
     autoProcessQueue: false,
+    addRemoveLinks: true,
+    // dictRemoveFile: 'Xóa hình',
     headers: {
       'X-CSRF-TOKEN': $('meta[name="_token"]').attr('content'),
     },
     init: function () {
       this.on('success', function(res) {
         const body = JSON.parse(res.xhr.response);
-        $('.dropzone-field').val(body.data[0]);
+
+        if (uploadImg) {
+          const startIndex = $('.image-links > div').length;
+
+          body.data.forEach((url, index) => {
+            $('.image-links').append(`
+              <div>
+                <input type="hidden" name="images[${startIndex + index}][url]" value="${url}">
+              </div>
+            `);
+            $('.images-visualization').append(`
+              <div class="col-md-4">
+                <img src="${url}" alt="">
+              </div>
+            `)
+          });
+        } else {
+          $('.dropzone-field').val(body.data[0]);
+        }
       });
     },
   });
 
   $('.dropzone-submit').click(function (e) {
     e.preventDefault();
-    dropzoneVideo.processQueue();
+    dropzone.processQueue();
   });
 
   $('a[href="#collapseDropzone"]').click(function () {
