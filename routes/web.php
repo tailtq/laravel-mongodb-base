@@ -17,6 +17,7 @@ Auth::routes(['register' => false]);
 
 Route::group(['middleware' => ['auth']], function () {
     Route::get('/', function () {
+
         return view('dashboard');
     });
 
@@ -149,7 +150,6 @@ Route::get('/clear-cache', function() {
     Artisan::call('cache:clear');
     return "Cache is cleared";
 });
-
 
 // 404 for undefined routes
 Route::any('/{page?}',function(){

@@ -49,7 +49,7 @@ class UserController extends Controller
 
             return redirect()->back()->withErrors($messageBag)->withInput($request->all());
         }
-        $data['mongo_id'] = $response->body->data->_id;
+        $data['mongo_id'] = $response->body->_id;
         $data['password'] = Hash::make($data['password']);
 
         User::create($data);

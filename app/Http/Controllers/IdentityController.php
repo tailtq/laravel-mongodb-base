@@ -7,6 +7,7 @@ use App\Http\Requests\IdentityCreateRequest;
 use App\Models\Identity;
 use App\Traits\RequestAPI;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\MessageBag;
 
 class IdentityController extends Controller
 {
@@ -36,29 +37,39 @@ class IdentityController extends Controller
     public function store(IdentityCreateRequest $request)
     {
         $data = $request->validated();
-        $files = $request->file('files');
+        $images = $request->file('images');
         $pathFiles = [];
 
-        try {
-            $identity = Identity::create([
-                'name'        => $data['name'],
-                'status'      => !empty($data['status']) ? 'tracking' : 'untracking',
-                'info'        => $data['info'],
-                'card_number' => $data['card_number'],
-            ]);
-
-            foreach ($files as $key => $file) {
-                $filename = CommonHelper::generateFileName($file);
-                $pathFiles[$key] = ['mongo_id' => rand(1, 999), 'url' => $this->uploadFile($file, $filename, $identity->id)];
-            }
+        foreach ($images as $image) {
+            array_push($pathFiles, $this->uploadFile($image));
         }
-        catch (\Exception $e) {
-            return $e->getMessage();
+        $response = $this->sendPOSTRequest(config('app.ai_server') . '/identities', [
+            'name' => $data['name'],
+            'status' => !empty($data['status']) ? 'tracking' : 'untracking',
+            'card_number' => $data['card_number'],
+            'images' => $pathFiles,
+        ], $this->getDefaultHeaders());
+
+        if (!$response->status) {
+            $messageBag = new MessageBag();
+            $messageBag->add('name', $response->body->message);
+
+            return redirect()->back()->withErrors($messageBag)->withInput($request->all());
         }
 
-
-        $identity->images = $pathFiles;
-        $identity->save();
+        Identity::create([
+            'name' => $data['name'],
+            'status' => !empty($data['status']) ? 'tracking' : 'untracking',
+            'card_number' => $data['card_number'],
+            'info' => $data['info'],
+            'mongo_id' => $response->body->_id,
+            'images' => array_map(function ($index, $url) use ($response) {
+                return [
+                    'url' => $url,
+                    'mongo_id' => $response->body->facial_data[$index]
+                ];
+            }, array_keys($pathFiles), $pathFiles),
+        ]);
 
         return redirect()->route('identities');
     }

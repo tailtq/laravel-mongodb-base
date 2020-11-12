@@ -18,14 +18,34 @@
                 <div>Luồng xử lý chi tiết</div>
 
                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal">
-                    Xem cấu hình
+                    Chỉnh sửa cấu hình
                 </button>
             </h6>
 
-            <div class="table-responsive">
-                <div>
-                    <video controls="true" class="w-100">
-                    </video>
+            <div class="table-responsive d-flex">
+                <video controls="true" class="w-60"></video>
+
+                <div class="w-100 ml-4">
+                    <h4 class="mb-2">Cấu hình</h4>
+
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Ngưỡng so sánh sinh trắc</th>
+                            <td>{{ object_get($process->mongoData, 'biometric_threshold', 0) }}%</td>
+                        </tr>
+                        <tr>
+                            <th>Độ chính xác đầu tối thiểu</th>
+                            <td>{{ object_get($process->mongoData, 'min_head_accuracy', 0) }}%</td>
+                        </tr>
+                        <tr>
+                            <th>Độ chính xác khuôn mặt tối thiểu</th>
+                            <td>{{ object_get($process->mongoData, 'min_face_accuracy', 0) }}%</td>
+                        </tr>
+                        <tr>
+                            <th>Độ chính xác thân hình tối thiểu</th>
+                            <td>{{ object_get($process->mongoData, 'min_body_accuracy', 0) }}%</td>
+                        </tr>
+                    </table>
                 </div>
             </div>
         </div>
@@ -249,7 +269,7 @@
 @endpush
 
 @push('custom-scripts')
-    <script src="{{ asset('assets/js/wizard.js') }}"></script>
+    <script src="{{ asset('assets/js/custom.js') }}"></script>
     <script>
       function init() {
         var video,
