@@ -30,7 +30,6 @@ class RedisSubscribe extends Command
     public function handle()
     {
         Redis::subscribe('process', function ($message) {
-            Log::info($message);
             // save objects to database
             // send to client via socket io
         });

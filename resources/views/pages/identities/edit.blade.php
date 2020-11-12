@@ -78,9 +78,9 @@
                                         </div>
                                     </div>
 
-                                    <div class="images-visualization row my-2">
+                                    <div class="images-visualization row my-4">
                                         @foreach ($identity->images as $index => $image)
-                                            <div class="col-md-4">
+                                            <div class="col-md-4 mb-2">
                                                 <img src="{{ $image['url'] }}" alt="" class="img-fluid">
                                             </div>
                                         @endforeach

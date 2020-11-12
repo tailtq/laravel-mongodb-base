@@ -77,6 +77,8 @@
                                         </div>
                                     </div>
 
+                                    <div class="images-visualization row my-4"></div>
+
                                     <div class="image-links"></div>
 
                                     @error('images')

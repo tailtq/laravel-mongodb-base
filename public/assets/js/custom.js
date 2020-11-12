@@ -97,8 +97,9 @@ function initDropzone() {
     paramName: 'files',
     uploadMultiple: uploadImg,
     autoProcessQueue: false,
-    addRemoveLinks: true,
+    // addRemoveLinks: true,
     // dictRemoveFile: 'Xóa hình',
+    // dictCancelUpload: 'Huỷ',
     headers: {
       'X-CSRF-TOKEN': $('meta[name="_token"]').attr('content'),
     },
@@ -116,8 +117,8 @@ function initDropzone() {
               </div>
             `);
             $('.images-visualization').append(`
-              <div class="col-md-4">
-                <img src="${url}" alt="">
+              <div class="col-md-4 mb-2">
+                <img src="${url}" alt="" class="img-fluid">
               </div>
             `)
           });
