@@ -17,7 +17,6 @@ Auth::routes(['register' => false]);
 
 Route::group(['middleware' => ['auth']], function () {
     Route::get('/', function () {
-
         return view('dashboard');
     });
 
@@ -40,7 +39,7 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::get('/{id}', 'IdentityController@edit')->name('identities.edit');
 
-        Route::put('/{id}', 'IdentityController@update')->name('identities.update');
+        Route::post('/{id}', 'IdentityController@update')->name('identities.edit');
 
         Route::delete('/{id}', 'IdentityController@delete')->name('identities.delete');
     });

@@ -39,7 +39,7 @@ class GetDataFromAI extends Command
      */
     public function handle()
     {
-        Redis::subscribe(['redisChat'], function ($message) {
+        Redis::subscribe(['redisAI'], function ($message) {
             Log::info($message);
         });
     }
