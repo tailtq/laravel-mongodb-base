@@ -41,6 +41,15 @@
 
   <!-- base js -->
   <script src="{{ asset('js/app.js') }}"></script>
+  <script src="http://localhost:6001/socket.io/socket.io.js"></script>
+  <script>
+    console.log(Echo);
+    Echo.channel('SocketTest')
+            .listen('EventName', (data) => {
+                console.log(data);
+            });
+  </script>
+
   <script src="{{ asset('assets/plugins/feather-icons/feather.min.js') }}"></script>
   <script src="{{ asset('assets/plugins/perfect-scrollbar/perfect-scrollbar.min.js') }}"></script>
   <!-- end base js -->
