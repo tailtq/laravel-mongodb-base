@@ -18,7 +18,8 @@ Auth::routes(['register' => false]);
 Route::group(['middleware' => ['auth']], function () {
     Route::get('/', function () {
 //       dd(\Illuminate\Support\Facades\Redis::connection());
-        broadcast(new \App\Events\EventName);
+
+        broadcast(new \App\Events\EventName(null));
         return view('dashboard');
     });
 
