@@ -2,7 +2,7 @@
   "_args": [
     [
       "@mdi/font@5.1.45",
-      "/Users/tailtq/Code/php/ai-application"
+      "/Users/tailtq/Code/php/ai-application/src"
     ]
   ],
   "_from": "@mdi/font@5.1.45",
@@ -27,7 +27,7 @@
   ],
   "_resolved": "https://registry.npmjs.org/@mdi/font/-/font-5.1.45.tgz",
   "_spec": "5.1.45",
-  "_where": "/Users/tailtq/Code/php/ai-application",
+  "_where": "/Users/tailtq/Code/php/ai-application/src",
   "author": {
     "name": "Austin Andrews",
     "url": "http://twitter.com/templarian"

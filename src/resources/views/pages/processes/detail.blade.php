@@ -35,15 +35,15 @@
                         </tr>
                         <tr>
                             <th>Độ chính xác đầu tối thiểu</th>
-                            <td>{{ object_get($process->mongoData, 'min_head_accuracy', 0) }}%</td>
+                            <td>{{ object_get($process->mongoData, 'min_head_confidence', 0) }}%</td>
                         </tr>
                         <tr>
                             <th>Độ chính xác khuôn mặt tối thiểu</th>
-                            <td>{{ object_get($process->mongoData, 'min_face_accuracy', 0) }}%</td>
+                            <td>{{ object_get($process->mongoData, 'min_face_confidence', 0) }}%</td>
                         </tr>
                         <tr>
                             <th>Độ chính xác thân hình tối thiểu</th>
-                            <td>{{ object_get($process->mongoData, 'min_body_accuracy', 0) }}%</td>
+                            <td>{{ object_get($process->mongoData, 'min_body_confidence', 0) }}%</td>
                         </tr>
                     </table>
                 </div>
@@ -260,9 +260,9 @@
                                                    class="form-control"
                                                    required
                                                    placeholder="Nhập thông số"
-                                                   name="min_head_accuracy"
+                                                   name="min_head_confidence"
                                                    disabled
-                                                   value="{{ old('min_head_accuracy', object_get($process->mongoData, 'min_head_accuracy')) }}">
+                                                   value="{{ old('min_head_confidence', object_get($process->mongoData, 'min_head_confidence')) }}">
                                         </div>
                                     </div>
 
@@ -273,9 +273,9 @@
                                                    class="form-control"
                                                    required
                                                    placeholder="Nhập thông số"
-                                                   name="min_face_accuracy"
+                                                   name="min_face_confidence"
                                                    disabled
-                                                   value="{{ old('min_face_accuracy', object_get($process->mongoData, 'min_face_accuracy')) }}">
+                                                   value="{{ old('min_face_confidence', object_get($process->mongoData, 'min_face_confidence')) }}">
                                         </div>
                                     </div>
 
@@ -286,9 +286,9 @@
                                                    class="form-control"
                                                    required
                                                    placeholder="Nhập thông số"
-                                                   name="min_body_accuracy"
+                                                   name="min_body_confidence"
                                                    disabled
-                                                   value="{{ old('min_body_accuracy', object_get($process->mongoData, 'min_body_accuracy')) }}">
+                                                   value="{{ old('min_body_confidence', object_get($process->mongoData, 'min_body_confidence')) }}">
                                         </div>
                                     </div>
                                 </div>
@@ -312,7 +312,7 @@
       function init() {
         var video,
           player,
-          url = 'http://192.168.1.252:9994/app/streaming/5fabbf4d8fbd6a237198cd58/dash_out.mpd';
+          url = 'http://192.168.1.252:9994/production/streaming/{{ $process->mongo_id }}/dash_out.mpd';
 
         video = document.querySelector("video");
         player = dashjs.MediaPlayer().create();

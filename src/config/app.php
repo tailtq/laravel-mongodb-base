@@ -171,7 +171,7 @@ return [
          */
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
-        // App\Providers\BroadcastServiceProvider::class,
+         App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
@@ -227,7 +227,7 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
     ],
 
-    'ai_server' => env('API_SERVER', 'http://14.241.120.239:12003/api'),
+    'ai_server' => env('AI_SERVER', 'http://14.241.120.239:12003/api'),
 
     'ai_api_key' => env('API_X_API_KEY', '7mM9NvYR7SfmIjejJQFcpw'),
 ];

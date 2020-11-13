@@ -63,9 +63,9 @@ class ProcessController extends Controller
             'min_face_size' => $data['min_face_size'],
             'tracking_scale' => $data['tracking_scale'],
             'biometric_threshold' => $data['biometric_threshold'],
-            'min_head_accuracy' => $data['min_head_accuracy'],
-            'min_face_accuracy' => $data['min_face_accuracy'],
-            'min_body_accuracy' => $data['min_body_accuracy'],
+            'min_head_confidence' => $data['min_head_confidence'],
+            'min_face_confidence' => $data['min_face_confidence'],
+            'min_body_confidence' => $data['min_body_confidence'],
         ], $this->getDefaultHeaders());
         if (!$processData->status) {
             return $this->error($processData->message, $processData->statusCode);

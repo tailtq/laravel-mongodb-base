@@ -24,7 +24,7 @@ class MediaCreateRequest extends FormRequest
     public function rules()
     {
         return [
-//            'files' => ''
+            'files' => 'required',
         ];
     }
 }

@@ -36,9 +36,9 @@ class ProcessCreateRequest extends FormRequest
             'min_face_size' => 'numeric',
             'tracking_scale' => 'numeric',
             'biometric_threshold' => 'numeric',
-            'min_head_accuracy' => 'numeric',
-            'min_face_accuracy' => 'numeric',
-            'min_body_accuracy' => 'numeric',
+            'min_head_confidence' => 'numeric',
+            'min_face_confidence' => 'numeric',
+            'min_body_confidence' => 'numeric',
         ];
     }
 }

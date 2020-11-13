@@ -232,8 +232,8 @@
                                                    class="form-control"
                                                    required
                                                    placeholder="Nhập thông số"
-                                                   name="min_head_accuracy"
-                                                   value="{{ old('min_head_accuracy', 50) }}">
+                                                   name="min_head_confidence"
+                                                   value="{{ old('min_head_confidence', 50) }}">
                                         </div>
                                     </div>
 
@@ -244,8 +244,8 @@
                                                    class="form-control"
                                                    required
                                                    placeholder="Nhập thông số"
-                                                   name="min_face_accuracy"
-                                                   value="{{ old('min_face_accuracy', 50) }}">
+                                                   name="min_face_confidence"
+                                                   value="{{ old('min_face_confidence', 50) }}">
                                         </div>
                                     </div>
 
@@ -256,8 +256,8 @@
                                                    class="form-control"
                                                    required
                                                    placeholder="Nhập thông số"
-                                                   name="min_body_accuracy"
-                                                   value="{{ old('min_body_accuracy', 50) }}">
+                                                   name="min_body_confidence"
+                                                   value="{{ old('min_body_confidence', 50) }}">
                                         </div>
                                     </div>
                                 </div>

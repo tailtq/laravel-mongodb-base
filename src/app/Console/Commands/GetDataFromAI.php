@@ -39,8 +39,16 @@ class GetDataFromAI extends Command
      */
     public function handle()
     {
-        Redis::subscribe(['redisAI'], function ($message) {
-            Log::info($message);
+        Redis::subscribe(['process'], function ($objects) {
+            Log::info($objects);
+//            $objects = json_decode($objects);
+//            $insertQueries = [];
+//
+//            foreach ($objects as $object) {
+//                if ($object->finished_track === false) {
+//
+//                }
+//            }
         });
     }
 }
