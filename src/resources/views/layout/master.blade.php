@@ -44,7 +44,8 @@
   <script src="http://localhost:6001/socket.io/socket.io.js"></script>
   <script>
     console.log(Echo);
-    Echo.channel('SocketTest')
+    let authId = {{ Auth::user()->id }}
+    Echo.channel('GetDataAI-' + authId)
             .listen('EventName', (data) => {
                 console.log(data);
             });

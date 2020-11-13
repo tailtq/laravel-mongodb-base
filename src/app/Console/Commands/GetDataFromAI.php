@@ -41,6 +41,7 @@ class GetDataFromAI extends Command
     {
         Redis::subscribe(['process'], function ($objects) {
             Log::info($objects);
+            broadcast(new \App\Events\EventName($objects));
 //            $objects = json_decode($objects);
 //            $insertQueries = [];
 //
