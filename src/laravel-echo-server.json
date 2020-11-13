@@ -4,7 +4,11 @@
 	"clients": [],
 	"database": "redis",
 	"databaseConfig": {
-		"redis": {},
+		"redis": {
+			"host": "core.greenlabs.ai",
+			"port": 11032,
+			"db": 0
+		},
 		"sqlite": {
 			"databasePath": "/database/laravel-echo-server.sqlite"
 		}
