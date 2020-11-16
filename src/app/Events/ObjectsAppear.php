@@ -4,28 +4,26 @@ namespace App\Events;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Auth;
 
-class EventName implements ShouldBroadcast
+class ObjectsAppear implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $userId;
+    public $processId;
     public $data;
 
     /**
      * Create a new event instance.
      *
+     * @param $processId
      * @param $data
      */
-    public function __construct($data)
+    public function __construct($processId, $data)
     {
-        $this->userId = Auth::user()->id;
+        $this->processId = $processId;
         $this->data = $data;
     }
 
@@ -36,15 +34,13 @@ class EventName implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new Channel('GetDataAI-' . 6);
+        return new Channel('process.' . $this->processId);
     }
 
     public function broadcastWith()
     {
         return [
             'data' => $this->data,
-            'user' => 'User' .  $this->userId,
         ];
     }
-
 }

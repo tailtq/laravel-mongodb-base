@@ -16,10 +16,13 @@ class CreateObjectsTable extends Migration
         Schema::create('objects', function (Blueprint $table) {
             $table->integerIncrements('id');
             $table->unsignedInteger('identity_id')->nullable();
+            $table->unsignedInteger('process_id');
+            $table->string('mongo_id');
             $table->unsignedInteger('track_id');
             $table->timestamps();
 
             $table->foreign('identity_id')->references('id')->on('identities');
+            $table->foreign('process_id')->references('id')->on('processes');
         });
     }
 

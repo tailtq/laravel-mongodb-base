@@ -10,7 +10,6 @@ trait HandleUploadFile
     /**
      * Upload file
      * @param $file
-     * @param $name
      * @param $id
      * @return mixed
      */
@@ -24,5 +23,17 @@ trait HandleUploadFile
         $disk->setVisibility($filePath, 'public');
 
         return $disk->url($filePath);
+    }
+
+    public function listFiles($path)
+    {
+        $disk = Storage::disk('minio');
+        $files = $disk->files($path);
+
+        foreach ($files as $index => $file) {
+            $files[$index] = $disk->url($file);
+        }
+
+        return $files;
     }
 }

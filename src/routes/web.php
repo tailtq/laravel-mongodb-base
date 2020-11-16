@@ -17,9 +17,10 @@ Auth::routes(['register' => false]);
 
 Route::group(['middleware' => ['auth']], function () {
     Route::get('/', function () {
-//       dd(\Illuminate\Support\Facades\Redis::connection());
 
-        broadcast(new \App\Events\EventName(null));
+        broadcast(new \App\Events\ObjectsAppear(1, null));
+        broadcast(new \App\Events\ObjectsAppear(2, null));
+        broadcast(new \App\Events\ObjectsAppear(3, null));
         return view('dashboard');
     });
 
@@ -42,7 +43,7 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::get('/{id}', 'IdentityController@edit')->name('identities.edit');
 
-        Route::post('/{id}', 'IdentityController@update')->name('identities.edit');
+        Route::put('/{id}', 'IdentityController@update')->name('identities.edit');
 
         Route::delete('/{id}', 'IdentityController@delete')->name('identities.delete');
     });

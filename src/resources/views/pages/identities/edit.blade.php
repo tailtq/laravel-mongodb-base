@@ -17,7 +17,7 @@
             <div class="card">
                 <div class="card-body">
                     <h6 class="card-title">Chỉnh sửa định danh</h6>
-                    <form action="{{ route('identities.update', $identity->id) }}" method="POST" enctype="multipart/form-data"
+                    <form action="{{ route('identities.edit', $identity->id) }}" method="POST" enctype="multipart/form-data"
                           id="form_objects">
                         @csrf
                         @method('PUT')

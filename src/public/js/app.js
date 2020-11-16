@@ -48775,8 +48775,8 @@ if (typeof io !== 'undefined') {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /home/nguyennd/Documents/web-face-reg-from-id-card/src/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /home/nguyennd/Documents/web-face-reg-from-id-card/src/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! /var/www/app/resources/js/app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! /var/www/app/resources/sass/app.scss */"./resources/sass/app.scss");
 
 
 /***/ }),

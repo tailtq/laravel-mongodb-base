@@ -17,7 +17,6 @@ services:
 #            - ./deployment/configs/crontab.conf:/etc/crontabs/root
             - ./deployment/configs/nginx/nginx-host.conf:/etc/nginx/sites-enabled/default.conf
             - ./deployment/configs/nginx/nginx.conf:/etc/nginx/nginx.conf
-
         environment:
             - PHP_MEM_LIMIT=2048M
     db:
