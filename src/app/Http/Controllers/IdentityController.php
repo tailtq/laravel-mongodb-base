@@ -13,7 +13,7 @@ class IdentityController extends Controller
 {
     use RequestAPI;
 
-    public function list()
+    public function index()
     {
         $identities = Identity::orderBy('created_at', 'desc')->paginate(10);
 
