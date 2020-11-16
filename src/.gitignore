@@ -16,3 +16,5 @@ composer.lock
 
 # mysql docker
 /storage/mysql
+dump.rdb
+laravel-echo-server.lock
