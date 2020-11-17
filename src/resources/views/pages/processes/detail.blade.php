@@ -312,7 +312,7 @@
       function init() {
         var video,
           player,
-          url = 'http://192.168.1.252:9994/production/streaming/{{ $process->mongo_id }}/dash_out.mpd';
+          url = 'http://192.168.1.252:9994/dev/streaming/{{ $process->mongo_id }}/dash_out.mpd';
 
         video = document.querySelector("video");
         player = dashjs.MediaPlayer().create();

@@ -10,6 +10,7 @@ use App\Models\TrackedObject;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 
@@ -106,7 +107,7 @@ class GetDataFromAI extends Command
             if (count($updatingAppearances) !== 0) {
                 DatabaseHelper::updateMultiple($updatingAppearances, 'object_id', 'object_appearances');
             }
-            $result = TrackedObject::join('object_appearances', 'objects.id', 'object_appearances.object_id')
+            $result = DB::table('objects')->join('object_appearances', 'objects.id', 'object_appearances.object_id')
                 ->whereIn('objects.id', $objectIds)
                 ->select([
                     'objects.id',

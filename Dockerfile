@@ -14,6 +14,7 @@ RUN npm install -g laravel-echo-server
 RUN npm install -g socket.io
 RUN npm install -g socket.io-client
 RUN npm install
+RUN supervisorctl reload
 
 #CMD ["redis-server"]
 #
