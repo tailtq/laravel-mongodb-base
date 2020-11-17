@@ -31,7 +31,7 @@ Route::group(['middleware' => ['auth']], function () {
     });
 
     Route::group(['prefix' => 'identities'], function () {
-        Route::get('/', 'IdentityController@list')->name('identities');
+        Route::get('/', 'IdentityController@index')->name('identities');
 
         Route::get('/create', 'IdentityController@create')->name('identities.create');
 

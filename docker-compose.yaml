@@ -7,7 +7,6 @@ services:
         ports:
             - 9000:80
             - 6001:6001
-            - 6378:6379
         depends_on:
             - db
         volumes:
