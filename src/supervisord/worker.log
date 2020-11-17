@@ -1450,3 +1450,72 @@ No scheduled commands are ready to run.
 No scheduled commands are ready to run.
 No scheduled commands are ready to run.
 No scheduled commands are ready to run.
+
+   Predis\Connection\ConnectionException 
+
+  Error while reading line from the server. [tcp://192.168.1.133:11032]
+
+  at vendor/predis/predis/src/Connection/AbstractConnection.php:155
+    151|      */
+    152|     protected function onConnectionError($message, $code = null)
+    153|     {
+    154|         CommunicationException::handle(
+  > 155|             new ConnectionException($this, static::createExceptionMessage($message), $code)
+    156|         );
+    157|     }
+    158| 
+    159|     /**
+
+      [2m+7 vendor frames [22m
+  8   app/Console/Commands/GetDataFromAI.php:131
+      Illuminate\Support\Facades\Facade::__callStatic("subscribe")
+
+      [2m+13 vendor frames [22m
+  22  artisan:37
+      Illuminate\Foundation\Console\Kernel::handle(Object(Symfony\Component\Console\Input\ArgvInput), Object(Symfony\Component\Console\Output\ConsoleOutput))
+
+   Predis\Connection\ConnectionException 
+
+  Error while reading line from the server. [tcp://192.168.1.133:11032]
+
+  at vendor/predis/predis/src/Connection/AbstractConnection.php:155
+    151|      */
+    152|     protected function onConnectionError($message, $code = null)
+    153|     {
+    154|         CommunicationException::handle(
+  > 155|             new ConnectionException($this, static::createExceptionMessage($message), $code)
+    156|         );
+    157|     }
+    158| 
+    159|     /**
+
+      [2m+7 vendor frames [22m
+  8   app/Console/Commands/GetDataFromAI.php:127
+      Illuminate\Support\Facades\Facade::__callStatic("subscribe")
+
+      [2m+13 vendor frames [22m
+  22  artisan:37
+      Illuminate\Foundation\Console\Kernel::handle(Object(Symfony\Component\Console\Input\ArgvInput), Object(Symfony\Component\Console\Output\ConsoleOutput))
+
+   Predis\Connection\ConnectionException 
+
+  Error while reading line from the server. [tcp://192.168.1.133:11032]
+
+  at vendor/predis/predis/src/Connection/AbstractConnection.php:155
+    151|      */
+    152|     protected function onConnectionError($message, $code = null)
+    153|     {
+    154|         CommunicationException::handle(
+  > 155|             new ConnectionException($this, static::createExceptionMessage($message), $code)
+    156|         );
+    157|     }
+    158| 
+    159|     /**
+
+      [2m+7 vendor frames [22m
+  8   app/Console/Commands/GetDataFromAI.php:127
+      Illuminate\Support\Facades\Facade::__callStatic("subscribe")
+
+      [2m+13 vendor frames [22m
+  22  artisan:37
+      Illuminate\Foundation\Console\Kernel::handle(Object(Symfony\Component\Console\Input\ArgvInput), Object(Symfony\Component\Console\Output\ConsoleOutput))

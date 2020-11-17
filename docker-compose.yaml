@@ -13,7 +13,8 @@ services:
         volumes:
             - ./src:/var/www/app
             - ./deployment/configs/php/php.ini:/usr/local/etc/php/conf.d/php.ini
-#            - ./deployment/configs/queue.conf:/etc/supervisor/conf.d/queue.conf
+            - ./deployment/configs/supervisor/echo-server.conf:/etc/supervisor/conf.d/echo-server.conf
+            - ./deployment/configs/supervisor/redis-server.conf:/etc/supervisor/conf.d/redis-server.conf
 #            - ./deployment/configs/crontab.conf:/etc/crontabs/root
             - ./deployment/configs/nginx/nginx-host.conf:/etc/nginx/sites-enabled/default.conf
             - ./deployment/configs/nginx/nginx.conf:/etc/nginx/nginx.conf
