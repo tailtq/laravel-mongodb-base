@@ -17,10 +17,6 @@ Auth::routes(['register' => false]);
 
 Route::group(['middleware' => ['auth']], function () {
     Route::get('/', function () {
-
-        broadcast(new \App\Events\ObjectsAppear(1, null));
-        broadcast(new \App\Events\ObjectsAppear(2, null));
-        broadcast(new \App\Events\ObjectsAppear(3, null));
         return view('dashboard');
     });
 
