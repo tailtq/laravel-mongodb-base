@@ -79,6 +79,7 @@ class IdentityController extends Controller
         if (!$identity) {
             abort(404);
         }
+
         return view('pages.identities.edit', [
             'identity' => $identity,
         ]);
