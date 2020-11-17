@@ -41,7 +41,7 @@
 
   <!-- base js -->
   <script src="{{ asset('js/app.js') }}"></script>
-  <script src="http://localhost:6001/socket.io/socket.io.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
   <script>
     console.log(Echo);
     let authId = {{ Auth::user()->id }}

@@ -12,7 +12,7 @@
         </ol>
     </nav>
 
-    <div class="row">
+    <div class="row echo-server" data-echo-server="{{ env('ECHO_SERVER') }}">
         <div class="card-body">
             <h6 class="card-title d-flex justify-content-md-between align-items-center">
                 <div>Luồng xử lý chi tiết</div>
@@ -312,7 +312,7 @@
       function init() {
         var video,
           player,
-          url = 'http://192.168.1.252:9994/dev/streaming/{{ $process->mongo_id }}/dash_out.mpd';
+          url = '{{ env('STREAMING_SERVER') }}/dev/streaming/{{ $process->mongo_id }}/dash_out.mpd';
 
         video = document.querySelector("video");
         player = dashjs.MediaPlayer().create();
