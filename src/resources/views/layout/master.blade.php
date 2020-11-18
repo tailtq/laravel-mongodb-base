@@ -1,61 +1,61 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>NobleUI Laravel Admin Dashboard Template</title>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NobleUI Laravel Admin Dashboard Template</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- CSRF Token -->
-  <meta name="_token" content="{{ csrf_token() }}">
+    <!-- CSRF Token -->
+    <meta name="_token" content="{{ csrf_token() }}">
 
-  <link rel="shortcut icon" href="{{ asset('/favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ asset('/favicon.ico') }}">
 
-  <!-- plugin css -->
-  <link href="{{ asset('assets/fonts/feather-font/css/iconfont.css') }}" rel="stylesheet" />
-  <link href="{{ asset('assets/plugins/perfect-scrollbar/perfect-scrollbar.css') }}" rel="stylesheet" />
-  <!-- end plugin css -->
+    <!-- plugin css -->
+    <link href="{{ asset('assets/fonts/feather-font/css/iconfont.css') }}" rel="stylesheet"/>
+    <link href="{{ asset('assets/plugins/perfect-scrollbar/perfect-scrollbar.css') }}" rel="stylesheet"/>
+    <!-- end plugin css -->
 
-  @stack('plugin-styles')
+    @stack('plugin-styles')
 
-  <!-- common css -->
-  <link href="{{ asset('css/app.css') }}" rel="stylesheet" />
+<!-- common css -->
+    <link href="{{ asset('css/app.css') }}" rel="stylesheet"/>
 
-  <!-- end common css -->
+    <!-- end common css -->
 
-  @stack('style')
+    @stack('style')
 </head>
 <body data-base-url="{{url('/')}}">
 
-
-  <div class="main-wrapper" id="app">
+<div class="main-wrapper" id="app">
     @include('layout.sidebar')
+
     <div class="page-wrapper">
-      @include('layout.header')
-      <div class="page-content">
-        @yield('content')
-      </div>
-      @include('layout.footer')
+        @include('layout.header')
+
+        <div class="page-content">
+            @yield('content')
+        </div>
+
+        @include('layout.footer')
     </div>
-  </div>
+</div>
 
-  <script src="{{ asset('js/app.js') }}"></script>
-  <script src="http://localhost:6001/socket.io/socket.io.js"></script>
+<script src="{{ asset('js/app.js') }}"></script>
+<script src="{{ asset('assets/plugins/feather-icons/feather.min.js') }}"></script>
+<script src="{{ asset('assets/plugins/perfect-scrollbar/perfect-scrollbar.min.js') }}"></script>
+<!-- end base js -->
+<script src="{{ asset('assets/js/spinner.js') }}"></script>
 
-  <script src="{{ asset('assets/plugins/feather-icons/feather.min.js') }}"></script>
-  <script src="{{ asset('assets/plugins/perfect-scrollbar/perfect-scrollbar.min.js') }}"></script>
-  <!-- end base js -->
-  <script src="{{ asset('assets/js/spinner.js') }}"></script>
+<!-- plugin js -->
+@stack('plugin-scripts')
+<!-- end plugin js -->
 
-  <!-- plugin js -->
-  @stack('plugin-scripts')
-  <!-- end plugin js -->
+<!-- common js -->
+<script src="{{ asset('assets/js/template.js') }}"></script>
+<!-- base js -->
+<!-- end common js -->
 
-  <!-- common js -->
-  <script src="{{ asset('assets/js/template.js') }}"></script>
-  <!-- base js -->
-  <!-- end common js -->
-
-  @stack('custom-scripts')
+@stack('custom-scripts')
 </body>
 </html>

@@ -47,7 +47,7 @@ class GetDataFromAI extends Command
      */
     public function handle()
     {
-        Redis::subscribe('processABC', function ($objects) {
+        Redis::subscribe('process', function ($objects) {
             $objects = json_decode($objects);
 
             if (!$objects) {
@@ -111,12 +111,17 @@ class GetDataFromAI extends Command
 //            if (count($updatingAppearances) !== 0) {
 //                DatabaseHelper::updateMultiple($updatingAppearances, 'object_id', 'object_appearances');
 //            }
-            $result = DB::table('objects')->join('object_appearances', 'objects.id', 'object_appearances.object_id')
+            $result = DB::table('objects')
+                ->leftJoin('identities', 'objects.identity_id', 'identities.id')
+                ->join('object_appearances', 'objects.id', 'object_appearances.object_id')
                 ->whereIn('objects.id', $objectIds)
                 ->select([
                     'objects.id',
                     'objects.process_id',
+                    'objects.track_id',
                     'objects.image',
+                    'identities.name',
+                    'identities.images',
                     'object_appearances.frame_from',
                     'object_appearances.frame_to',
                     'object_appearances.time_from',
