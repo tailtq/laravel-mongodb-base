@@ -53,37 +53,35 @@
                 <h6 class="mb-2">Danh sách đối tượng</h6>
 
                 <div class="mb-4">
-                    @for ($i = 0; $i < 3; $i++)
-                        <div class="media d-block mb-2 d-sm-flex">
-                            <img src="https://www.nobleui.com/laravel/template/light/assets/images/placeholder.jpg" class="wd-100p wd-sm-200 mb-3 mb-sm-0 mr-3" alt="...">
-                            <div class="media-body">
-                                <p class="mt-1 mb-2"><b>{{ $i + 1 }}. Nicolas Tesla</b></p>
+                    <div class="media d-block mb-2 d-sm-flex socket-render">
+                        <img src="https://www.nobleui.com/laravel/template/light/assets/images/placeholder.jpg" class="wd-100p wd-sm-200 mb-3 mb-sm-0 mr-3" alt="...">
+                        <div class="media-body">
+                            <p class="mt-1 mb-2"><b>{{ 1 }}. Nicolas Tesla</b></p>
 
-                                <div class="progress ht-10">
-                                    <div class="progress-bar bg-success" role="progressbar"
-                                         data-toggle="tooltip"
-                                         style="width: 15%"
-                                         aria-valuenow="15"
-                                         aria-valuemin="0"
-                                         aria-valuemax="100" title="hello"></div>
+                            <div class="progress ht-10">
+                                <div class="progress-bar bg-success" role="progressbar"
+                                     data-toggle="tooltip"
+                                     style="width: 15%"
+                                     aria-valuenow="15"
+                                     aria-valuemin="0"
+                                     aria-valuemax="100" title="hello"></div>
 
-                                    <div class="progress-bar bg-transparent" role="progressbar"
-                                         data-toggle="tooltip"
-                                         style="width: 30%"
-                                         aria-valuenow="30"
-                                         aria-valuemin="0"
-                                         aria-valuemax="100" title="hello"></div>
+                                <div class="progress-bar bg-transparent" role="progressbar"
+                                     data-toggle="tooltip"
+                                     style="width: 30%"
+                                     aria-valuenow="30"
+                                     aria-valuemin="0"
+                                     aria-valuemax="100" title="hello"></div>
 
-                                    <div class="progress-bar bg-success" role="progressbar"
-                                         data-toggle="tooltip"
-                                         style="width: 20%"
-                                         aria-valuenow="20"
-                                         aria-valuemin="0"
-                                         aria-valuemax="100" title="hello"></div>
-                                </div>
+                                <div class="progress-bar bg-success" role="progressbar"
+                                     data-toggle="tooltip"
+                                     style="width: 20%"
+                                     aria-valuenow="20"
+                                     aria-valuemin="0"
+                                     aria-valuemax="100" title="hello"></div>
                             </div>
                         </div>
-                    @endfor
+                    </div>
                 </div>
             </div>
         </div>

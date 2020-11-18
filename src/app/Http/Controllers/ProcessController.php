@@ -72,7 +72,7 @@ class ProcessController extends Controller
         if (!$processData->status) {
             return $this->error($processData->message, $processData->statusCode);
         }
-        Log::info(json_encode($processData));
+
         $process = Process::create([
             'user_id' => Auth::id(),
             'name' => $data['name'],

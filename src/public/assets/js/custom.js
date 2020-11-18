@@ -44,6 +44,11 @@ function initWizardForProcess() {
   const $processForm = $('#process-form');
 
   $processForm.steps({
+    labels: {
+      finish: 'Hoàn tất',
+      next: 'Tiếp theo',
+      previous: 'Quay lại',
+    },
     headerTag: 'h2',
     bodyTag: 'section',
     transitionEffect: 'slideLeft',
@@ -54,7 +59,11 @@ function initWizardForProcess() {
       return validRequiredInputs($($processForm.find('section')[currentIndex]));
     },
     onFinished: function (event, currentIndex) {
-      $('#process-form a[href="#finish"]').attr('disabled', true);
+      console.log(this);
+      $('#process-form a[href="#finish"]').attr('disabled', true).css({'padding': '.5rem 1rem .3rem'});
+      $('#process-form a[href="#finish"]').html(`
+        <span class="spinner-border text-light" style="width: 1rem; height: 1rem;"></span>
+      `);
       const serializableData = $processForm.serializeArray();
 
       if (serializableData.length === 0 || !$processForm.hasClass('editable')) {
@@ -74,7 +83,8 @@ function initWizardForProcess() {
           window.location.href = `/processes/${res.data.id}`;
         },
         error: function (res) {
-          $('#process-form a[href="#finish"]').attr('disabled', false);
+          $('#process-form a[href="#finish"]').attr('disabled', false).attr('style', null);
+          $('#process-form a[href="#finish"]').html('Hoàn tất');
 
           Swal.fire({
             icon: 'error',
