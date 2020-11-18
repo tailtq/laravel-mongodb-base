@@ -52,8 +52,8 @@
             <div class="mt-4">
                 <h6 class="mb-2">Danh sách đối tượng</h6>
 
-                <div class="mb-4">
-                    <div class="media d-block mb-2 d-sm-flex socket-render">
+                <div class="mb-4 socket-render">
+                    <div class="media d-block mb-2 d-sm-flex">
                         <img src="https://www.nobleui.com/laravel/template/light/assets/images/placeholder.jpg" class="wd-100p wd-sm-200 mb-3 mb-sm-0 mr-3" alt="...">
                         <div class="media-body">
                             <p class="mt-1 mb-2"><b>{{ 1 }}. Nicolas Tesla</b></p>

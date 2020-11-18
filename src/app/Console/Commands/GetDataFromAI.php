@@ -47,9 +47,8 @@ class GetDataFromAI extends Command
      */
     public function handle()
     {
-        Redis::subscribe('process', function ($objects) {
+        Redis::subscribe('processABC', function ($objects) {
             $objects = json_decode($objects);
-            Log::info($objects);
 
             if (!$objects) {
                 return;
@@ -122,12 +121,13 @@ class GetDataFromAI extends Command
             $groupedResult = $result->groupBy('process_id');
 
             $attrs = [];
-            Log::info($groupedResult);
+
             foreach ($groupedResult as $processId => $result) {
                 $attrs[$processId] = $result;
-//                broadcast(new ObjectsAppear($processId, $result));
             }
+
             foreach ($attrs as $key => $value) {
+                Log::info($value);
                 broadcast(new ObjectsAppear($key, $value));
             }
         });
