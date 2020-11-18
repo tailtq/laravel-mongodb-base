@@ -121,8 +121,14 @@ class GetDataFromAI extends Command
                 ->get();
             $groupedResult = $result->groupBy('process_id');
 
+            $attrs = [];
+            Log::info($groupedResult);
             foreach ($groupedResult as $processId => $result) {
-                broadcast(new ObjectsAppear($processId, $result));
+                $attrs[$processId] = $result;
+//                broadcast(new ObjectsAppear($processId, $result));
+            }
+            foreach ($attrs as $key => $value) {
+                broadcast(new ObjectsAppear($key, $value));
             }
         });
     }
