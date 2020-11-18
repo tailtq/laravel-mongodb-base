@@ -11,6 +11,7 @@ class TrackedObject extends Model
         'process_id',
         'track_id',
         'mongo_id',
+        'image',
     ];
 
     protected $table = 'objects';
