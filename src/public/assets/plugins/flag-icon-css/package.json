@@ -2,7 +2,7 @@
   "_args": [
     [
       "flag-icon-css@3.4.6",
-      "/Users/tailtq/Code/php/ai-application/src"
+      "/home/nguyennd/Documents/web-face-reg-from-id-card/src"
     ]
   ],
   "_from": "flag-icon-css@3.4.6",
@@ -26,7 +26,7 @@
   ],
   "_resolved": "https://registry.npmjs.org/flag-icon-css/-/flag-icon-css-3.4.6.tgz",
   "_spec": "3.4.6",
-  "_where": "/Users/tailtq/Code/php/ai-application/src",
+  "_where": "/home/nguyennd/Documents/web-face-reg-from-id-card/src",
   "author": {
     "name": "Panayiotis Lipiridis",
     "email": "lipiridis@gmail.com"
