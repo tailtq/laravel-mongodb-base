@@ -18,3 +18,10 @@ composer.lock
 /storage/mysql
 dump.rdb
 laravel-echo-server.lock
+
+# build
+/public/js/app.js
+/public/js/app.js.map
+
+/public/css/app.css
+/public/css/app.css.map

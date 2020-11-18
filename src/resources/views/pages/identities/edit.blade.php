@@ -69,7 +69,11 @@
                                     <div class="stretch-card grid-margin grid-margin-md-0">
                                         <div class="card">
                                             <div class="card-body">
-                                                <div class="dropzone" id="dropzone" data-type="image"></div>
+                                                <div class="dropzone" id="dropzone" data-type="image">
+                                                    <div class="dropzone" id="dropzone" data-type="image">
+                                                        <div class="dz-message">Kéo ảnh vào đây để tải lên</div>
+                                                    </div>
+                                                </div>
 
                                                 <div class="text-center mt-3">
                                                     <button class="btn btn-primary dropzone-submit">Tải lên</button>

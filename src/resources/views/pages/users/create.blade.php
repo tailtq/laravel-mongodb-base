@@ -12,12 +12,12 @@
         <div class="col-md-12 grid-margin stretch-card">
             <div class="card">
                 <div class="card-body">
-                    <h6 class="card-title">Create new user</h6>
+                    <h6 class="card-title">Thông tin người dùng</h6>
                     <form action="{{ route('users.create') }}" method="POST">
                         @csrf
 
                         <div class="form-group">
-                            <label>Name</label>
+                            <label>Tên</label>
                             <input type="text" class="form-control" placeholder="Enter Name"
                                    name="name"
                                    value="{{ old('name') }}">
@@ -41,7 +41,7 @@
                             @enderror
                         </div>
                         <div class="form-group">
-                            <label>Password</label>
+                            <label>Mật khẩu</label>
                             <input type="password" class="form-control" placeholder="Enter Password"
                                    name="password"
                                    value="{{ old('password') }}">
@@ -53,7 +53,7 @@
                             @enderror
                         </div>
                         <div class="form-group">
-                            <label>Password Confirmation</label>
+                            <label>Xác nhận mật khẩu</label>
                             <input type="password" class="form-control" placeholder="Confirm Password"
                                    name="password_confirmation"
                                    value="{{ old('password_confirmation') }}">
