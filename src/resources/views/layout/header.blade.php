@@ -22,8 +22,8 @@
         <div class="dropdown-menu" aria-labelledby="profileDropdown">
           <div class="dropdown-header d-flex flex-column align-items-center">
             <div class="info text-center">
-              <p class="name font-weight-bold mb-0">Amiah Burton</p>
-              <p class="email text-muted mb-3">amiahburton@gmail.com</p>
+              <p class="name font-weight-bold mb-0">{{ \Auth::user()->name }}</p>
+              <p class="email text-muted mb-3">{{ \Auth::user()->email }}</p>
             </div>
           </div>
           <div class="dropdown-body">
@@ -44,7 +44,7 @@
                 <a class="nav-link" href="{{ route('logout') }}"
                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                   <i data-feather="log-out"></i>
-                  Log Out
+                  Đăng xuất
                 </a>
 
                 <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">

@@ -5,14 +5,14 @@
         <div class="card-body">
             <h6 class="card-title d-flex justify-content-md-between align-items-center">
                 <div>Danh sách định danh</div>
-                <a href="{{ route('identities.create') }}" class="btn btn-success">Tạo mới</a>
+                <a href="{{ route('identities.create') }}" class="btn btn-primary">Tạo mới</a>
             </h6>
 
             <div class="table-responsive">
                 <table class="table">
                     <thead>
                     <tr>
-                        <th>STT</th>
+                        <th class="text-center">STT</th>
                         <th>Hình</th>
                         <th>Tên</th>
                         <th>Ngày tạo</th>
@@ -26,7 +26,7 @@
 
                     @foreach ($identities as $identity)
                         <tr>
-                            <th>{{ ++$index }}</th>
+                            <th class="text-center">{{ ++$index }}</th>
                             <td><img src="{{ !empty($identity->images[0]['url'] ) ? $identity->images[0]['url'] : asset('img/icon-avatar-default.png')}}" alt=""></td>
                             <td>{{ $identity->name }}</td>
                             <td>{{ $identity->created_at }}</td>

@@ -26,5 +26,7 @@ class Process extends Model
         'user_id',
         'thumbnail',
         'mongo_id',
+        'total_time',
+        'total_frames',
     ];
 }

@@ -16,7 +16,7 @@
             <li class="nav-item {{ active_class(['/']) }}">
                 <a href="{{ url('/') }}" class="nav-link">
                     <i class="link-icon" data-feather="box"></i>
-                    <span class="link-title">Dashboard</span>
+                    <span class="link-title">Trang chủ</span>
                 </a>
             </li>
             {{--<li class="nav-item nav-category">Application</li>--}}
@@ -31,7 +31,7 @@
             <li class="nav-item {{ active_class(['identities', 'identities/*']) }}">
                 <a class="nav-link" href="{{ route('identities') }}">
                     <i class="link-icon" data-feather="user"></i>
-                    <span class="link-title">Quản lý đối tượng</span>
+                    <span class="link-title">Quản lý định danh</span>
                 </a>
             </li>
 
@@ -43,9 +43,10 @@
             </li>
 
             <li class="nav-item {{ active_class(['settings', 'settings/*']) }}">
-                <a class="nav-link" href="#">
-                    <i class="link-icon" data-feather="settings"></i>
-                    <span class="link-title">Cấu hình hệ thống</span>
+                <a class="nav-link" href="{{ route('logout') }}"
+                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                    <i class="link-icon" data-feather="log-out"></i>
+                    <span class="link-title">Đăng xuất</span>
                 </a>
             </li>
 

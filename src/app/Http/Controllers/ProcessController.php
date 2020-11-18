@@ -6,6 +6,7 @@ use App\Http\Requests\ProcessCreateRequest;
 use App\Models\Process;
 use App\Traits\RequestAPI;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class ProcessController extends Controller
 {
@@ -67,10 +68,11 @@ class ProcessController extends Controller
             'min_face_confidence' => $data['min_face_confidence'],
             'min_body_confidence' => $data['min_body_confidence'],
         ], $this->getDefaultHeaders());
+
         if (!$processData->status) {
             return $this->error($processData->message, $processData->statusCode);
         }
-
+        Log::info(json_encode($processData));
         $process = Process::create([
             'user_id' => Auth::id(),
             'name' => $data['name'],
@@ -79,6 +81,8 @@ class ProcessController extends Controller
             'description' => $data['description'],
             'status' => Process::STATUS['ready'],
             'mongo_id' => $processData->body->_id,
+            'total_time' => $processData->body->total_time,
+            'total_frames' => $processData->body->total_frames,
         ]);
 
         return $this->success($process);
