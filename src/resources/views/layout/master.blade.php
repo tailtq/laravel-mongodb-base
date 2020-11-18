@@ -41,33 +41,6 @@
 
   <script src="{{ asset('js/app.js') }}"></script>
   <script src="http://localhost:6001/socket.io/socket.io.js"></script>
-  <script>
-
-      function checkData() {
-
-      }
-
-      let data1 = [];
-      console.log(Echo);
-      let processId = "{{ $process->id }}";
-
-      Echo.channel('process.1')
-          .listen('.App\\Events\\ObjectsAppear', (res) => {
-              console.log(res)
-              if (data1.length === 0) {
-                  data1 = res.data;
-              } else {
-                  // if (res.data.length !== 0) {
-                  //     res.data.forEach(item => {
-                  //         data1.push(item)
-                  //     })
-                  // }
-                  // console.log(data1, res);
-              }
-              // console.log(data1, '12312s')
-          });
-      console.log(data1, 11)
-  </script>
 
   <script src="{{ asset('assets/plugins/feather-icons/feather.min.js') }}"></script>
   <script src="{{ asset('assets/plugins/perfect-scrollbar/perfect-scrollbar.min.js') }}"></script>
