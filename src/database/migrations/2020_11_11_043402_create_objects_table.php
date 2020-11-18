@@ -19,6 +19,7 @@ class CreateObjectsTable extends Migration
             $table->unsignedInteger('process_id');
             $table->string('mongo_id');
             $table->unsignedInteger('track_id');
+            $table->string('image');
             $table->timestamps();
 
             $table->foreign('identity_id')->references('id')->on('identities');
