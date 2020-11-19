@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProcessCreateRequest;
 use App\Models\Process;
 use App\Traits\RequestAPI;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -12,6 +13,9 @@ class ProcessController extends Controller
 {
     use RequestAPI;
 
+    /**
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function index()
     {
         $processes = Process::orderBy('created_at', 'desc')->paginate(10);
@@ -21,6 +25,10 @@ class ProcessController extends Controller
         ]);
     }
 
+    /**
+     * @param $id
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function show($id)
     {
         $process = Process::where('id', $id)->first();
@@ -37,6 +45,10 @@ class ProcessController extends Controller
         ]);
     }
 
+    /**
+     * @param ProcessCreateRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(ProcessCreateRequest $request)
     {
         $data = $request->validationData();
@@ -87,5 +99,31 @@ class ProcessController extends Controller
         ]);
 
         return $this->success($process);
+    }
+
+    /**
+     * @param Request $request
+     * @return bool
+     */
+    public function startProcess(Request $request)
+    {
+        $id = $request->processId;
+        //TODO: request AI
+        // code
+        $process = Process::findOrfail($id);
+        $process->update(['status' => Process::STATUS['detecting']]);
+        return true;
+    }
+
+    /**
+     * @param Request $request
+     * @return bool
+     */
+    public function stopProcess(Request $request)
+    {
+        $id = $request->processId;
+        //TODO: request AI
+        // code
+        return true;
     }
 }

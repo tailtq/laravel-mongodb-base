@@ -14,6 +14,9 @@
     <!-- plugin css -->
     <link href="{{ asset('assets/fonts/feather-font/css/iconfont.css') }}" rel="stylesheet"/>
     <link href="{{ asset('assets/plugins/perfect-scrollbar/perfect-scrollbar.css') }}" rel="stylesheet"/>
+    {{--<link rel="stylesheet" href="https://www.nobleui.com/laravel/template/light/assets/plugins/@mdi/css/materialdesignicons.min.css">--}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css" id="theme-styles">
+
     <!-- end plugin css -->
 
     @stack('plugin-styles')
