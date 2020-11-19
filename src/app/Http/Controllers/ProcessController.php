@@ -66,7 +66,7 @@ class ProcessController extends Controller
         $processData = $this->sendPOSTRequest(config('app.ai_server') . '/processes', [
             'name' => $data['name'],
             'url' => $data['video_url'],
-            'status' => Process::STATUS['running'],
+            'status' => Process::STATUS['ready'],
             'detection_scale' => $data['detection_scale'],
             'frame_drop' => $data['frame_drop'],
             'frame_step' => $data['frame_step'],
@@ -95,6 +95,7 @@ class ProcessController extends Controller
             'mongo_id' => $processData->body->_id,
             'total_time' => $processData->body->total_time,
             'total_frames' => $processData->body->total_frames,
+            'fps' => $processData->body->fps,
         ]);
 
         return $this->success($process);

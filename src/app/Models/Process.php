@@ -30,5 +30,6 @@ class Process extends Model
         'mongo_id',
         'total_time',
         'total_frames',
+        'fps',
     ];
 }

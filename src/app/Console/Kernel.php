@@ -26,15 +26,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-         $schedule->command('redis:get-ai-data')
-             ->cron('* * * * *')
-             ->withoutOverlapping()
-             ->before(function (){
-                 Log::info("BEFORE RUN");
-             })
-             ->after(function (){
-                 Log::info("AFTER RUN");
-             });
+        //
     }
 
     /**
