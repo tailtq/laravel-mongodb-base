@@ -15,13 +15,11 @@
                         <div class="col-md-8 pl-md-0">
                             <div class="auth-form-wrapper px-4 py-5">
                                 <a href="/" class="noble-ui-logo d-block mb-2">Face<span>AI</span></a>
-                                <h5 class="text-muted font-weight-normal mb-4">Welcome back! Log in to your
-                                    account.</h5>
                                 <form method="POST" class="forms-sample" action="{{ route('login') }}">
                                     @csrf
 
                                     <div class="form-group">
-                                        <label for="exampleInputEmail1">Email address</label>
+                                        <label for="exampleInputEmail1">Địa chỉ email</label>
                                         <input type="email" class="form-control" name="email"
                                                placeholder="Email"
                                                value="{{ old('email') }}">
@@ -34,7 +32,7 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label>Password</label>
+                                        <label>Mật khẩu</label>
                                         <input type="password" class="form-control" name="password"
                                                autocomplete="current-password" placeholder="Password"
                                                value="{{ old('password') }}">
@@ -46,14 +44,8 @@
                                         @enderror
                                     </div>
 
-                                    <div class="form-check form-check-flat form-check-primary">
-                                        <label class="form-check-label">
-                                            <input type="checkbox" class="form-check-input" name="remember">
-                                            Remember me
-                                        </label>
-                                    </div>
                                     <div class="mt-3">
-                                        <button class="btn btn-primary mr-2 mb-2 mb-md-0">Login</button>
+                                        <button class="btn btn-primary mr-2 mb-2 mb-md-0">Đăng nhập</button>
                                     </div>
                                 </form>
                             </div>
