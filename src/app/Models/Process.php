@@ -8,9 +8,11 @@ class Process extends Model
 {
     const STATUS = [
         'ready' => 'ready',
-        'running' => 'running',
-        'paused' => 'paused',
-        'stopped' => 'stopped'
+        'stopped' => 'stopped',
+        'detecting' => 'detecting',
+        'grouping' => 'grouping',
+        'done' => 'done',
+        'error' => 'error',
     ];
 
     /**

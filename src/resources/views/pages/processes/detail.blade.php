@@ -54,7 +54,8 @@
 
                 <div class="mb-4 socket-render">
                     <div class="media d-block mb-2 d-sm-flex">
-                        <img src="https://www.nobleui.com/laravel/template/light/assets/images/placeholder.jpg" class="wd-100p wd-sm-200 mb-3 mb-sm-0 mr-3" alt="...">
+                        <img src="https://www.nobleui.com/laravel/template/light/assets/images/placeholder.jpg"
+                             class="wd-100p wd-sm-200 mb-3 mb-sm-0 mr-3" alt="...">
                         <div class="media-body">
                             <p class="mt-1 mb-2"><b>{{ 1 }}. Nicolas Tesla</b></p>
 
@@ -301,95 +302,70 @@
 
 @push('plugin-scripts')
     <script src="{{ asset('assets/plugins/jquery-steps/jquery.steps.min.js') }}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dashjs/3.1.3/dash.all.min.js" integrity="sha512-KbtNOWr7e/rlM9utrUc5cO9PeJZO3jFfCjWPe1mHe2sPvIike3IZIH6h4ja6wH7aXNKrecP8zh6/SYDc3t6Jog==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dashjs/3.1.3/dash.all.min.js"
+            integrity="sha512-KbtNOWr7e/rlM9utrUc5cO9PeJZO3jFfCjWPe1mHe2sPvIike3IZIH6h4ja6wH7aXNKrecP8zh6/SYDc3t6Jog=="
+            crossorigin="anonymous"></script>
 @endpush
 
 @push('custom-scripts')
     <script src="{{ asset('assets/js/custom.js') }}"></script>
     <script>
+      // dash player
       function init() {
-        var video,
-          player,
-          url = '{{ env('STREAMING_SERVER') }}/dev/streaming/{{ $process->mongo_id }}/dash_out.mpd';
+        const url = '{{ env('STREAMING_SERVER') }}/dev/streaming/{{ $process->mongo_id }}/dash_out.mpd';
+        const video = document.querySelector('video');
+        const player = dashjs.MediaPlayer().create();
 
-        video = document.querySelector("video");
-        player = dashjs.MediaPlayer().create();
         player.initialize(video, url, false);
       }
-    </script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
+      document.addEventListener('DOMContentLoaded', function () {
         init();
       });
-    </script>
+      // end dash player
 
-    <script>
+      // render objects
+      const processId = '{{ $process->id }}';
+      const totalFrames = parseInt('{{ $process->total_frames }}', 10);
 
-        console.log(Echo);
-        let processId = "{{ $process->id }}";
+      function buildProgressBar(times, totalFrames) {
+        let bars = ``;
+        let currentTime = 0;
 
-        Echo.channel('process.' + processId)
-            .listen('.App\\Events\\ObjectsAppear', (res) => {
-                // console.log(res)
-                let result = [];
-                if (result.length === 0) {
-                    result = res.data;
-                } else {
-                    if (res.data.length !== 0) {
-                        let result = [];
-                        res.data.forEach(item => {
-                            result.push(item)
-                        })
-                    }
-                }
+        times.forEach(({ frameFrom, frameTo }) => {
+          const length = frameTo - frameFrom;
+          const transparentLength = frameFrom - currentTime;
 
-                result.forEach((value, index) => {
-                    console.log(value, index);
+          bars += `
+            <div class="progress-bar bg-transparent" role="progressbar"
+                 data-toggle="tooltip"
+                 style="width: ${transparentLength / totalFrames * 100}%"
+                 title="hello"></div>
 
-                    $('.socket-render').append(
-                        `
-                    <div class="media d-block mb-2 d-sm-flex">
-                        <img src="${value['image'] ? value['image'] : 'https://www.nobleui.com/laravel/template/light/assets/images/placeholder.jpg'}" class="wd-100p wd-sm-200 mb-3 mb-sm-0 mr-3" alt="...">
-                        <div class="media-body">
-                            <p class="mt-1 mb-2"><b>${value['process_id']}. Nicolas Tesla</b></p>
+            <div class="progress-bar bg-success" role="progressbar"
+                 data-toggle="tooltip"
+                 style="width: ${length / totalFrames * 100}%"
+                 title="hello"></div>
+            `;
+          currentTime += frameTo;
+        });
 
-                            <div class="progress ht-10">
-                                <div class="progress-bar bg-success" role="progressbar"
-                                     data-toggle="tooltip"
-                                     style="width: 15%"
-                                     aria-valuenow="15"
-                                     aria-valuemin="0"
-                                     aria-valuemax="100" title="hello"></div>
+        return `<div class="progress ht-10">${bars}</div>`;
+      }
 
-                                <div class="progress-bar bg-transparent" role="progressbar"
-                                     data-toggle="tooltip"
-                                     style="width: 30%"
-                                     aria-valuenow="30"
-                                     aria-valuemin="0"
-                                     aria-valuemax="100" title="hello"></div>
+      Echo.channel(`process.${processId}`).listen('.App\\Events\\ObjectsAppear', (res) => {
+        res.data.forEach(value => {
+            $('.socket-render').prepend(`
+                <div class="media d-block mb-2 d-sm-flex">
+                    <img src="${value.image ? value.image : 'https://www.nobleui.com/laravel/template/light/assets/images/placeholder.jpg'}"
+                         class="wd-100p wd-sm-200 mb-3 mb-sm-0 mr-3" alt="...">
+                    <div class="media-body">
+                        <p class="mt-1 mb-2"><b>${value.track_id}. ${value.name || 'Unknown'}</b></p>
 
-                                <div class="progress-bar bg-success" role="progressbar"
-                                     data-toggle="tooltip"
-                                     style="width: 20%"
-                                     aria-valuenow="20"
-                                     aria-valuemin="0"
-                                     aria-valuemax="100" title="hello"></div>
-                            </div>
-                        </div>
+                        ${buildProgressBar([{ frameFrom: value.frame_from, frameTo: value.frame_to }], totalFrames)}
                     </div>
-                      `
-                    );
-                    // $('.image-links').append(`
-                    //     <div>
-                    //       <input type="hidden" name="images[${startIndex + index}][url]" value="${url}">
-                    //     </div>
-                    //   `);
-                    // $('.images-visualization').append(`
-                    //       <div class="col-md-4 mb-2">
-                    //         <img src="${url}" alt="" class="img-fluid">
-                    //       </div>
-                    //     `)
-                });
-            });
+                </div>`);
+          });
+        });
     </script>
 @endpush
