@@ -15,4 +15,9 @@ class TrackedObject extends Model
     ];
 
     protected $table = 'objects';
+
+    public function appearances()
+    {
+        return $this->hasMany(ObjectAppearance::class, 'object_id');
+    }
 }
