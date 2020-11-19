@@ -16,10 +16,21 @@
         <div class="card-body">
             <h6 class="card-title d-flex justify-content-md-between align-items-center">
                 <div>Luồng xử lý chi tiết</div>
-
-                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal">
-                    Chỉnh sửa cấu hình
-                </button>
+                <div style="display: inline-block">
+                    <button type="button" class="btn btn-success btn-play">
+                        <i class="link-icon" data-feather="play"></i>
+                        Bắt đầu
+                    </button>
+                    <button type="button" class="btn btn-danger btn-stop">
+                        {{--<i class="link-icon" data-feather="mdi mdi-stop"></i>.--}}
+                        <i class="mdi mdi-stop"></i>
+                        Kết thúc
+                    </button>
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal">
+                        <i class="link-icon" data-feather="settings"></i>
+                        Cấu hình
+                    </button>
+                </div>
             </h6>
 
             <div class="table-responsive d-flex">
@@ -89,254 +100,108 @@
     </div>
 
     <!-- Modal -->
-    <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Thêm luồng xử lý</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-
-                <div class="modal-body">
-                    <div class="row">
-                        <form action="" id="process-form">
-                            <h2>Thông tin</h2>
-                            <section>
-                                <div class="form-group">
-                                    <label>Tên video *</label>
-                                    <input type="text"
-                                           class="form-control"
-                                           placeholder="Nhập tên"
-                                           name="name"
-                                           disabled
-                                           value="{{ old('name', $process->name) }}">
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Đường dẫn *</label>
-                                    <input type="text"
-                                           class="form-control"
-                                           placeholder="Nhập video"
-                                           name="video_url"
-                                           disabled
-                                           value="{{ old('video_url', $process->video_url) }}">
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Mô tả</label>
-                                    <textarea name="description"
-                                              cols="30"
-                                              rows="10"
-                                              disabled
-                                              class="form-control mb-0">{{ old('description', $process->description) }}</textarea>
-                                </div>
-                            </section>
-
-                            <h2>Cấu hình</h2>
-                            <section>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Detection scale</label>
-                                            <input type="text"
-                                                   class="form-control"
-                                                   placeholder="Nhập thông số"
-                                                   name="detection_scale"
-                                                   disabled
-                                                   value="{{ old('detection_scale', object_get($process->mongoData, 'detection_scale')) }}">
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Frame drop</label>
-                                            <input type="text"
-                                                   class="form-control"
-                                                   placeholder="Nhập thông số"
-                                                   name="frame_drop"
-                                                   disabled
-                                                   value="{{ old('frame_drop', object_get($process->mongoData, 'frame_drop')) }}">
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Frame step</label>
-                                            <input type="text"
-                                                   class="form-control"
-                                                   placeholder="Nhập thông số"
-                                                   name="frame_step"
-                                                   disabled
-                                                   value="{{ old('frame_step', object_get($process->mongoData, 'frame_step')) }}">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Max pitch</label>
-                                            <input type="text"
-                                                   class="form-control"
-                                                   placeholder="Nhập thông số"
-                                                   name="max_pitch"
-                                                   disabled
-                                                   value="{{ old('max_pitch', object_get($process->mongoData, 'max_pitch')) }}">
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Max roll</label>
-                                            <input type="text"
-                                                   class="form-control"
-                                                   placeholder="Nhập thông số"
-                                                   name="max_roll"
-                                                   disabled
-                                                   value="{{ old('max_roll', object_get($process->mongoData, 'max_roll')) }}">
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Max yaw</label>
-                                            <input type="text"
-                                                   class="form-control"
-                                                   placeholder="Nhập thông số"
-                                                   name="max_yaw"
-                                                   disabled
-                                                   value="{{ old('max_yaw', object_get($process->mongoData, 'max_yaw')) }}">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Kích thước khuôn mặt tối thiểu</label>
-                                            <input type="text"
-                                                   class="form-control"
-                                                   placeholder="Nhập thông số"
-                                                   name="min_face_size"
-                                                   disabled
-                                                   value="{{ old('min_face_size', object_get($process->mongoData, 'min_face_size')) }}">
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Tỉ lệ theo dõi</label>
-                                            <input type="text"
-                                                   class="form-control"
-                                                   placeholder="Nhập thông số"
-                                                   name="tracking_scale"
-                                                   disabled
-                                                   value="{{ old('tracking_scale', object_get($process->mongoData, 'tracking_scale')) }}">
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Ngưỡng so sánh sinh trắc</label>
-                                            <input type="text"
-                                                   class="form-control"
-                                                   placeholder="Nhập thông số"
-                                                   name="biometric_threshold"
-                                                   disabled
-                                                   value="{{ old('biometric_threshold', object_get($process->mongoData, 'biometric_threshold')) }}">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Tỉ lệ chính xác đầu tối thiểu</label>
-                                            <input type="number"
-                                                   class="form-control"
-                                                   required
-                                                   placeholder="Nhập thông số"
-                                                   name="min_head_confidence"
-                                                   disabled
-                                                   value="{{ old('min_head_confidence', object_get($process->mongoData, 'min_head_confidence')) }}">
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Tỉ lệ chính xác khuôn mặt tối thiểu</label>
-                                            <input type="number"
-                                                   class="form-control"
-                                                   required
-                                                   placeholder="Nhập thông số"
-                                                   name="min_face_confidence"
-                                                   disabled
-                                                   value="{{ old('min_face_confidence', object_get($process->mongoData, 'min_face_confidence')) }}">
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Tỉ lệ chính xác thân hình tối thiểu</label>
-                                            <input type="number"
-                                                   class="form-control"
-                                                   required
-                                                   placeholder="Nhập thông số"
-                                                   name="min_body_confidence"
-                                                   disabled
-                                                   value="{{ old('min_body_confidence', object_get($process->mongoData, 'min_body_confidence')) }}">
-                                        </div>
-                                    </div>
-                                </div>
-                            </section>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    @include('pages.processes.modal_process')
 @endsection
 
 @push('plugin-scripts')
     <script src="{{ asset('assets/plugins/jquery-steps/jquery.steps.min.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dashjs/3.1.3/dash.all.min.js"
-            integrity="sha512-KbtNOWr7e/rlM9utrUc5cO9PeJZO3jFfCjWPe1mHe2sPvIike3IZIH6h4ja6wH7aXNKrecP8zh6/SYDc3t6Jog=="
-            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dashjs/3.1.3/dash.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@8.15.3/dist/sweetalert2.all.min.js"></script>
+
 @endpush
 
 @push('custom-scripts')
     <script src="{{ asset('assets/js/custom.js') }}"></script>
     <script>
-      // dash player
-      function init() {
-        const url = '{{ env('STREAMING_SERVER') }}/dev/streaming/{{ $process->mongo_id }}/dash_out.mpd';
-        const video = document.querySelector('video');
-        const player = dashjs.MediaPlayer().create();
 
-        player.initialize(video, url, false);
-      }
-      document.addEventListener('DOMContentLoaded', function () {
-        init();
-      });
-      // end dash player
+        const processId = '{{ $process->id }}';
 
-      // render objects
-      const processId = '{{ $process->id }}';
-      const totalFrames = parseInt('{{ $process->total_frames }}', 10);
+        $(document).ready(function () {
+            $('.btn-stop').attr('disabled', true);
+        });
 
-      function buildProgressBar(times, totalFrames) {
+        $('.btn-play').click(function(){
+            console.log("START PROCESS");
+            $.ajax({
+                url: '/processes/start-process',
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json; charset=UTF-8',
+                data: JSON.stringify({
+                    _token: $('meta[name="_token"]').attr('content'),
+                    processId: processId
+                }),
+                success: function (res) {
+                    processMessage('start');
+                    $('.btn-play').attr('disabled', true);
+                    $('.btn-stop').attr('disabled', false);
+                },
+                error: function (res) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Đã có lỗi xảy ra',
+                        text: res.responseJSON.message,
+                    });
+                }
+            });
+        });
+
+        $('.btn-stop').click(function(){
+            console.log("STOP PROCESS");
+            processMessage('stop');
+            $('.btn-play').attr('disabled', false);
+            $('.btn-stop').attr('disabled', true);
+        });
+
+        // function for alert message when click action play, stop
+        function processMessage (type) {
+
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000,
+            });
+
+            if (type === 'start') {
+                Toast.fire({
+                    type: 'success',
+                    title: 'Bắt đầu thực thi'
+                })
+            } else {
+                Toast.fire({
+                    type: 'success',
+                    title: 'Kết thúc thực thi'
+                })
+            }
+        }
+
+          // dash player
+        function init() {
+            const url = '{{ env('STREAMING_SERVER') }}/dev/streaming/{{ $process->mongo_id }}/dash_out.mpd';
+            const video = document.querySelector('video');
+            const player = dashjs.MediaPlayer().create();
+
+            player.initialize(video, url, false);
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            init();
+        });
+        // end dash player
+
+        // render objects
+        const totalFrames = parseInt('{{ $process->total_frames }}', 10);
+
+        function buildProgressBar(times, totalFrames) {
         let bars = ``;
         let currentTime = 0;
 
         times.forEach(({ frameFrom, frameTo }) => {
-          const length = frameTo - frameFrom;
-          const transparentLength = frameFrom - currentTime;
+            const length = frameTo - frameFrom;
+            const transparentLength = frameFrom - currentTime;
 
-          bars += `
+            bars += `
             <div class="progress-bar bg-transparent" role="progressbar"
                  data-toggle="tooltip"
                  style="width: ${transparentLength / totalFrames * 100}%"
@@ -347,25 +212,25 @@
                  style="width: ${length / totalFrames * 100}%"
                  title="hello"></div>
             `;
-          currentTime += frameTo;
+            currentTime += frameTo;
         });
 
         return `<div class="progress ht-10">${bars}</div>`;
-      }
+        }
 
-      Echo.channel(`process.${processId}`).listen('.App\\Events\\ObjectsAppear', (res) => {
-        res.data.forEach(value => {
-            $('.socket-render').prepend(`
-                <div class="media d-block mb-2 d-sm-flex">
-                    <img src="${value.image ? value.image : 'https://www.nobleui.com/laravel/template/light/assets/images/placeholder.jpg'}"
-                         class="wd-100p wd-sm-200 mb-3 mb-sm-0 mr-3" alt="...">
-                    <div class="media-body">
-                        <p class="mt-1 mb-2"><b>${value.track_id}. ${value.name || 'Unknown'}</b></p>
+        Echo.channel(`process.${processId}`).listen('.App\\Events\\ObjectsAppear', (res) => {
+            res.data.forEach(value => {
+                $('.socket-render').prepend(`
+                    <div class="media d-block mb-2 d-sm-flex">
+                        <img src="${value.image ? value.image : 'https://www.nobleui.com/laravel/template/light/assets/images/placeholder.jpg'}"
+                             class="wd-100p wd-sm-200 mb-3 mb-sm-0 mr-3" alt="...">
+                        <div class="media-body">
+                            <p class="mt-1 mb-2"><b>${value.track_id}. ${value.name || 'Unknown'}</b></p>
 
-                        ${buildProgressBar([{ frameFrom: value.frame_from, frameTo: value.frame_to }], totalFrames)}
-                    </div>
-                </div>`);
-          });
+                            ${buildProgressBar([{ frameFrom: value.frame_from, frameTo: value.frame_to }], totalFrames)}
+                        </div>
+                    </div>`);
+            });
         });
     </script>
 @endpush
