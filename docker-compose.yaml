@@ -13,7 +13,8 @@ services:
             - ./src:/var/www/app
             - ./deployment/configs/php/php.ini:/usr/local/etc/php/conf.d/php.ini
             - ./deployment/configs/supervisor/echo-server.conf:/etc/supervisor/conf.d/echo-server.conf
-            - ./deployment/configs/supervisor/redis-server.conf:/etc/supervisor/conf.d/redis-server.conf
+            - ./deployment/configs/supervisor/redis-get-ai-data.conf:/etc/supervisor/conf.d/redis-get-ai-data.conf
+            - ./deployment/configs/supervisor/redis-listen-ai-progress.conf:/etc/supervisor/conf.d/redis-listen-ai-progress.conf
 #            - ./deployment/configs/crontab.conf:/etc/crontabs/root
             - ./deployment/configs/nginx/nginx-host.conf:/etc/nginx/sites-enabled/default.conf
             - ./deployment/configs/nginx/nginx.conf:/etc/nginx/nginx.conf

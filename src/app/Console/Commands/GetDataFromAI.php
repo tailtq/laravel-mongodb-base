@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Events\ObjectsAppear;
-use App\Helpers\DatabaseHelper;
 use App\Models\ObjectAppearance;
 use App\Models\Process;
 use App\Models\TrackedObject;
@@ -42,8 +41,6 @@ class GetDataFromAI extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
     public function handle()
     {
