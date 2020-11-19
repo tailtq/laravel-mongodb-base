@@ -23,7 +23,9 @@
             </h5>
 
             <div class="table-responsive d-flex">
-                <video controls="true" class="w-60" preload="auto"></video>
+                <video controls class="w-60" preload="auto" autoplay>
+                    <source src="{{ $process->video_url }}" type="video/mp4">
+                </video>
 
                 <div class="w-100 ml-4">
                     <h5 class="mb-2">Cấu hình</h5>
@@ -294,31 +296,34 @@
 @push('plugin-scripts')
     <script src="{{ asset('assets/plugins/jquery-steps/jquery.steps.min.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dashjs/3.1.3/dash.all.min.js"
-            integrity="sha512-KbtNOWr7e/rlM9utrUc5cO9PeJZO3jFfCjWPe1mHe2sPvIike3IZIH6h4ja6wH7aXNKrecP8zh6/SYDc3t6Jog=="
-            crossorigin="anonymous"></script>
+{{--    <script src="https://cdnjs.cloudflare.com/ajax/libs/dashjs/3.1.3/dash.all.min.js"--}}
+{{--            integrity="sha512-KbtNOWr7e/rlM9utrUc5cO9PeJZO3jFfCjWPe1mHe2sPvIike3IZIH6h4ja6wH7aXNKrecP8zh6/SYDc3t6Jog=="--}}
+{{--            crossorigin="anonymous"></script>--}}
 @endpush
 
 @push('custom-scripts')
     <script src="{{ asset('assets/js/custom.js') }}"></script>
     <script>
       // dash player
-      function init() {
-        const url = '{{ env('STREAMING_SERVER') }}/dev/streaming/{{ $process->mongo_id }}/dash_out.mpd';
-        const video = document.querySelector('video');
-        const player = dashjs.MediaPlayer().create();
+      {{--function init() {--}}
+      {{--  --}}{{--const url = '{{ env('STREAMING_SERVER') }}/dev/streaming/{{ $process->mongo_id }}/dash_out.mpd';--}}
+      {{--  const url = '{{ $process->video_url }}';--}}
+      {{--  const video = document.querySelector('video');--}}
+      {{--  const player = dashjs.MediaPlayer().create();--}}
 
-        player.initialize(video, url, false);
-      }
+      {{--  player.initialize(video, url, false);--}}
+      {{--}--}}
 
-      document.addEventListener('DOMContentLoaded', function () {
-        init();
-      });
+      {{--document.addEventListener('DOMContentLoaded', function () {--}}
+      {{--  init();--}}
+      {{--});--}}
       // end dash player
 
       // render objects
       const processId = '{{ $process->id }}';
       const totalFrames = parseInt('{{ $process->total_frames }}', 10);
+      const fps = parseInt('{{ $process->fps }}', 10);
+      const renderHour = totalFrames / 3600 >= 1;
 
       function buildProgressBar(times, totalFrames) {
         let bars = ``;
@@ -345,18 +350,36 @@
         return `<div class="progress ht-10">${bars}</div>`;
       }
 
+      function getTimeString(frameFrom, frameTo, fps, renderHour) {
+        let secondFrom = frameFrom / fps;
+        let minFrom = Math.floor(secondFrom / 60);
+        const hourFrom = (Math.floor(minFrom / 60)).toString().padStart(2, '0');
+        minFrom = (minFrom % 60).toString().padStart(2, '0');
+        secondFrom = (secondFrom % 60).toString().padStart(2, '0');
+
+        let secondTo = frameTo / fps;
+        let minTo = Math.floor(secondTo / 60);
+        const hourTo = (Math.floor(minTo / 60)).toString().padStart(2, '0');
+        minTo = (minTo % 60).toString().padStart(2, '0');
+        secondTo = (secondTo % 60).toString().padStart(2, '0');
+
+        return `${renderHour ? `${hourFrom}:` : ''}${minFrom}:${secondFrom} - ${renderHour ? `${hourTo}:` : ''}${minTo}:${secondTo}`
+      }
+
       Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectsAppear', (res) => {
         $('.socket__message').remove();
 
         res.data.forEach(value => {
+          const { frame_from: frameFrom, frame_to: frameTo } = value;
+
           $('.socket-render').prepend(`
             <div class="media d-block mb-2 d-sm-flex">
                 <img src="${value.image ? value.image : 'https://www.nobleui.com/laravel/template/light/assets/images/placeholder.jpg'}"
                      class="wd-100p wd-sm-200 mb-3 mb-sm-0 mr-3" alt="...">
                 <div class="media-body">
-                    <p class="mt-1 mb-2"><b>${value.track_id}. ${value.name || 'Unknown'}</b></p>
+                    <p class="mt-1 mb-2"><b>${value.name || 'Unknown'}</b> &nbsp; ${getTimeString(frameFrom, frameTo, fps, renderHour)}</p>
 
-                    ${buildProgressBar([{frameFrom: value.frame_from, frameTo: value.frame_to}], totalFrames)}
+                    ${buildProgressBar([{frameFrom, frameTo}], totalFrames)}
                 </div>
             </div>
           `);

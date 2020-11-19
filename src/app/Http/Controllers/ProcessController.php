@@ -83,6 +83,7 @@ class ProcessController extends Controller
             'mongo_id' => $processData->body->_id,
             'total_time' => $processData->body->total_time,
             'total_frames' => $processData->body->total_frames,
+            'fps' => $processData->body->fps,
         ]);
 
         return $this->success($process);
