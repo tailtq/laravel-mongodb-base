@@ -52,7 +52,7 @@ class ListenAIProgress extends Command
                 $data = [
                     'id' => $process->id,
                     'status' => $process->status,
-                    'progress' => $event->progress,
+                    'progress' => $event->progress ?? 0,
                 ];
 
                 if ($process->status != $event->status) {
