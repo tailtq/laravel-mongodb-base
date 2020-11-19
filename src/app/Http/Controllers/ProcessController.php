@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProcessCreateRequest;
 use App\Models\Process;
+use App\Models\TrackedObject;
 use App\Traits\RequestAPI;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 
 class ProcessController extends Controller
 {
@@ -103,27 +103,61 @@ class ProcessController extends Controller
 
     /**
      * @param Request $request
-     * @return bool
+     * @return \Illuminate\Http\JsonResponse
      */
     public function startProcess(Request $request)
     {
-        $id = $request->processId;
-        //TODO: request AI
-        // code
-        $process = Process::findOrfail($id);
+        $process = Process::find($request->processId);
+
+        if (!$process) {
+            return $this->error('Không tìm thấy luồng xử lý', 404);
+        }
+        $processData = $this->sendGETRequest(
+            config('app.ai_server') . "/processes/$process->mongo_id/start", [], $this->getDefaultHeaders()
+        );
+        if (!$processData->status) {
+            return $this->error('Đã có lỗi xảy ra', 400);
+        }
         $process->update(['status' => Process::STATUS['detecting']]);
-        return true;
+
+        return $this->success('Bắt đầu thành công');
     }
 
     /**
      * @param Request $request
-     * @return bool
+     * @return \Illuminate\Http\JsonResponse
      */
     public function stopProcess(Request $request)
     {
-        $id = $request->processId;
-        //TODO: request AI
-        // code
-        return true;
+        $process = Process::find($request->processId);
+
+        if (!$process) {
+            return $this->error('Không tìm thấy luồng xử lý', 404);
+        }
+        $processData = $this->sendGETRequest(
+            config('app.ai_server') . "/processes/$process->mongo_id/stop", [], $this->getDefaultHeaders()
+        );
+        if (!$processData->status) {
+            return $this->error('Đã có lỗi xảy ra', 400);
+        }
+        $process->update(['status' => Process::STATUS['stopped']]);
+
+        return $this->success('Kết thúc thành công');
+    }
+
+    /**
+     * @param $processId
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     */
+    public function getObjects($processId)
+    {
+        $objects = TrackedObject::leftJoin('identities', 'objects.id', 'identities.id')
+            ->where('process_id', $processId)
+            ->select(['objects.id', 'objects.process_id', 'objects.track_id', 'objects.image', 'identities.name', 'identities.images'])
+            ->orderBy('objects.id', 'desc')
+            ->with('appearances:frame_from,frame_to,time_from,time_to')
+            ->get();
+
+        return response($objects);
     }
 }

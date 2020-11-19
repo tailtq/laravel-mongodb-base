@@ -2,6 +2,7 @@
 
 @push('plugin-styles')
     <link href="{{ asset('assets/plugins/jquery-steps/jquery.steps.css') }}" rel="stylesheet"/>
+    <link rel="stylesheet" href="{{ asset('assets/plugins/@mdi/css/materialdesignicons.min.css') }}">
 @endpush
 
 @section('content')
@@ -12,22 +13,31 @@
         </ol>
     </nav>
 
-    <div class="row echo-server" data-echo-server="{{ env('ECHO_SERVER') }}">
+    <div class="row">
         <div class="card-body">
             <h5 class="card-title d-flex justify-content-md-between align-items-center">
                 <div>Luồng xử lý chi tiết</div>
                 <div style="display: inline-block">
-                    <button type="button" class="btn btn-success btn-play">
-                        <i class="link-icon" data-feather="play"></i>
+                    <button type="button"
+                            @if($process->status == 'detecting' || $process->status == 'grouping')
+                                disabled
+                            @endif
+                            class="btn btn-success btn-start">
+                        <i class="link-icon" data-feather="play" style="width: 15px; height: 15px;"></i>
                         Bắt đầu
                     </button>
-                    <button type="button" class="btn btn-danger btn-stop">
-                        {{--<i class="link-icon" data-feather="mdi mdi-stop"></i>.--}}
-                        <i class="mdi mdi-stop"></i>
+
+                    <button type="button"
+                            @if($process->status != 'detecting' && $process->status != 'grouping')
+                                disabled
+                            @endif
+                            class="btn btn-danger btn-stop">
+                        <i class="mdi mdi-stop" style="font-size: 15px;"></i>
                         Kết thúc
                     </button>
+
                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal">
-                        <i class="link-icon" data-feather="settings"></i>
+                        <i class="link-icon" data-feather="settings" style="width: 15px; height: 15px;"></i>
                         Cấu hình
                     </button>
                 </div>
@@ -98,7 +108,6 @@
 
 @push('plugin-scripts')
     <script src="{{ asset('assets/plugins/jquery-steps/jquery.steps.min.js') }}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
     {{--<script src="https://cdnjs.cloudflare.com/ajax/libs/dashjs/3.1.3/dash.all.min.js"></script>--}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@8.15.3/dist/sweetalert2.all.min.js"></script>
 
@@ -107,97 +116,94 @@
 @push('custom-scripts')
     <script src="{{ asset('assets/js/custom.js') }}"></script>
     <script>
+      const processId = '{{ $process->id }}';
 
-        const processId = '{{ $process->id }}';
-
-        $(document).ready(function () {
-            $('.btn-stop').attr('disabled', true);
+      // function for alert message when click action play, stop
+      function processMessage(type) {
+        const Toast = Swal.mixin({
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 2000,
         });
 
-        $('.btn-play').click(function(){
-            console.log("START PROCESS");
-            $.ajax({
-                url: '/processes/start-process',
-                type: 'POST',
-                dataType: 'json',
-                contentType: 'application/json; charset=UTF-8',
-                data: JSON.stringify({
-                    _token: $('meta[name="_token"]').attr('content'),
-                    processId: processId
-                }),
-                success: function (res) {
-                    processMessage('start');
-                    $('.btn-play').attr('disabled', true);
-                    $('.btn-stop').attr('disabled', false);
-                },
-                error: function (res) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Đã có lỗi xảy ra',
-                        text: res.responseJSON.message,
-                    });
-                }
-            });
-        });
-
-        $('.btn-stop').click(function(){
-            console.log("STOP PROCESS");
-            processMessage('stop');
-            $('.btn-play').attr('disabled', false);
-            $('.btn-stop').attr('disabled', true);
-        });
-
-        // function for alert message when click action play, stop
-        function processMessage (type) {
-
-            const Toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 2000,
-            });
-
-            if (type === 'start') {
-                Toast.fire({
-                    type: 'success',
-                    title: 'Bắt đầu thực thi'
-                })
-            } else {
-                Toast.fire({
-                    type: 'success',
-                    title: 'Kết thúc thực thi'
-                })
-            }
+        if (type === 'start') {
+          Toast.fire({
+            type: 'success',
+            title: 'Bắt đầu thực thi'
+          })
+        } else {
+          Toast.fire({
+            type: 'success',
+            title: 'Kết thúc thực thi'
+          })
         }
-        // dash player
-        {{--function init() {--}}
-        {{--  --}}{{--const url = '{{ env('STREAMING_SERVER') }}/dev/streaming/{{ $process->mongo_id }}/dash_out.mpd';--}}
-        {{--  const url = '{{ $process->video_url }}';--}}
-        {{--  const video = document.querySelector('video');--}}
-        {{--  const player = dashjs.MediaPlayer().create();--}}
+      }
 
-        {{--  player.initialize(video, url, false);--}}
-        {{--}--}}
+      function sendStartStopRequest(processId, type) {
+        $.ajax({
+          url: `/processes/${type}-process`,
+          type: 'POST',
+          dataType: 'json',
+          contentType: 'application/json; charset=UTF-8',
+          data: JSON.stringify({
+            _token: $('meta[name="_token"]').attr('content'),
+            processId: processId
+          }),
+          success: function (res) {
+            const otherType = type === 'start' ? 'stop' : 'start';
 
-        {{--document.addEventListener('DOMContentLoaded', function () {--}}
-        {{--  init();--}}
-        {{--});--}}
-        // end dash player
+            $(`.btn-${type}`).attr('disabled', true);
+            $(`.btn-${otherType}`).attr('disabled', false);
 
-        // render objects
-        const totalFrames = parseInt('{{ $process->total_frames }}', 10);
-        const fps = parseInt('{{ $process->fps }}', 10);
-        const renderHour = totalFrames / 3600 >= 1;
+            processMessage(type);
+          },
+          error: function (res) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Đã có lỗi xảy ra',
+            });
+          }
+        });
+      }
 
-        function buildProgressBar(times, totalFrames) {
-            let bars = ``;
-            let currentTime = 0;
+      $('.btn-start').click(function () {
+        sendStartStopRequest(processId, 'start');
+      });
 
-            times.forEach(({frameFrom, frameTo}) => {
-                const length = frameTo - frameFrom;
-                const transparentLength = frameFrom - currentTime;
+      $('.btn-stop').click(function () {
+        sendStartStopRequest(processId, 'stop');
+      });
 
-                bars += `
+      // dash player
+      {{--function init() {--}}
+      {{--  --}}{{--const url = '{{ env('STREAMING_SERVER') }}/dev/streaming/{{ $process->mongo_id }}/dash_out.mpd';--}}
+      {{--  const url = '{{ $process->video_url }}';--}}
+      {{--  const video = document.querySelector('video');--}}
+      {{--  const player = dashjs.MediaPlayer().create();--}}
+
+      {{--  player.initialize(video, url, false);--}}
+      {{--}--}}
+
+      {{--document.addEventListener('DOMContentLoaded', function () {--}}
+      {{--  init();--}}
+      {{--});--}}
+      // end dash player
+
+      // render objects
+      const totalFrames = parseInt('{{ $process->total_frames }}', 10);
+      const fps = parseInt('{{ $process->fps }}', 10);
+      const renderHour = totalFrames / 3600 >= 1;
+
+      function buildProgressBar(times, totalFrames) {
+        let bars = ``;
+        let currentTime = 0;
+
+        times.forEach(({frameFrom, frameTo}) => {
+          const length = frameTo - frameFrom;
+          const transparentLength = frameFrom - currentTime;
+
+          bars += `
             <div class="progress-bar bg-transparent" role="progressbar"
                  data-toggle="tooltip"
                  style="width: ${transparentLength / totalFrames * 100}%"
@@ -208,35 +214,35 @@
                  style="width: ${length / totalFrames * 100}%"
                  title="hello"></div>
             `;
-                currentTime += frameTo;
-            });
+          currentTime += frameTo;
+        });
 
-            return `<div class="progress ht-10">${bars}</div>`;
-        }
+        return `<div class="progress ht-10">${bars}</div>`;
+      }
 
-        function getTimeString(frameFrom, frameTo, fps, renderHour) {
-            let secondFrom = frameFrom / fps;
-            let minFrom = Math.floor(secondFrom / 60);
-            const hourFrom = (Math.floor(minFrom / 60)).toString().padStart(2, '0');
-            minFrom = (minFrom % 60).toString().padStart(2, '0');
-            secondFrom = (secondFrom % 60).toString().padStart(2, '0');
+      function getTimeString(frameFrom, frameTo, fps, renderHour) {
+        let secondFrom = frameFrom / fps;
+        let minFrom = Math.floor(secondFrom / 60);
+        const hourFrom = (Math.floor(minFrom / 60)).toString().padStart(2, '0');
+        minFrom = (minFrom % 60).toString().padStart(2, '0');
+        secondFrom = (secondFrom % 60).toString().padStart(2, '0');
 
-            let secondTo = frameTo / fps;
-            let minTo = Math.floor(secondTo / 60);
-            const hourTo = (Math.floor(minTo / 60)).toString().padStart(2, '0');
-            minTo = (minTo % 60).toString().padStart(2, '0');
-            secondTo = (secondTo % 60).toString().padStart(2, '0');
+        let secondTo = frameTo / fps;
+        let minTo = Math.floor(secondTo / 60);
+        const hourTo = (Math.floor(minTo / 60)).toString().padStart(2, '0');
+        minTo = (minTo % 60).toString().padStart(2, '0');
+        secondTo = (secondTo % 60).toString().padStart(2, '0');
 
-            return `${renderHour ? `${hourFrom}:` : ''}${minFrom}:${secondFrom} - ${renderHour ? `${hourTo}:` : ''}${minTo}:${secondTo}`
-        }
+        return `${renderHour ? `${hourFrom}:` : ''}${minFrom}:${secondFrom} - ${renderHour ? `${hourTo}:` : ''}${minTo}:${secondTo}`
+      }
 
-        Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectsAppear', (res) => {
-            $('.socket__message').remove();
+      Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectsAppear', (res) => {
+        $('.socket__message').remove();
 
-            res.data.forEach(value => {
-                const { frame_from: frameFrom, frame_to: frameTo } = value;
+        res.data.forEach(value => {
+          const {frame_from: frameFrom, frame_to: frameTo} = value;
 
-                $('.socket-render').prepend(`
+          $('.socket-render').prepend(`
             <div class="media d-block mb-2 d-sm-flex">
                 <img src="${value.image ? value.image : 'https://www.nobleui.com/laravel/template/light/assets/images/placeholder.jpg'}"
                      class="wd-100p wd-sm-200 mb-3 mb-sm-0 mr-3" alt="...">
@@ -247,37 +253,37 @@
                 </div>
             </div>
           `);
-            });
         });
+      });
 
-        Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChange', (res) => {
-            const { status, progress } = res.data;
-            const $detecting = $('.progress-bar__detecting');
+      Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChange', (res) => {
+        const {status, progress} = res.data;
+        const $detecting = $('.progress-bar__detecting');
 
-            if (status === 'grouping' && parseFloat($detecting.attr('aria-valuenow')) === 0) {
-                $detecting.css({width: '50%'});
-                $detecting.attr('aria-valuenow', '100');
+        if (status === 'grouping' && parseFloat($detecting.attr('aria-valuenow')) === 0) {
+          $detecting.css({width: '50%'});
+          $detecting.attr('aria-valuenow', '100');
 
-                setTimeout(() => $detecting.popover('show'), 400);
-            }
-            if (status === 'detecting' || status === 'grouping') {
-                const $element = $(`.progress-bar__${status}`);
+          setTimeout(() => $detecting.popover('show'), 400);
+        }
+        if (status === 'detecting' || status === 'grouping') {
+          const $element = $(`.progress-bar__${status}`);
 
-                $element.css({width: `${progress / 2}%`});
-                $element.attr('aria-valuenow', progress);
+          $element.css({width: `${progress / 2}%`});
+          $element.attr('aria-valuenow', progress);
 
-                setTimeout(() => $element.popover('show'), 400);
-            }
+          setTimeout(() => $element.popover('show'), 400);
+        }
+      });
+
+      $(document).ready(function () {
+        $('.process__progress-bar .progress-bar').each((index, element) => {
+          const value = parseFloat($(element).attr('aria-valuenow'));
+
+          if (value > 0) {
+            $(element).popover('show');
+          }
         });
-
-        $(document).ready(function () {
-            $('.process__progress-bar .progress-bar').each((index, element) => {
-                const value = parseFloat($(element).attr('aria-valuenow'));
-
-                if (value > 0) {
-                    $(element).popover('show');
-                }
-            });
-        });
+      });
     </script>
 @endpush

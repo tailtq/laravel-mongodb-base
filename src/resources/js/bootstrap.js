@@ -37,6 +37,6 @@ window.io = require('socket.io-client');
 if (typeof io !== 'undefined') {
   window.Echo = new Echo({
     broadcaster: 'socket.io',
-    host: $('.echo-server').data('echo-server'),
+    host: $('body').data('echo-server'),
   });
 }
