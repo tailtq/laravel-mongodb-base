@@ -118,6 +118,16 @@
     <script>
       const processId = '{{ $process->id }}';
 
+      function renderData() {
+        $.ajax({
+          url: `/processes/${processId}/objects`,
+          type: 'GET',
+          success: function (res) {
+            console.log(res);
+          },
+        })
+      }
+
       // function for alert message when click action play, stop
       function processMessage(type) {
         const Toast = Swal.mixin({
@@ -131,12 +141,12 @@
           Toast.fire({
             type: 'success',
             title: 'Bắt đầu thực thi'
-          })
+          });
         } else {
           Toast.fire({
             type: 'success',
             title: 'Kết thúc thực thi'
-          })
+          });
         }
       }
 
@@ -159,9 +169,9 @@
             processMessage(type);
           },
           error: function (res) {
-            Swal.fire({
-              icon: 'error',
-              title: 'Đã có lỗi xảy ra',
+            Toast.fire({
+              type: 'error',
+              title: 'Đã có lỗi xảy ra'
             });
           }
         });
@@ -221,13 +231,13 @@
       }
 
       function getTimeString(frameFrom, frameTo, fps, renderHour) {
-        let secondFrom = frameFrom / fps;
+        let secondFrom = Math.floor(frameFrom / fps);
         let minFrom = Math.floor(secondFrom / 60);
         const hourFrom = (Math.floor(minFrom / 60)).toString().padStart(2, '0');
         minFrom = (minFrom % 60).toString().padStart(2, '0');
         secondFrom = (secondFrom % 60).toString().padStart(2, '0');
 
-        let secondTo = frameTo / fps;
+        let secondTo = Math.floor(frameTo / fps);
         let minTo = Math.floor(secondTo / 60);
         const hourTo = (Math.floor(minTo / 60)).toString().padStart(2, '0');
         minTo = (minTo % 60).toString().padStart(2, '0');
@@ -277,6 +287,8 @@
       });
 
       $(document).ready(function () {
+        renderData();
+
         $('.process__progress-bar .progress-bar').each((index, element) => {
           const value = parseFloat($(element).attr('aria-valuenow'));
 

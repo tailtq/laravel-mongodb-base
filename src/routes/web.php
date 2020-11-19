@@ -52,7 +52,10 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('/create', 'ProcessController@store')->name('processes.create');
 
         Route::post('/start-process', 'ProcessController@startProcess')->name('processes.start');
+
         Route::post('/stop-process', 'ProcessController@stopProcess')->name('processes.stop');
+
+        Route::get('/{id}/objects', 'ProcessController@getObjects')->name('processes.objects');
     });
 
     Route::group(['prefix' => '/medias'], function () {
