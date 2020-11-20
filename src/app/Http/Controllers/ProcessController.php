@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProcessCreateRequest;
+use App\Models\ObjectAppearance;
 use App\Models\Process;
 use App\Models\TrackedObject;
 use App\Traits\RequestAPI;
@@ -159,5 +160,28 @@ class ProcessController extends Controller
             ->get();
 
         return $this->success($objects);
+    }
+
+    /**
+     * @param $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function delete($id)
+    {
+        $process = Process::find($id);
+
+        if (!$process) {
+            abort(404);
+        } else if ($process->status == Process::STATUS['detecting'] || $process->status != Process::STATUS['grouping']) {
+            abort(400);
+        }
+//        $this->sendDELETERequest($this->getIdentityUrl($identity->mongo_id), [], $this->getDefaultHeaders());
+        $objectIds = TrackedObject::where('process_id', $id)->pluck('id');
+
+        ObjectAppearance::whereIn('object_id', $objectIds)->delete();
+        TrackedObject::where('process_id', $id)->delete();
+        $process->delete();
+
+        return redirect()->route('processes');
     }
 }

@@ -31,13 +31,32 @@
                                 <a href="{{ route('processes.detail', $process->id) }}">
                                     <img src="{{ $process->thumbnail }}" class="wd-100p wd-sm-200 mb-3 mb-sm-0 mr-3" alt="Thumbnail">
                                 </a>
-                                <div class="media-body">
-                                    <h5 class="mt-1">
-                                        <a href="{{ route('processes.detail', $process->id) }}">{{ $process->name }}</a>
-                                        &nbsp;
-                                        <span class="badge badge-success text-uppercase">{{ $process->status }}</span>
-                                    </h5>
-                                    <p class="mt-1">{{ $process->description }}</p>
+                                <div class="media-body d-flex d-inline-flex justify-content-between">
+                                    <div>
+                                        <h5 class="mt-1">
+                                            <a href="{{ route('processes.detail', $process->id) }}">{{ $process->name }}</a>
+                                            &nbsp;
+                                            <span class="badge badge-success text-uppercase">{{ $process->status }}</span>
+                                        </h5>
+
+                                        <p class="mt-1">{{ $process->description }}</p>
+                                    </div>
+
+                                    <div>
+                                        @if ($process->status !== 'detecting' && $process->status !== 'grouping')
+                                            <form onsubmit="return confirm('Bạn có chắc chắn không?');"
+                                                  action="{{ route('processes.delete', $process->id) }}"
+                                                  method="POST"
+                                                  class="d-inline">
+                                                @csrf
+                                                @method('DELETE')
+
+                                                <button class="btn btn-danger btn-icon">
+                                                    <i data-feather="trash"></i>
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                         </li>
