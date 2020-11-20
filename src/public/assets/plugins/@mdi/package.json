@@ -1,33 +1,33 @@
 {
   "_args": [
     [
-      "@mdi/font@5.1.45",
-      "/home/nguyennd/Documents/web-face-reg-from-id-card/src"
+      "@mdi/font@5.8.55",
+      "/var/www/app"
     ]
   ],
-  "_from": "@mdi/font@5.1.45",
-  "_id": "@mdi/font@5.1.45",
+  "_from": "@mdi/font@5.8.55",
+  "_id": "@mdi/font@5.8.55",
   "_inBundle": false,
-  "_integrity": "sha512-7H1UMwUpEp8mthdPlpAi7bhEyvTbvtK1TlA89scc0cXMpQy0UFygdkaf+6fveIxpBcRNgw0gnGSEonlsfYocXg==",
+  "_integrity": "sha512-8mrwfFBsmj+D67ZiGQSe5TU/lcWCtDyli2eshQ2fvLCZGRPqFMM23YQp4+JMOTpk5yMZKTeAwNWIYfITy76OHA==",
   "_location": "/@mdi/font",
   "_phantomChildren": {},
   "_requested": {
     "type": "version",
     "registry": true,
-    "raw": "@mdi/font@5.1.45",
+    "raw": "@mdi/font@5.8.55",
     "name": "@mdi/font",
     "escapedName": "@mdi%2ffont",
     "scope": "@mdi",
-    "rawSpec": "5.1.45",
+    "rawSpec": "5.8.55",
     "saveSpec": null,
-    "fetchSpec": "5.1.45"
+    "fetchSpec": "5.8.55"
   },
   "_requiredBy": [
     "/"
   ],
-  "_resolved": "https://registry.npmjs.org/@mdi/font/-/font-5.1.45.tgz",
-  "_spec": "5.1.45",
-  "_where": "/home/nguyennd/Documents/web-face-reg-from-id-card/src",
+  "_resolved": "https://registry.npmjs.org/@mdi/font/-/font-5.8.55.tgz",
+  "_spec": "5.8.55",
+  "_where": "/var/www/app",
   "author": {
     "name": "Austin Andrews",
     "url": "http://twitter.com/templarian"
@@ -43,16 +43,7 @@
     "icons",
     "webfont"
   ],
-  "licenses": [
-    {
-      "type": "OFL-1.1",
-      "url": "http://scripts.sil.org/OFL"
-    },
-    {
-      "type": "MIT",
-      "url": "http://opensource.org/licenses/mit-license.html"
-    }
-  ],
+  "license": "Apache-2.0",
   "name": "@mdi/font",
   "repository": {
     "type": "git",
@@ -62,5 +53,5 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "style": "css/materialdesignicons.css",
-  "version": "5.1.45"
+  "version": "5.8.55"
 }

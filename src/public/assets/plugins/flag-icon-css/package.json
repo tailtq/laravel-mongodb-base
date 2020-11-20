@@ -1,32 +1,32 @@
 {
   "_args": [
     [
-      "flag-icon-css@3.4.6",
-      "/home/nguyennd/Documents/web-face-reg-from-id-card/src"
+      "flag-icon-css@3.5.0",
+      "/var/www/app"
     ]
   ],
-  "_from": "flag-icon-css@3.4.6",
-  "_id": "flag-icon-css@3.4.6",
+  "_from": "flag-icon-css@3.5.0",
+  "_id": "flag-icon-css@3.5.0",
   "_inBundle": false,
-  "_integrity": "sha512-rF69rt19Hr63SRQTiPBzQABaYB20LAgZhDkr/AxqSdgmCIN+tC5PRMz56Y0gxehFXJmdRwv55+GMi7R1fCRTwg==",
+  "_integrity": "sha512-pgJnJLrtb0tcDgU1fzGaQXmR8h++nXvILJ+r5SmOXaaL/2pocunQo2a8TAXhjQnBpRLPtZ1KCz/TYpqeNuE2ew==",
   "_location": "/flag-icon-css",
   "_phantomChildren": {},
   "_requested": {
     "type": "version",
     "registry": true,
-    "raw": "flag-icon-css@3.4.6",
+    "raw": "flag-icon-css@3.5.0",
     "name": "flag-icon-css",
     "escapedName": "flag-icon-css",
-    "rawSpec": "3.4.6",
+    "rawSpec": "3.5.0",
     "saveSpec": null,
-    "fetchSpec": "3.4.6"
+    "fetchSpec": "3.5.0"
   },
   "_requiredBy": [
     "/"
   ],
-  "_resolved": "https://registry.npmjs.org/flag-icon-css/-/flag-icon-css-3.4.6.tgz",
-  "_spec": "3.4.6",
-  "_where": "/home/nguyennd/Documents/web-face-reg-from-id-card/src",
+  "_resolved": "https://registry.npmjs.org/flag-icon-css/-/flag-icon-css-3.5.0.tgz",
+  "_spec": "3.5.0",
+  "_where": "/var/www/app",
   "author": {
     "name": "Panayiotis Lipiridis",
     "email": "lipiridis@gmail.com"
@@ -34,16 +34,16 @@
   "bugs": {
     "url": "https://github.com/lipis/flag-icon-css/issues"
   },
-  "description": "> A collection of all country flags in SVG — plus the CSS for easier integration. > See the [demo](http://flag-icon-css.lip.is).",
+  "description": "> A collection of all country flags in SVG — plus the CSS for easier integration. > See the [demo](https://flagicons.lipis.dev).",
   "devDependencies": {
-    "grunt": "1.0.4",
+    "grunt": "1.1.0",
     "grunt-contrib-connect": "2.1.0",
     "grunt-contrib-cssmin": "3.0.0",
     "grunt-contrib-less": "2.0.0",
     "grunt-contrib-watch": "1.1.0",
-    "husky": "3.1.0",
-    "lint-staged": "10.0.7",
-    "prettier": "1.19.1",
+    "husky": "4.2.5",
+    "lint-staged": "10.2.9",
+    "prettier": "2.0.5",
     "svgo": "1.3.2"
   },
   "homepage": "https://github.com/lipis/flag-icon-css#readme",
@@ -77,5 +77,5 @@
     "svgo:min": "find flags | grep '\\.svg$' | xargs -Iz -n 1 svgo --config=svgo.yaml z",
     "test": "yarn prettier --list-different"
   },
-  "version": "3.4.6"
+  "version": "3.5.0"
 }
