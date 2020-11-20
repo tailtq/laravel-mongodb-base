@@ -24,25 +24,63 @@
             </h6>
 
             <div class="table-responsive">
-                <ul class="list-group">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th class="text-center">STT</th>
+                        <th class="text-center">Hình đại diện</th>
+                        <th>Tên</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày tạo</th>
+                        <th>Tùy chọn</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @php
+                        $index = $processes->perPage() * ($processes->currentPage() - 1);
+                    @endphp
+
                     @foreach ($processes as $process)
-                        <li class="list-group-item mb-4 rounded-0 border">
-                            <div class="media d-block d-sm-flex">
-                                <a href="{{ route('processes.detail', $process->id) }}">
-                                    <img src="{{ $process->thumbnail }}" class="wd-100p wd-sm-200 mb-3 mb-sm-0 mr-3" alt="Thumbnail">
+                        <tr>
+                            <td class="text-center">{{ ++$index }}</td>
+                            <td class="text-center">
+                                <img src="{{ $process->thumbnail }}" />
+                            </td>
+                            <td><a href="{{ route('processes.detail', $process->id) }}">{{ $process->name }}</a></td>
+                            <td>
+                                <span class="badge
+                                    @if($process->status == 'error' || $process->status == 'stopped')
+                                        badge-danger
+                                    @else
+                                        badge-success
+                                    @endif
+                                        text-uppercase">
+                                    {{ __('status.' . $process->status, [], 'vi') }}
+                                </span>
+                            </td>
+                            <td>{{ $process->created_at }}</td>
+                            <td>
+                                <a class="btn btn-primary btn-icon" role="button"
+                                   href="{{ route('processes.detail', $process->id) }}" style="line-height: 2">
+                                    <i data-feather="eye"></i>
                                 </a>
-                                <div class="media-body">
-                                    <h5 class="mt-1">
-                                        <a href="{{ route('processes.detail', $process->id) }}">{{ $process->name }}</a>
-                                        &nbsp;
-                                        <span class="badge badge-success text-uppercase">{{ $process->status }}</span>
-                                    </h5>
-                                    <p class="mt-1">{{ $process->description }}</p>
-                                </div>
-                            </div>
-                        </li>
+
+                                <form onsubmit="return confirm('Bạn có chắc chắn không?');"
+                                      action="{{ route('processes.delete', $process->id) }}"
+                                      method="POST"
+                                      class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button class="btn btn-danger btn-icon">
+                                        <i data-feather="trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
                     @endforeach
-                </ul>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -66,7 +104,7 @@
                             <h2>Thông tin</h2>
                             <section>
                                 <div class="form-group">
-                                    <label>Tên video *</label>
+                                    <label>Tên luồng xử lý *</label>
                                     <input type="text" class="form-control required" placeholder="Nhập tên" name="name" required>
                                 </div>
 

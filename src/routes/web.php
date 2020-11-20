@@ -50,6 +50,8 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::post('/create', 'ProcessController@store')->name('processes.create');
 
+        Route::delete('/{id}', 'ProcessController@delete')->name('processes.delete');
+
         Route::post('/start-process', 'ProcessController@startProcess')->name('processes.start');
 
         Route::post('/stop-process', 'ProcessController@stopProcess')->name('processes.stop');

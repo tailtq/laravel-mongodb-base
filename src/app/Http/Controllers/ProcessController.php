@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProcessCreateRequest;
+use App\Models\ObjectAppearance;
 use App\Models\Process;
 use App\Models\TrackedObject;
 use App\Traits\RequestAPI;
@@ -138,7 +139,7 @@ class ProcessController extends Controller
             config('app.ai_server') . "/processes/$process->mongo_id/stop", [], $this->getDefaultHeaders()
         );
         if (!$processData->status) {
-            return $this->error('Đã có lỗi xảy ra', 400);
+            return $this->error($processData->body->message, 400);
         }
         $process->update(['status' => Process::STATUS['stopped']]);
 
@@ -147,7 +148,7 @@ class ProcessController extends Controller
 
     /**
      * @param $processId
-     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function getObjects($processId)
     {
@@ -155,9 +156,32 @@ class ProcessController extends Controller
             ->where('process_id', $processId)
             ->select(['objects.id', 'objects.process_id', 'objects.track_id', 'objects.image', 'identities.name', 'identities.images'])
             ->orderBy('objects.id', 'desc')
-            ->with('appearances:frame_from,frame_to,time_from,time_to')
+            ->with('appearances')
             ->get();
 
-        return response($objects);
+        return $this->success($objects);
+    }
+
+    /**
+     * @param $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function delete($id)
+    {
+        $process = Process::find($id);
+
+        if (!$process) {
+            abort(404);
+        } else if ($process->status == Process::STATUS['detecting'] || $process->status != Process::STATUS['grouping']) {
+            abort(400);
+        }
+//        $this->sendDELETERequest($this->getIdentityUrl($identity->mongo_id), [], $this->getDefaultHeaders());
+        $objectIds = TrackedObject::where('process_id', $id)->pluck('id');
+
+        ObjectAppearance::whereIn('object_id', $objectIds)->delete();
+        TrackedObject::where('process_id', $id)->delete();
+        $process->delete();
+
+        return redirect()->route('processes');
     }
 }

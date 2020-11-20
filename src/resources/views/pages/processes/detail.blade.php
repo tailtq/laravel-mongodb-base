@@ -15,12 +15,15 @@
 
     <div class="row">
         <div class="card-body">
-            <h5 class="card-title d-flex justify-content-md-between align-items-center">
-                <div>Luồng xử lý chi tiết</div>
+            <div class="d-flex justify-content-md-between align-items-center mb-3">
+                <h5 class="card-title">
+                    Luồng xử lý chi tiết &nbsp;
+                    <span class="badge badge-success text-uppercase process__status">{{ __('status.' . $process->status, [], 'vi') }}</span>
+                </h5>
                 <div style="display: inline-block">
                     <button type="button"
-                            @if($process->status == 'detecting' || $process->status == 'grouping')
-                                disabled
+                            @if($process->status != 'ready')
+                            disabled
                             @endif
                             class="btn btn-success btn-start">
                         <i class="link-icon" data-feather="play" style="width: 15px; height: 15px;"></i>
@@ -29,7 +32,7 @@
 
                     <button type="button"
                             @if($process->status != 'detecting' && $process->status != 'grouping')
-                                disabled
+                            disabled
                             @endif
                             class="btn btn-danger btn-stop">
                         <i class="mdi mdi-stop" style="font-size: 15px;"></i>
@@ -41,7 +44,7 @@
                         Cấu hình
                     </button>
                 </div>
-            </h5>
+            </div>
 
             <div class="table-responsive d-flex">
                 <video controls class="w-60" preload="auto" autoplay>
@@ -49,24 +52,33 @@
                 </video>
 
                 <div class="w-100 ml-4">
-                    <h5 class="mb-2">Cấu hình</h5>
+                    <h5 class="mb-2">Thống kê</h5>
+
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Số lượng đối tượng</th>
+                            <td class="process__total-objects" width="80"></td>
+                        </tr>
+                    </table>
+
+                    <h5 class="mt-4 mb-2">Cấu hình</h5>
 
                     <table class="table table-bordered">
                         <tr>
                             <th>Ngưỡng so sánh sinh trắc</th>
-                            <td>{{ object_get($process->mongoData, 'biometric_threshold', 0) }}%</td>
+                            <td width="80">{{ object_get($process->mongoData, 'biometric_threshold', 0) }}%</td>
                         </tr>
                         <tr>
                             <th>Độ chính xác đầu tối thiểu</th>
-                            <td>{{ object_get($process->mongoData, 'min_head_confidence', 0) }}%</td>
+                            <td width="80">{{ object_get($process->mongoData, 'min_head_confidence', 0) }}%</td>
                         </tr>
                         <tr>
                             <th>Độ chính xác khuôn mặt tối thiểu</th>
-                            <td>{{ object_get($process->mongoData, 'min_face_confidence', 0) }}%</td>
+                            <td width="80">{{ object_get($process->mongoData, 'min_face_confidence', 0) }}%</td>
                         </tr>
                         <tr>
                             <th>Độ chính xác thân hình tối thiểu</th>
-                            <td>{{ object_get($process->mongoData, 'min_body_confidence', 0) }}%</td>
+                            <td width="80">{{ object_get($process->mongoData, 'min_body_confidence', 0) }}%</td>
                         </tr>
                     </table>
                 </div>
@@ -75,19 +87,35 @@
             <div class="process__progress-bar mt-4">
                 <h5 class="mb-2">Tiến trình thực hiện</h5>
 
+                @php
+                    $detectingPercentage = 0;
+                    $groupingPercentage = 0;
+                @endphp
+                @if ($process->status == 'done')
+                    @php $detectingPercentage = 100; @endphp
+                @endif
+
+                <p>Nhận diện đối tượng</p>
                 <div class="progress">
                     <div class="progress-bar progress-bar-striped progress-bar-animated progress-bar__detecting"
-                         data-toggle="popover"
-                         data-placement="bottom"
-                         role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
-                         data-content="Nhận diện đối tượng">
+                         role="progressbar"
+                         style="width: {{ $detectingPercentage }}%"
+                         aria-valuenow="{{ $detectingPercentage }}"
+                         aria-valuemin="0"
+                         aria-valuemax="100">
+                        {{ $detectingPercentage }}%
                     </div>
+                </div>
 
+                <p class="mt-4">Nhất thể hoá</p>
+                <div class="progress">
                     <div class="progress-bar progress-bar-striped progress-bar-animated bg-success progress-bar__grouping"
-                         data-toggle="popover"
-                         data-placement="bottom"
-                         role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
-                         data-content="Nhất thể hoá">
+                         role="progressbar"
+                         style="width: {{ $groupingPercentage }}%"
+                         aria-valuenow="{{ $groupingPercentage }}"
+                         aria-valuemin="0"
+                         aria-valuemax="100">
+                        {{ $groupingPercentage }}%
                     </div>
                 </div>
             </div>
@@ -95,7 +123,21 @@
             <div class="mt-5">
                 <h5 class="mb-2">Danh sách đối tượng</h5>
 
-                <div class="mb-4 socket-render"></div>
+                <div class="mb-4 socket-render">
+                    <div class="table-responsive pt-3">
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th width="5%">STT</th>
+                                <th width="7%" class="text-center">Ảnh</th>
+                                <th width="25%">Tên đối tượng</th>
+                                <th>Thời gian xuất hiện</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
 
                 <p class="socket__message">Hiện tại chưa có đối tượng được theo dõi</p>
             </div>
@@ -117,16 +159,8 @@
     <script src="{{ asset('assets/js/custom.js') }}"></script>
     <script>
       const processId = '{{ $process->id }}';
-
-      function renderData() {
-        $.ajax({
-          url: `/processes/${processId}/objects`,
-          type: 'GET',
-          success: function (res) {
-            console.log(res);
-          },
-        })
-      }
+      const allStatus = <?= json_encode(__('status', [], 'vi'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+      let totalObjects = 0;
 
       // function for alert message when click action play, stop
       function processMessage(type) {
@@ -169,6 +203,12 @@
             processMessage(type);
           },
           error: function (res) {
+            const Toast = Swal.mixin({
+              toast: true,
+              position: 'top-end',
+              showConfirmButton: false,
+              timer: 2000,
+            });
             Toast.fire({
               type: 'error',
               title: 'Đã có lỗi xảy ra'
@@ -209,7 +249,7 @@
         let bars = ``;
         let currentTime = 0;
 
-        times.forEach(({frameFrom, frameTo}) => {
+        times.forEach(({frame_from: frameFrom, frame_to: frameTo}) => {
           const length = frameTo - frameFrom;
           const transparentLength = frameFrom - currentTime;
 
@@ -219,7 +259,7 @@
                  style="width: ${transparentLength / totalFrames * 100}%"
                  title="hello"></div>
 
-            <div class="progress-bar bg-success" role="progressbar"
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar"
                  data-toggle="tooltip"
                  style="width: ${length / totalFrames * 100}%"
                  title="hello"></div>
@@ -227,7 +267,7 @@
           currentTime += frameTo;
         });
 
-        return `<div class="progress ht-10">${bars}</div>`;
+        return `<div class="progress ht-15">${bars}</div>`;
       }
 
       function getTimeString(frameFrom, frameTo, fps, renderHour) {
@@ -246,41 +286,73 @@
         return `${renderHour ? `${hourFrom}:` : ''}${minFrom}:${secondFrom} - ${renderHour ? `${hourTo}:` : ''}${minTo}:${secondTo}`
       }
 
+      function renderBlock(object, appearances, fps, renderHour, index) {
+        return (`
+            <tr>
+                <td>${index + 1}</td>
+                <td class="py-1 text-center">
+                    <img src="${object.image}" alt="image">
+                </td>
+                <td>${object.name || 'Unknown'}</td>
+                <td>
+                    ${buildProgressBar(appearances, totalFrames, fps, renderHour)}
+                </td>
+            </tr>
+        `);
+      }
+
+      function renderData() {
+        $.ajax({
+          url: `/processes/${processId}/objects`,
+          type: 'GET',
+          success: function (res) {
+            $('.process__total-objects').html(totalObjects);
+
+            const { length: total } = res.data;
+
+            totalObjects += total;
+
+            res.data.forEach((value, index) => {
+              $('.socket-render tbody').prepend(
+                // for not appending to last index in the same time
+                renderBlock(value, value.appearances, fps, renderHour, total - index - 1)
+              );
+            });
+          },
+        })
+      }
+
       Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectsAppear', (res) => {
         $('.socket__message').remove();
 
-        res.data.forEach(value => {
-          const {frame_from: frameFrom, frame_to: frameTo} = value;
+        $('.process__total-objects').html(totalObjects);
 
-          $('.socket-render').prepend(`
-            <div class="media d-block mb-2 d-sm-flex">
-                <img src="${value.image ? value.image : 'https://www.nobleui.com/laravel/template/light/assets/images/placeholder.jpg'}"
-                     class="wd-100p wd-sm-200 mb-3 mb-sm-0 mr-3" alt="...">
-                <div class="media-body">
-                    <p class="mt-1 mb-2"><b>${value.name || 'Unknown'}</b> &nbsp; ${getTimeString(frameFrom, frameTo, fps, renderHour)}</p>
-
-                    ${buildProgressBar([{frameFrom, frameTo}], totalFrames)}
-                </div>
-            </div>
-          `);
+        res.data.forEach((value, index) => {
+          $('.socket-render tbody').append(renderBlock(value, [value], fps, renderHour, totalObjects + index));
         });
+
+        totalObjects += res.data.length;
       });
 
       Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChange', (res) => {
         const {status, progress} = res.data;
         const $detecting = $('.progress-bar__detecting');
 
+        $('.process__status').text(allStatus[status]);
+
         if (status === 'grouping' && parseFloat($detecting.attr('aria-valuenow')) === 0) {
-          $detecting.css({width: '50%'});
+          $detecting.css({ width: '100%' });
           $detecting.attr('aria-valuenow', '100');
+          $detecting.text('100%');
 
           setTimeout(() => $detecting.popover('show'), 400);
         }
         if (status === 'detecting' || status === 'grouping') {
           const $element = $(`.progress-bar__${status}`);
 
-          $element.css({width: `${progress / 2}%`});
+          $element.css({width: `${progress}%`});
           $element.attr('aria-valuenow', progress);
+          $element.text(`${progress}%`);
 
           setTimeout(() => $element.popover('show'), 400);
         }
@@ -288,14 +360,6 @@
 
       $(document).ready(function () {
         renderData();
-
-        $('.process__progress-bar .progress-bar').each((index, element) => {
-          const value = parseFloat($(element).attr('aria-valuenow'));
-
-          if (value > 0) {
-            $(element).popover('show');
-          }
-        });
       });
     </script>
 @endpush
