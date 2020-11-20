@@ -118,16 +118,6 @@
     <script>
       const processId = '{{ $process->id }}';
 
-      function renderData() {
-        $.ajax({
-          url: `/processes/${processId}/objects`,
-          type: 'GET',
-          success: function (res) {
-            console.log(res);
-          },
-        })
-      }
-
       // function for alert message when click action play, stop
       function processMessage(type) {
         const Toast = Swal.mixin({
@@ -209,7 +199,7 @@
         let bars = ``;
         let currentTime = 0;
 
-        times.forEach(({frameFrom, frameTo}) => {
+        times.forEach(({ frame_from: frameFrom, frame_to: frameTo }) => {
           const length = frameTo - frameFrom;
           const transparentLength = frameFrom - currentTime;
 
@@ -246,23 +236,41 @@
         return `${renderHour ? `${hourFrom}:` : ''}${minFrom}:${secondFrom} - ${renderHour ? `${hourTo}:` : ''}${minTo}:${secondTo}`
       }
 
+      function renderBlock(object, frameFrom, frameTo, appearances, fps, renderHour) {
+        return (`
+            <div class="media d-block mb-2 d-sm-flex">
+                <img src="${object.image ? object.image : 'https://www.nobleui.com/laravel/template/light/assets/images/placeholder.jpg'}"
+                     class="wd-100p wd-sm-200 mb-3 mb-sm-0 mr-3" alt="...">
+                <div class="media-body">
+                    <p class="mt-1 mb-2"><b>${object.name || 'Unknown'}</b> &nbsp; ${getTimeString(frameFrom, frameTo, fps, renderHour)}</p>
+
+                    ${buildProgressBar(appearances, totalFrames)}
+                </div>
+            </div>
+        `);
+      }
+
+      function renderData() {
+        $.ajax({
+          url: `/processes/${processId}/objects`,
+          type: 'GET',
+          success: function (res) {
+            res.data.forEach(value => {
+              const lastAppearance = value.appearances[value.appearances.length - 1];
+
+              $('.socket-render').append(
+                renderBlock(value, value.appearances[0].frame_from, lastAppearance.frame_to, value.appearances, fps, renderHour)
+              );
+            });
+          },
+        })
+      }
+
       Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectsAppear', (res) => {
         $('.socket__message').remove();
 
         res.data.forEach(value => {
-          const {frame_from: frameFrom, frame_to: frameTo} = value;
-
-          $('.socket-render').prepend(`
-            <div class="media d-block mb-2 d-sm-flex">
-                <img src="${value.image ? value.image : 'https://www.nobleui.com/laravel/template/light/assets/images/placeholder.jpg'}"
-                     class="wd-100p wd-sm-200 mb-3 mb-sm-0 mr-3" alt="...">
-                <div class="media-body">
-                    <p class="mt-1 mb-2"><b>${value.name || 'Unknown'}</b> &nbsp; ${getTimeString(frameFrom, frameTo, fps, renderHour)}</p>
-
-                    ${buildProgressBar([{frameFrom, frameTo}], totalFrames)}
-                </div>
-            </div>
-          `);
+          $('.socket-render').prepend(renderBlock(value, value.frame_from, value.frame_to, [value], fps, renderHour));
         });
       });
 

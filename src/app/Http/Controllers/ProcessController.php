@@ -147,7 +147,7 @@ class ProcessController extends Controller
 
     /**
      * @param $processId
-     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function getObjects($processId)
     {
@@ -155,9 +155,9 @@ class ProcessController extends Controller
             ->where('process_id', $processId)
             ->select(['objects.id', 'objects.process_id', 'objects.track_id', 'objects.image', 'identities.name', 'identities.images'])
             ->orderBy('objects.id', 'desc')
-            ->with('appearances:frame_from,frame_to,time_from,time_to')
+            ->with('appearances')
             ->get();
 
-        return response($objects);
+        return $this->success($objects);
     }
 }
