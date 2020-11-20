@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Identity;
 use App\Models\Process;
-use Illuminate\Http\Request;
+use App\Models\TrackedObject;
 
 class DashboardController extends Controller
 {
@@ -13,7 +14,10 @@ class DashboardController extends Controller
     public function index()
     {
         $processesDone = Process::where('status', Process::STATUS['done'])->count();
-        $processesTotal = Process::count();
-        return view('dashboard', compact('processesDone', 'processesTotal'));
+        $processesTotal = Process::where('status', '!=', Process::STATUS['ready'])->count();
+        $trackedObjects = TrackedObject::count();
+        $identities = Identity::count();
+
+        return view('dashboard', compact('processesDone', 'processesTotal', 'trackedObjects', 'identities'));
     }
 }
