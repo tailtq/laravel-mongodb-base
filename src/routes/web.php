@@ -16,9 +16,8 @@
 Auth::routes(['register' => false]);
 
 Route::group(['middleware' => ['auth']], function () {
-    Route::get('/', function () {
-        return view('dashboard');
-    });
+
+    Route::get('/', 'DashboardController@index')->name('dashboard.index');
 
     Route::group(['prefix' => 'users'], function () {
         Route::get('/', 'UserController@list')->name('users');
