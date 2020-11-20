@@ -1,6 +1,6 @@
 <nav class="sidebar">
     <div class="sidebar-header">
-        <a href="#" class="sidebar-brand">
+        <a href="{{ url('/') }}" class="sidebar-brand">
             Face<span>AI</span>
         </a>
         <div class="sidebar-toggler not-active">

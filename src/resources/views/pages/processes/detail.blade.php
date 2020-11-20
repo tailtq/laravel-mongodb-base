@@ -15,11 +15,14 @@
 
     <div class="row">
         <div class="card-body">
-            <h5 class="card-title d-flex justify-content-md-between align-items-center">
-                <div>Luồng xử lý chi tiết</div>
+            <div class="d-flex justify-content-md-between align-items-center">
+                <h5 class="card-title">
+                    Luồng xử lý chi tiết &nbsp;
+                    <span class="badge badge-success text-uppercase process__status">{{ $process->status }}</span>
+                </h5>
                 <div style="display: inline-block">
                     <button type="button"
-                            @if($process->status == 'detecting' || $process->status == 'grouping')
+                            @if($process->status != 'ready')
                                 disabled
                             @endif
                             class="btn btn-success btn-start">
@@ -41,7 +44,7 @@
                         Cấu hình
                     </button>
                 </div>
-            </h5>
+            </div>
 
             <div class="table-responsive d-flex">
                 <video controls class="w-60" preload="auto" autoplay>
@@ -76,18 +79,35 @@
                 <h5 class="mb-2">Tiến trình thực hiện</h5>
 
                 <div class="progress">
+                    @php
+                        $detectingPercentage = 0;
+                        $groupingPercentage = 0;
+                    @endphp
+                    @if ($process->status == 'done')
+                        @php $detectingPercentage = 100; @endphp
+                    @endif
                     <div class="progress-bar progress-bar-striped progress-bar-animated progress-bar__detecting"
                          data-toggle="popover"
                          data-placement="bottom"
-                         role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
+                         role="progressbar"
+                         style="width: {{ $detectingPercentage / 2 }}%"
+                         aria-valuenow="{{ $detectingPercentage }}"
+                         aria-valuemin="0"
+                         aria-valuemax="100"
                          data-content="Nhận diện đối tượng">
+                        {{ $detectingPercentage }}%
                     </div>
 
                     <div class="progress-bar progress-bar-striped progress-bar-animated bg-success progress-bar__grouping"
                          data-toggle="popover"
                          data-placement="bottom"
-                         role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
+                         role="progressbar"
+                         style="width: {{ $groupingPercentage / 2 }}%"
+                         aria-valuenow="{{ $groupingPercentage }}"
+                         aria-valuemin="0"
+                         aria-valuemax="100"
                          data-content="Nhất thể hoá">
+                        {{ $groupingPercentage }}%
                     </div>
                 </div>
             </div>
@@ -275,12 +295,15 @@
       });
 
       Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChange', (res) => {
-        const {status, progress} = res.data;
+        const { status, progress } = res.data;
         const $detecting = $('.progress-bar__detecting');
+
+        $('.process__status').text(status);
 
         if (status === 'grouping' && parseFloat($detecting.attr('aria-valuenow')) === 0) {
           $detecting.css({width: '50%'});
           $detecting.attr('aria-valuenow', '100');
+          $detecting.text('100%');
 
           setTimeout(() => $detecting.popover('show'), 400);
         }
@@ -289,6 +312,7 @@
 
           $element.css({width: `${progress / 2}%`});
           $element.attr('aria-valuenow', progress);
+          $element.text(`${progress}%`);
 
           setTimeout(() => $element.popover('show'), 400);
         }
