@@ -15,7 +15,7 @@
 
     <div class="row">
         <div class="card-body">
-            <div class="d-flex justify-content-md-between align-items-center">
+            <div class="d-flex justify-content-md-between align-items-center mb-3">
                 <h5 class="card-title">
                     Luồng xử lý chi tiết &nbsp;
                     <span class="badge badge-success text-uppercase process__status">{{ $process->status }}</span>
@@ -179,6 +179,12 @@
             processMessage(type);
           },
           error: function (res) {
+            const Toast = Swal.mixin({
+              toast: true,
+              position: 'top-end',
+              showConfirmButton: false,
+              timer: 2000,
+            });
             Toast.fire({
               type: 'error',
               title: 'Đã có lỗi xảy ra'
