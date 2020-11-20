@@ -139,7 +139,7 @@ class ProcessController extends Controller
             config('app.ai_server') . "/processes/$process->mongo_id/stop", [], $this->getDefaultHeaders()
         );
         if (!$processData->status) {
-            return $this->error('Đã có lỗi xảy ra', 400);
+            return $this->error($processData->body->message, 400);
         }
         $process->update(['status' => Process::STATUS['stopped']]);
 
