@@ -17,7 +17,7 @@
           <div class="card">
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-baseline">
-                <h6 class="card-title mb-0">Lượt xử lý thực hiện</h6>
+                <h6 class="card-title mb-0">Số lượt đã xử lý</h6>
               </div>
               <div class="row">
                 <div class="col-6 col-md-12 col-xl-5">
@@ -32,7 +32,7 @@
           <div class="card">
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-baseline">
-                <h6 class="card-title mb-0">Lượt xử lý thành công</h6>
+                <h6 class="card-title mb-0">Số lượt xử lý thành công</h6>
               </div>
               <div class="row">
                 <div class="col-6 col-md-12 col-xl-5">
