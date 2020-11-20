@@ -15,7 +15,7 @@
             <h2>Thông tin</h2>
             <section>
               <div class="form-group">
-                <label>Tên video *</label>
+                <label>Tên luồng xử lý *</label>
                 <input type="text"
                        class="form-control"
                        placeholder="Nhập tên"

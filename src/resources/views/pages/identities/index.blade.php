@@ -13,7 +13,7 @@
                     <thead>
                     <tr>
                         <th class="text-center">STT</th>
-                        <th>Hình</th>
+                        <th>Hình đại diện</th>
                         <th>Tên</th>
                         <th>Ngày tạo</th>
                         <th>Tùy chọn</th>
