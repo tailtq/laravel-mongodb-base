@@ -287,10 +287,10 @@
         return `${renderHour ? `${hourFrom}:` : ''}${minFrom}:${secondFrom} - ${renderHour ? `${hourTo}:` : ''}${minTo}:${secondTo}`
       }
 
-      function renderBlock(object, appearances, fps, renderHour, index) {
+      function renderBlock(object, appearances, fps, renderHour) {
         return (`
             <tr data-id="${object.id}">
-                <td class="text-center">${index + 1}</td>
+                <td class="text-center">${object.track_id}</td>
                 <td class="py-1 text-center">
                     <img src="${object.image}" alt="image" style="width: 40px; height: 40px;">
                 </td>
@@ -317,7 +317,7 @@
               objectIds.push(value.id);
               $('.socket-render tbody').prepend(
                 // for not appending to last index in the same time
-                renderBlock(value, value.appearances, fps, renderHour, total - index - 1)
+                renderBlock(value, value.appearances, fps, renderHour)
               );
             });
           },
@@ -331,10 +331,14 @@
 
         res.data.forEach((value, index) => {
           if (objectIds.indexOf(value.id) >= 0) {
+            $(`.socket-render tbody tr[data-id="${value.id}"] td:last-child`).html(
+              buildProgressBar([value], totalFrames, fps, renderHour)
+            );
+            // increasing progressbar
             // update progress bar
           } else {
             objectIds.push(value.id);
-            $('.socket-render tbody').append(renderBlock(value, [value], fps, renderHour, totalObjects + index));
+            $('.socket-render tbody').append(renderBlock(value, [value], fps, renderHour));
           }
         });
 
