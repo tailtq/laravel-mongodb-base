@@ -242,11 +242,13 @@
       // end dash player
 
       // render objects
-      const totalFrames = parseInt('{{ $process->total_frames }}', 10);
-      const fps = parseInt('{{ $process->fps }}', 10);
+      const frameStep = {{ object_get($process->mongoData, 'frame_step', 1) }};
+      const totalFrames = Math.round(parseInt({{ $process->total_frames }}, 10) / frameStep);
+      const fps = Math.round(parseInt('{{ $process->fps }}', 10) / frameStep);
       const renderHour = totalFrames / 3600 >= 1;
+      let currentFrame = 0;
 
-      function buildProgressBar(times, totalFrames) {
+      function buildProgressBar(times, totalFrames, fps, renderHour, shouldIncreasing = false) {
         let bars = ``;
         let currentTime = 0;
 
@@ -260,10 +262,11 @@
                  style="width: ${transparentLength / totalFrames * 100}%"
                  title="hello"></div>
 
-            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar"
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success ${shouldIncreasing ? 'increasing' : ''}" role="progressbar"
                  data-toggle="tooltip"
+                 data-frame-from="${frameFrom}"
                  style="width: ${length / totalFrames * 100}%"
-                 title="hello"></div>
+                 title="${getTimeString(frameFrom, frameTo, fps, renderHour)}"></div>
             `;
           currentTime += frameTo;
         });
@@ -278,16 +281,20 @@
         minFrom = (minFrom % 60).toString().padStart(2, '0');
         secondFrom = (secondFrom % 60).toString().padStart(2, '0');
 
+        if (!frameTo) {
+          return `${renderHour ? `${hourFrom}:` : ''}${minFrom}:${secondFrom} - now`;
+        }
+
         let secondTo = Math.floor(frameTo / fps);
         let minTo = Math.floor(secondTo / 60);
         const hourTo = (Math.floor(minTo / 60)).toString().padStart(2, '0');
         minTo = (minTo % 60).toString().padStart(2, '0');
         secondTo = (secondTo % 60).toString().padStart(2, '0');
 
-        return `${renderHour ? `${hourFrom}:` : ''}${minFrom}:${secondFrom} - ${renderHour ? `${hourTo}:` : ''}${minTo}:${secondTo}`
+        return `${renderHour ? `${hourFrom}:` : ''}${minFrom}:${secondFrom} - ${renderHour ? `${hourTo}:` : ''}${minTo}:${secondTo}`;
       }
 
-      function renderBlock(object, appearances, fps, renderHour) {
+      function renderBlock(object, appearances, fps, renderHour, shouldIncreasing) {
         return (`
             <tr data-id="${object.id}">
                 <td class="text-center">${object.track_id}</td>
@@ -296,7 +303,7 @@
                 </td>
                 <td>${object.name || 'Unknown'}</td>
                 <td>
-                    ${buildProgressBar(appearances, totalFrames, fps, renderHour)}
+                    ${buildProgressBar(appearances, totalFrames, fps, renderHour, shouldIncreasing)}
                 </td>
             </tr>
         `);
@@ -311,7 +318,7 @@
               objectIds.push(value.id);
               $('.socket-render tbody').prepend(
                 // for not appending to last index in the same time
-                renderBlock(value, value.appearances, fps, renderHour)
+                renderBlock(value, value.appearances, fps, renderHour, value.appearances[0].frameTo === null)
               );
             });
           },
@@ -324,14 +331,14 @@
         res.data.forEach((value, index) => {
           if (objectIds.indexOf(value.id) >= 0) {
             $(`.socket-render tbody tr[data-id="${value.id}"] td:last-child`).html(
-              buildProgressBar([value], totalFrames, fps, renderHour)
+              buildProgressBar([value], totalFrames, fps, renderHour, false)
             );
             // increasing progressbar
             // update progress bar
           } else {
             totalObjects += 1;
             objectIds.push(value.id);
-            $('.socket-render tbody').append(renderBlock(value, [value], fps, renderHour));
+            $('.socket-render tbody').append(renderBlock(value, [value], fps, renderHour, true));
           }
         });
 
@@ -339,8 +346,12 @@
       });
 
       Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChange', (res) => {
-        const {status, progress} = res.data;
+        const {status, progress, frame_index: frameIndex} = res.data;
         const $detecting = $('.progress-bar__detecting');
+
+        if (!isNaN(frameIndex)) {
+          currentFrame = frameIndex;
+        }
 
         $('.process__status').text(allStatus[status]);
 
@@ -361,6 +372,19 @@
           setTimeout(() => $element.popover('show'), 400);
         }
       });
+      const intervalId = setInterval(function () {
+        $('.progress-bar.increasing').each((index, element) => {
+          const frameFrom = $(element).data('frame-from');
+          const length = currentFrame - frameFrom;
+
+          if (length > 0) {
+            $(element).css({ width: `${length / totalFrames * 100}%` });
+          }
+        });
+        if (currentFrame > totalFrames) {
+          clearInterval(intervalId);
+        }
+      }, 1000);
 
       $(document).ready(function () {
         renderData();
