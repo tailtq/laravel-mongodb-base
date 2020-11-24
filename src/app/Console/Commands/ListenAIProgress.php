@@ -54,7 +54,9 @@ class ListenAIProgress extends Command
                     'status' => $process->status,
                     'progress' => $event->progress ?? 0,
                 ];
-
+                if (!empty($event->stream_url)) {
+                    $process->video_result = $event->stream_url;
+                }
                 if ($process->status != $event->status) {
                     $process->status = $event->status;
                     $process->save();

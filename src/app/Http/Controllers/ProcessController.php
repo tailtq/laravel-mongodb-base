@@ -175,7 +175,7 @@ class ProcessController extends Controller
         } else if ($process->status == Process::STATUS['detecting'] || $process->status == Process::STATUS['grouping']) {
             abort(400);
         }
-//        $this->sendDELETERequest($this->getIdentityUrl($identity->mongo_id), [], $this->getDefaultHeaders());
+        $this->sendDELETERequest( "/processes/$process->mongo_id", [], $this->getDefaultHeaders());
         $objectIds = TrackedObject::where('process_id', $id)->pluck('id');
 
         ObjectAppearance::whereIn('object_id', $objectIds)->delete();

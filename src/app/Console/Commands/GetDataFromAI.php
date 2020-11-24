@@ -41,7 +41,10 @@ class GetDataFromAI extends Command
     }
 
     /**
-     * Execute the console command.
+     * Receive AI's data and map to MySQL database.
+     * When finished_track = false, we insert data without MongoId (due to AI process).
+     * Then when finished_track = true, based on track_id + process_id, we map frame_to and mongo_id to our data
+     * Currently we handle multiple processes (create many + update many + publish many events) in the same time for optimization
      */
     public function handle()
     {
@@ -56,10 +59,9 @@ class GetDataFromAI extends Command
             $updatingObjects = [];
 
             $processMongoIds = Arr::pluck($objects, 'process_id');
-            $processes = DB::table('processes')
-                ->where('mongo_id', $processMongoIds)
-                ->get();
+            $processes = DB::table('processes')->where('mongo_id', $processMongoIds)->get();
 
+            // Get existing tracks for updating mongo_id and frame_to
             $trackIds = Arr::pluck($objects, 'track_id');
             $tracks = DB::table('objects')
                 ->join('processes', 'processes.id', 'objects.process_id')
@@ -70,6 +72,7 @@ class GetDataFromAI extends Command
             $objectIds = [];
 
             foreach ($objects as $object) {
+                // Object begins being tracked
                 if ($object->finished_track === false) {
                     $process = Arr::first($processes, function ($process) use ($object) {
                         return $object->process_id === $process->mongo_id;
@@ -90,12 +93,13 @@ class GetDataFromAI extends Command
                         ]);
                         $objectIds[] = $trackedObject->id;
                     }
-                } else {
+                } else { // Object finished being tracked
                     $track = Arr::first($tracks, function ($track) use ($object) {
                         return $track->process_id === $object->process_id;
                     });
 
                     if ($track) {
+                        //
                         array_push($updatingObjects, [
                             'id' => $track->id,
                             'mongo_id' => $object->mongo_id,
@@ -116,6 +120,15 @@ class GetDataFromAI extends Command
             if (count($updatingAppearances) !== 0) {
                 DatabaseHelper::updateMultiple($updatingObjects, 'id', 'objects');
                 DatabaseHelper::updateMultiple($updatingAppearances, 'object_id', 'object_appearances');
+            }
+            foreach ($processes as $process) {
+                if ($process->status === Process::STATUS['detecting']) {
+                    DB::table('processes')
+                        ->where('id', $process->id)
+                        ->update([
+                            'ungrouped_count' => DB::raw("(SELECT COUNT(*) FROM objects WHERE process_id = $process->id)"),
+                    ]);
+                }
             }
             $result = DB::table('objects')
                 ->leftJoin('identities', 'objects.identity_id', 'identities.id')

@@ -57,7 +57,7 @@
                     <table class="table table-bordered">
                         <tr>
                             <th>Số lượng đối tượng</th>
-                            <td class="process__total-objects" width="80"></td>
+                            <td class="process__total-objects" width="80">{{ $process->ungrouped_count }}</td>
                         </tr>
                     </table>
 
@@ -161,7 +161,7 @@
       const processId = '{{ $process->id }}';
       const allStatus = <?= json_encode(__('status', [], 'vi'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
       let objectIds = [];
-      let totalObjects = 0;
+      let totalObjects = <?= $process->ungrouped_count ?>;
 
       // function for alert message when click action play, stop
       function processMessage(type) {
@@ -307,12 +307,6 @@
           url: `/processes/${processId}/objects`,
           type: 'GET',
           success: function (res) {
-            $('.process__total-objects').html(totalObjects);
-
-            const { length: total } = res.data;
-
-            totalObjects += total;
-
             res.data.forEach((value, index) => {
               objectIds.push(value.id);
               $('.socket-render tbody').prepend(
@@ -327,8 +321,6 @@
       Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectsAppear', (res) => {
         $('.socket__message').remove();
 
-        $('.process__total-objects').html(totalObjects);
-
         res.data.forEach((value, index) => {
           if (objectIds.indexOf(value.id) >= 0) {
             $(`.socket-render tbody tr[data-id="${value.id}"] td:last-child`).html(
@@ -337,12 +329,13 @@
             // increasing progressbar
             // update progress bar
           } else {
+            totalObjects += 1;
             objectIds.push(value.id);
             $('.socket-render tbody').append(renderBlock(value, [value], fps, renderHour));
           }
         });
 
-        totalObjects += res.data.length;
+        $('.process__total-objects').html(totalObjects);
       });
 
       Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChange', (res) => {
