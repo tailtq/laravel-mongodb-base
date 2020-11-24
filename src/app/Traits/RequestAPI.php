@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 trait RequestAPI
 {
@@ -49,6 +50,7 @@ trait RequestAPI
         if ($result->status) {
             $result->body = $result->body->data;
         } else {
+            Log::error(json_encode($response->toPsrResponse()));
             $result->message = 'HTTP Request: ' . $response->toPsrResponse()->getReasonPhrase();
         }
 

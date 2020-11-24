@@ -128,7 +128,7 @@
                         <table class="table table-bordered">
                             <thead>
                             <tr>
-                                <th width="5%">STT</th>
+                                <th width="5%" class="text-center">Id</th>
                                 <th width="7%" class="text-center">Ảnh</th>
                                 <th width="25%">Tên đối tượng</th>
                                 <th>Thời gian xuất hiện</th>
@@ -160,6 +160,7 @@
     <script>
       const processId = '{{ $process->id }}';
       const allStatus = <?= json_encode(__('status', [], 'vi'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+      let objectIds = [];
       let totalObjects = 0;
 
       // function for alert message when click action play, stop
@@ -288,10 +289,10 @@
 
       function renderBlock(object, appearances, fps, renderHour, index) {
         return (`
-            <tr>
-                <td>${index + 1}</td>
+            <tr data-id="${object.id}">
+                <td class="text-center">${index + 1}</td>
                 <td class="py-1 text-center">
-                    <img src="${object.image}" alt="image">
+                    <img src="${object.image}" alt="image" style="width: 40px; height: 40px;">
                 </td>
                 <td>${object.name || 'Unknown'}</td>
                 <td>
@@ -313,6 +314,7 @@
             totalObjects += total;
 
             res.data.forEach((value, index) => {
+              objectIds.push(value.id);
               $('.socket-render tbody').prepend(
                 // for not appending to last index in the same time
                 renderBlock(value, value.appearances, fps, renderHour, total - index - 1)
@@ -328,7 +330,12 @@
         $('.process__total-objects').html(totalObjects);
 
         res.data.forEach((value, index) => {
-          $('.socket-render tbody').append(renderBlock(value, [value], fps, renderHour, totalObjects + index));
+          if (objectIds.indexOf(value.id) >= 0) {
+            // update progress bar
+          } else {
+            objectIds.push(value.id);
+            $('.socket-render tbody').append(renderBlock(value, [value], fps, renderHour, totalObjects + index));
+          }
         });
 
         totalObjects += res.data.length;
