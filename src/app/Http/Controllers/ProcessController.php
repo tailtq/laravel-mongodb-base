@@ -172,7 +172,7 @@ class ProcessController extends Controller
 
         if (!$process) {
             abort(404);
-        } else if ($process->status == Process::STATUS['detecting'] || $process->status != Process::STATUS['grouping']) {
+        } else if ($process->status == Process::STATUS['detecting'] || $process->status == Process::STATUS['grouping']) {
             abort(400);
         }
 //        $this->sendDELETERequest($this->getIdentityUrl($identity->mongo_id), [], $this->getDefaultHeaders());

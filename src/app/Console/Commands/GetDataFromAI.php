@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Events\ObjectsAppear;
+use App\Helpers\DatabaseHelper;
 use App\Models\ObjectAppearance;
 use App\Models\Process;
 use App\Models\TrackedObject;
@@ -51,17 +52,25 @@ class GetDataFromAI extends Command
                 return;
             }
             $insertingAppearances = [];
-//            $updatingAppearances = [];
+            $updatingAppearances = [];
+            $updatingObjects = [];
 
             $processMongoIds = Arr::pluck($objects, 'process_id');
-            $processes = Process::whereIn('mongo_id', $processMongoIds)->get();
+            $processes = DB::table('processes')
+                ->where('mongo_id', $processMongoIds)
+                ->get();
+
+            $trackIds = Arr::pluck($objects, 'track_id');
+            $tracks = DB::table('objects')
+                ->join('processes', 'processes.id', 'objects.process_id')
+                ->whereIn('track_id', $trackIds)
+                ->whereIn('processes.mongo_id', $processMongoIds)
+                ->select(['objects.id', 'objects.mongo_id', 'processes.mongo_id as process_id'])
+                ->get();
             $objectIds = [];
 
-//            $objectMongoIds = Arr::pluck($objects, 'mongo_id');
-//            $trackedObjects = TrackedObject::whereIn('mongo_id', $objectMongoIds)->get();
-
             foreach ($objects as $object) {
-//                if ($object->finished_track === false) {
+                if ($object->finished_track === false) {
                     $process = Arr::first($processes, function ($process) use ($object) {
                         return $object->process_id === $process->mongo_id;
                     });
@@ -70,44 +79,44 @@ class GetDataFromAI extends Command
                         $trackedObject = TrackedObject::create([
                             'process_id' => $process->id,
                             'track_id' => $object->track_id,
-                            'mongo_id' => $object->mongo_id,
                             'image' => $object->image,
                         ]);
                         array_push($insertingAppearances, [
                             'object_id' => $trackedObject->id,
                             'frame_from' => $object->frame_from,
                             'time_from' => object_get($object, 'time_from'),
-                            // follow AI flow - Remove and uncomment the code below if change again
-                            'frame_to' => object_get($object, 'frame_to'),
-                            'time_to' => object_get($object, 'time_to'),
-                            // end following AI flow
                             'created_at' => Carbon::now(),
                             'updated_at' => Carbon::now(),
                         ]);
                         $objectIds[] = $trackedObject->id;
                     }
-//                } else {
-//                    $trackedObject = Arr::first($trackedObjects, function ($trackedObject) use ($object) {
-//                        return $trackedObject->mongo_id === $object->mongo_id;
-//                    });
-//
-//                    if ($trackedObject) {
-//                        array_push($updatingAppearances, [
-//                            'object_id' => $trackedObject->id,
-//                            'frame_to' => $object->frame_to,
-//                            'time_to' => object_get($object, 'time_to'),
-//                            'updated_at' => Carbon::now(),
-//                        ]);
-//                        $objectIds[] = $trackedObject->id;
-//                    }
-//                }
+                } else {
+                    $track = Arr::first($tracks, function ($track) use ($object) {
+                        return $track->process_id === $object->process_id;
+                    });
+
+                    if ($track) {
+                        array_push($updatingObjects, [
+                            'id' => $track->id,
+                            'mongo_id' => $object->mongo_id,
+                        ]);
+                        array_push($updatingAppearances, [
+                            'object_id' => $track->id,
+                            'frame_to' => $object->frame_to,
+                            'time_to' => object_get($object, 'time_to'),
+                            'updated_at' => Carbon::now(),
+                        ]);
+                        $objectIds[] = $track->id;
+                    }
+                }
             }
             if (count($insertingAppearances) !== 0) {
                 ObjectAppearance::insert($insertingAppearances);
             }
-//            if (count($updatingAppearances) !== 0) {
-//                DatabaseHelper::updateMultiple($updatingAppearances, 'object_id', 'object_appearances');
-//            }
+            if (count($updatingAppearances) !== 0) {
+                DatabaseHelper::updateMultiple($updatingObjects, 'id', 'objects');
+                DatabaseHelper::updateMultiple($updatingAppearances, 'object_id', 'object_appearances');
+            }
             $result = DB::table('objects')
                 ->leftJoin('identities', 'objects.identity_id', 'identities.id')
                 ->join('object_appearances', 'objects.id', 'object_appearances.object_id')
@@ -121,9 +130,6 @@ class GetDataFromAI extends Command
                     'identities.images',
                     'object_appearances.frame_from',
                     'object_appearances.frame_to',
-                    'object_appearances.time_from',
-                    'object_appearances.time_to',
-                    'objects.created_at',
                 ])
                 ->get();
             $groupedResult = $result->groupBy('process_id');
@@ -132,9 +138,6 @@ class GetDataFromAI extends Command
             foreach ($groupedResult as $processId => $result) {
                 $attrs[$processId] = $result;
             }
-
-            Log::info($groupedResult);
-
             foreach ($attrs as $key => $value) {
                 broadcast(new ObjectsAppear($key, $value));
             }
