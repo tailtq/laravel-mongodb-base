@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Helpers;
+use App\Models\Identity;
+use App\Models\ObjectAppearance;
 use App\Models\TrackedObject;
 use Illuminate\Support\Arr;
 
@@ -11,76 +13,37 @@ class UpdateObjectsAppear
      */
     public static function updateObject($data)
     {
-        //Response data AI
-        $data = [
-            [
-                "mongo_id"    => "5fb1e9b739311f1812035085",
-                "identity"    => "1",
-                "appearances" => [
-                    [
-                        "mongo_id"   => "5fb1e9b739311f1812035085",
-                        "track_id"   => '123',
-                        "frame_from" => '590',
-                        "frame_to"   => '733'
-                    ],
-                    [
-                        "mongo_id"   => "123",
-                        "track_id"   => '123',
-                        "frame_from" => '590',
-                        "frame_to"   => '733'
-                    ],
-                    [
-                        "mongo_id"   => "1233",
-                        "track_id"   => '123',
-                        "frame_from" => '590',
-                        "frame_to"   => '733'
-                    ]
-                ]
-            ],
-            [
-                "mongo_id"    => "5fb1e9b739311f1812035085",
-                "identity"    => "1",
-                "appearances" => [
-                    [
-                        "mongo_id"   => "5fb1e9b739311f1812035085",
-                        "track_id"   => '123',
-                        "frame_from" => '590',
-                        "frame_to"   => '733'
-                    ],
-                    [
-                        "mongo_id"   => "5fb1e9b739311f1812035085",
-                        "track_id"   => '123',
-                        "frame_from" => '590',
-                        "frame_to"   => '733'
-                    ],
-                    [
-                        "mongo_id"   => "5fb1e9b739311f1812035085",
-                        "track_id"   => '123',
-                        "frame_from" => '590',
-                        "frame_to"   => '733'
-                    ]
-                ]
-            ]
-        ];
+        // Response data AI
+        $mongoIds = Arr::collapse(Arr::pluck($data, 'appearances.*.object_id'));
+        $objects = TrackedObject::whereIn('mongo_id', $mongoIds)->select(['id', 'mongo_id'])->get();
 
-        if (!empty($data)) {
-            foreach ($data as &$value){
-                $value['appearances'] = Arr::pluck($value['appearances'], 'mongo_id');
+        $identityMongoIds = array_filter(Arr::pluck($data, 'identity'), function ($element) {
+            return $element != null;
+        });
+        $identities = Identity::whereIn('mongo_id', $identityMongoIds)->select(['id', 'mongo_id'])->get();
+        $deleteIds = [];
+        $identityData = [];
 
-                $objectUpdate = TrackedObject::where('mongo_id', $value['mongo_id'])->first();
+        foreach ($data as $element) {
+            $appearanceMongoIds = Arr::pluck((array) $element['appearances'], 'object_id');
+            $object = $objects->where('mongo_id', $element['object_id'])->first();
+            $identity = !empty($element['identity']) ? $identities->where('mongo_id', $element['identity'])->first() : null;
 
-                foreach ($value['appearances'] as $key => $item){
-                    if ($value['mongo_id'] !== $item) {
-                        $object = TrackedObject::where('mongo_id', $item)->first();
-                        if ($object) {
-                            $object->appearances()->update(['object_id' => $objectUpdate->id]);
-                        }
-                        $object->delete();
-                    }
-                }
+            if ($object) {
+                $appearanceIds = $objects->whereIn('mongo_id', $appearanceMongoIds)
+                    ->where('mongo_id', '!=', $object->mongo_id)
+                    ->pluck('id')
+                    ->all();
+                ObjectAppearance::whereIn('object_id', $appearanceIds)->update(['object_id' => $object->id]);
+
+                $identityData[] = [
+                    'id' => $object->id,
+                    'identity_id' => $identity->id ?? null
+                ];
+                $deleteIds = array_merge($deleteIds, $appearanceIds);
             }
         }
-
-        return;
+        TrackedObject::whereIn('id', $deleteIds)->delete();
+        DatabaseHelper::updateMultiple($identityData, 'id', 'objects');
     }
 }
