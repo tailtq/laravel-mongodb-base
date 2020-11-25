@@ -3,6 +3,15 @@
 @push('plugin-styles')
     <link href="{{ asset('assets/plugins/jquery-steps/jquery.steps.css') }}" rel="stylesheet"/>
     <link rel="stylesheet" href="{{ asset('assets/plugins/@mdi/css/materialdesignicons.min.css') }}">
+    <style>
+        .status-overlay {
+            top: 3px;
+            padding: inherit;
+            width: 100%;
+            text-align: center;
+            font-size: 12px;
+        }
+    </style>
 @endpush
 
 @section('content')
@@ -160,8 +169,6 @@
     <script>
       const processId = '{{ $process->id }}';
       const allStatus = <?= json_encode(__('status', [], 'vi'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
-      let objectIds = [];
-      let totalObjects = <?= $process->ungrouped_count ?>;
 
       // function for alert message when click action play, stop
       function processMessage(type) {
@@ -196,14 +203,15 @@
             processId: processId
           }),
           success: function (res) {
-            const otherType = type === 'start' ? 'stop' : 'start';
-
-            $(`.btn-${type}`).attr('disabled', true);
-            $(`.btn-${otherType}`).attr('disabled', false);
-
+            if (type === 'start') {
+              $('.btn-start').attr('disabled', true);
+              $('.btn-stop').attr('disabled', false);
+            } else if (type === 'stop') {
+              $('.btn-stop').attr('disabled', true);
+            }
             processMessage(type);
           },
-          error: function (res) {
+          error: function ({ responseJSON: res }) {
             const Toast = Swal.mixin({
               toast: true,
               position: 'top-end',
@@ -212,7 +220,7 @@
             });
             Toast.fire({
               type: 'error',
-              title: 'Đã có lỗi xảy ra'
+              title: res.message
             });
           }
         });
@@ -247,6 +255,7 @@
       const fps = Math.round(parseInt('{{ $process->fps }}', 10) / frameStep);
       const renderHour = totalFrames / 3600 >= 1;
       let currentFrame = 0;
+      let trackIds = [];
 
       function buildProgressBar(times, totalFrames, fps, renderHour, shouldIncreasing = false) {
         let bars = ``;
@@ -256,18 +265,20 @@
           const length = frameTo - frameFrom;
           const transparentLength = frameFrom - currentTime;
 
+          // for shouldIncreasing case, we just render a red slice of the bar
           bars += `
             <div class="progress-bar bg-transparent" role="progressbar"
                  data-toggle="tooltip"
                  style="width: ${transparentLength / totalFrames * 100}%"
                  title="hello"></div>
 
-            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success ${shouldIncreasing ? 'increasing' : ''}" role="progressbar"
+            <div class="progress-bar progress-bar-striped progress-bar-animated ${shouldIncreasing ? 'bg-danger' : 'bg-success'}" role="progressbar"
                  data-toggle="tooltip"
                  data-frame-from="${frameFrom}"
-                 style="width: ${length / totalFrames * 100}%"
+                 style="width: ${shouldIncreasing ? 1 : (length / totalFrames * 100)}%"
                  title="${getTimeString(frameFrom, frameTo, fps, renderHour)}"></div>
             `;
+
           currentTime += frameTo;
         });
 
@@ -296,17 +307,47 @@
 
       function renderBlock(object, appearances, fps, renderHour, shouldIncreasing) {
         return (`
-            <tr data-id="${object.id}">
+            <tr data-track-id="${object.track_id}">
                 <td class="text-center">${object.track_id}</td>
                 <td class="py-1 text-center">
                     <img src="${object.image}" alt="image" style="width: 40px; height: 40px;">
                 </td>
                 <td>${object.name || 'Unknown'}</td>
-                <td>
+                <td class="position-relative">
                     ${buildProgressBar(appearances, totalFrames, fps, renderHour, shouldIncreasing)}
+                    <div class="status-overlay position-absolute">${shouldIncreasing ? 'Đang nhận diện' : ''}</div>
                 </td>
             </tr>
         `);
+      }
+
+      function renderBlockInOrder(html, order, trackIds) {
+        let index;
+
+        if (order !== 0) {
+          index = order - 1;
+        }
+        if (order === 0) {
+          $('.socket-render tbody').prepend(html);
+        } else {
+          const prevTrackId = trackIds[index];
+          const $element = $(`.socket-render tbody tr[data-track-id="${prevTrackId}"]`);
+
+          if ($element.length === 0) {
+            $('.socket-render tbody').append(html);
+          } else {
+            $element.after(html);
+          }
+        }
+      }
+
+      function insertInOrder(element, array) {
+        array.push(element);
+        array.sort(function(a, b) {
+          return a - b;
+        });
+
+        return [array, array.indexOf(element)];
       }
 
       function renderData() {
@@ -314,11 +355,13 @@
           url: `/processes/${processId}/objects`,
           type: 'GET',
           success: function (res) {
-            res.data.forEach((value, index) => {
-              objectIds.push(value.id);
-              $('.socket-render tbody').prepend(
-                // for not appending to last index in the same time
-                renderBlock(value, value.appearances, fps, renderHour, value.appearances[0].frameTo === null)
+            res.data.forEach((value) => {
+              [trackIds, trackIndex] = insertInOrder(value.track_id, trackIds);
+
+              renderBlockInOrder(
+                renderBlock(value, value.appearances, fps, renderHour, value.appearances[0].frameTo === null),
+                trackIndex,
+                trackIds
               );
             });
           },
@@ -328,21 +371,24 @@
       Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectsAppear', (res) => {
         $('.socket__message').remove();
 
-        res.data.forEach((value, index) => {
-          if (objectIds.indexOf(value.id) >= 0) {
-            $(`.socket-render tbody tr[data-id="${value.id}"] td:last-child`).html(
-              buildProgressBar([value], totalFrames, fps, renderHour, false)
-            );
-            // increasing progressbar
-            // update progress bar
+        res.data.forEach((value) => {
+          if (trackIds.indexOf(value.track_id) >= 0) {
+            $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:last-child`).html(`
+              ${buildProgressBar([value], totalFrames, fps, renderHour, false)}
+              <div class="status-overlay position-absolute"></div>
+            `);
           } else {
-            totalObjects += 1;
-            objectIds.push(value.id);
-            $('.socket-render tbody').append(renderBlock(value, [value], fps, renderHour, true));
+            [trackIds, trackIndex] = insertInOrder(value.track_id, trackIds);
+
+            renderBlockInOrder(
+              renderBlock(value, [value], fps, renderHour, true),
+              trackIndex,
+              trackIds
+            );
           }
         });
 
-        $('.process__total-objects').html(totalObjects);
+        $('.process__total-objects').html(trackIds.length);
       });
 
       Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChange', (res) => {
@@ -372,19 +418,6 @@
           setTimeout(() => $element.popover('show'), 400);
         }
       });
-      const intervalId = setInterval(function () {
-        $('.progress-bar.increasing').each((index, element) => {
-          const frameFrom = $(element).data('frame-from');
-          const length = currentFrame - frameFrom;
-
-          if (length > 0) {
-            $(element).css({ width: `${length / totalFrames * 100}%` });
-          }
-        });
-        if (currentFrame > totalFrames) {
-          clearInterval(intervalId);
-        }
-      }, 1000);
 
       $(document).ready(function () {
         renderData();
