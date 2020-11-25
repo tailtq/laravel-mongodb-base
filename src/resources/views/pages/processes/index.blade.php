@@ -65,17 +65,19 @@
                                     <i data-feather="eye"></i>
                                 </a>
 
-                                <form onsubmit="return confirm('Bạn có chắc chắn không?');"
-                                      action="{{ route('processes.delete', $process->id) }}"
-                                      method="POST"
-                                      class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
+                                @if ($process->status !== 'detecting' && $process->status !== 'grouping')
+                                    <form onsubmit="return confirm('Bạn có chắc chắn không?');"
+                                          action="{{ route('processes.delete', $process->id) }}"
+                                          method="POST"
+                                          class="d-inline">
+                                        @csrf
+                                        @method('DELETE')
 
-                                    <button class="btn btn-danger btn-icon">
-                                        <i data-feather="trash"></i>
-                                    </button>
-                                </form>
+                                        <button class="btn btn-danger btn-icon">
+                                            <i data-feather="trash"></i>
+                                        </button>
+                                    </form>
+                                @endif
                             </td>
                         </tr>
                     @endforeach
