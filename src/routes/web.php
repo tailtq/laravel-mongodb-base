@@ -13,11 +13,19 @@
 
 // Application layer
 
+use App\Helpers\UpdateObjectsAppear;
+
 Auth::routes(['register' => false]);
 
 Route::group(['middleware' => ['auth']], function () {
 
     Route::get('/', 'DashboardController@index')->name('dashboard.index');
+
+    // test update object appear
+    Route::get('/test', function (){
+        UpdateObjectsAppear::updateObject('1');
+    });
+
 
     Route::group(['prefix' => 'users'], function () {
         Route::get('/', 'UserController@list')->name('users');
