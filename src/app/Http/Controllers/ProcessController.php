@@ -9,6 +9,7 @@ use App\Models\TrackedObject;
 use App\Traits\RequestAPI;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use PhpParser\Error;
 
 class ProcessController extends Controller
 {
@@ -117,7 +118,7 @@ class ProcessController extends Controller
             config('app.ai_server') . "/processes/$process->mongo_id/start", [], $this->getDefaultHeaders()
         );
         if (!$processData->status) {
-            return $this->error('Đã có lỗi xảy ra', 400);
+            return $this->error($processData->body->message, 400);
         }
         $process->update(['status' => Process::STATUS['detecting']]);
 
@@ -155,7 +156,7 @@ class ProcessController extends Controller
         $objects = TrackedObject::leftJoin('identities', 'objects.id', 'identities.id')
             ->where('process_id', $processId)
             ->select(['objects.id', 'objects.process_id', 'objects.track_id', 'objects.image', 'identities.name', 'identities.images'])
-            ->orderBy('objects.id', 'desc')
+            ->orderBy('objects.track_id')
             ->with('appearances')
             ->get();
 
