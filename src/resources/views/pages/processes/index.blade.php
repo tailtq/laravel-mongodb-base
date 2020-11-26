@@ -159,7 +159,7 @@
                                                    required
                                                    placeholder="Nhập thông số"
                                                    name="detection_scale"
-                                                   value="{{ old('detection_scale', 0.25) }}">
+                                                   value="{{ old('detection_scale', 0.5) }}">
                                         </div>
                                     </div>
 
@@ -183,7 +183,7 @@
                                                    required
                                                    placeholder="Nhập thông số"
                                                    name="frame_step"
-                                                   value="{{ old('frame_step', 2) }}">
+                                                   value="{{ old('frame_step', 1) }}">
                                         </div>
                                     </div>
                                 </div>
