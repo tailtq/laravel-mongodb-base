@@ -6,9 +6,11 @@ use App\Http\Requests\ProcessCreateRequest;
 use App\Models\ObjectAppearance;
 use App\Models\Process;
 use App\Models\TrackedObject;
+use App\Models\User;
 use App\Traits\RequestAPI;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use DB;
 
 class ProcessController extends Controller
 {
@@ -32,20 +34,36 @@ class ProcessController extends Controller
      */
     public function show($id)
     {
-        $process = Process::select('*')
-            ->addSelect([
-                'grouped_count' => TrackedObject::where('process_id', $id)->count(),
-                'identified_count' => TrackedObject::where('process_id', $id)->whereNull('identity_id')->count(),
-                'unidentified_count' => TrackedObject::where('process_id', $id)->whereNotNull('identity_id')->count(),
-            ])
-            ->where('id', $id)
-            ->first();
+        $process = Process::select('*',
+            DB::raw("
+            (SELECT COUNT(objects.process_id) FROM objects
+             WHERE objects.process_id = $id
+             GROUP BY objects.process_id) as grouped_count"),
+            DB::raw("
+            (SELECT COUNT(objects.process_id) FROM objects
+             WHERE objects.process_id = $id 
+             AND objects.identity_id is NULL
+             GROUP BY objects.process_id) as identified_count"),
+            DB::raw("
+            (SELECT COUNT(objects.process_id) FROM objects
+             WHERE objects.process_id = $id 
+             AND objects.identity_id is NOT NULL
+             GROUP BY objects.process_id) as unidentified_count")
+        )->where('id', $id)->first();
+
         if (!$process) {
             abort(404);
         }
+        if ($process->status !== 'done') {
+            $process->grouped_count = 0;
+            $process->identified_count = 0;
+            $process->unidentified_count = 0;
+        }
+
         $processData = $this->sendGETRequest(
             config('app.ai_server') . "/processes/$process->mongo_id", [], $this->getDefaultHeaders()
         );
+
         $process->mongoData = $processData->status ? $processData->body : null;
 
         return view('pages.processes.detail', [
@@ -182,9 +200,13 @@ class ProcessController extends Controller
         } else if ($process->status == Process::STATUS['detecting'] || $process->status == Process::STATUS['grouping']) {
             abort(400);
         }
-        $this->sendDELETERequest(
+
+        $response = $this->sendDELETERequest(
             config('app.ai_server') . "/processes/$process->mongo_id", [], $this->getDefaultHeaders()
         );
+        if (!$response->status) {
+            abort(400, 'Cannot sync AI server');
+        }
         $objectIds = TrackedObject::where('process_id', $id)->pluck('id');
 
         ObjectAppearance::whereIn('object_id', $objectIds)->delete();
@@ -192,5 +214,17 @@ class ProcessController extends Controller
         $process->delete();
 
         return redirect()->route('processes');
+    }
+
+    public function groupObjects($id)
+    {
+        $process = Process::find($id);
+
+        if (!$process) {
+            abort(404);
+        }
+        $response = $this->sendDELETERequest(
+            config('app.ai_server') . "/processes/$process->mongo_id/grouping", [], $this->getDefaultHeaders()
+        );
     }
 }
