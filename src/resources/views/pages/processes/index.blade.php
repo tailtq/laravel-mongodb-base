@@ -197,7 +197,7 @@
                                                    required
                                                    placeholder="Nhập thông số"
                                                    name="max_pitch"
-                                                   value="{{ old('max_pitch', 30) }}">
+                                                   value="{{ old('max_pitch', 90) }}">
                                         </div>
                                     </div>
 
@@ -209,7 +209,7 @@
                                                    required
                                                    placeholder="Nhập thông số"
                                                    name="max_roll"
-                                                   value="{{ old('max_roll', 30) }}">
+                                                   value="{{ old('max_roll', 90) }}">
                                         </div>
                                     </div>
 
@@ -221,7 +221,7 @@
                                                    required
                                                    placeholder="Nhập thông số"
                                                    name="max_yaw"
-                                                   value="{{ old('max_yaw', 30) }}">
+                                                   value="{{ old('max_yaw', 90) }}">
                                         </div>
                                     </div>
                                 </div>
@@ -235,7 +235,7 @@
                                                    required
                                                    placeholder="Nhập thông số"
                                                    name="min_face_size"
-                                                   value="{{ old('min_face_size', 50) }}">
+                                                   value="{{ old('min_face_size', 25) }}">
                                         </div>
                                     </div>
 
