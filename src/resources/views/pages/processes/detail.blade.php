@@ -68,26 +68,17 @@
                             <th>Số lượng đối tượng</th>
                             <td class="process__total-objects" width="80">{{ $process->ungrouped_count }}</td>
                         </tr>
-                    </table>
-
-                    <h5 class="mt-4 mb-2">Cấu hình</h5>
-
-                    <table class="table table-bordered">
                         <tr>
-                            <th>Ngưỡng so sánh sinh trắc</th>
-                            <td width="80">{{ object_get($process->mongoData, 'biometric_threshold', 0) }}%</td>
+                            <th>Số lượng đối tượng đã gom nhóm</th>
+                            <td width="80">{{ $process->grouped_count }}</td>
                         </tr>
                         <tr>
-                            <th>Độ chính xác đầu tối thiểu</th>
-                            <td width="80">{{ object_get($process->mongoData, 'min_head_confidence', 0) }}%</td>
+                            <th>Số lượng đối tượng xác định</th>
+                            <td width="80">{{ $process->identified_count }}</td>
                         </tr>
                         <tr>
-                            <th>Độ chính xác khuôn mặt tối thiểu</th>
-                            <td width="80">{{ object_get($process->mongoData, 'min_face_confidence', 0) }}%</td>
-                        </tr>
-                        <tr>
-                            <th>Độ chính xác thân hình tối thiểu</th>
-                            <td width="80">{{ object_get($process->mongoData, 'min_body_confidence', 0) }}%</td>
+                            <th>Số lượng đối tượng không xác định</th>
+                            <td width="80">{{ $process->unidentified_count }}</td>
                         </tr>
                     </table>
                 </div>

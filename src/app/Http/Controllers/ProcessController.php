@@ -9,7 +9,6 @@ use App\Models\TrackedObject;
 use App\Traits\RequestAPI;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use PhpParser\Error;
 
 class ProcessController extends Controller
 {
@@ -33,7 +32,14 @@ class ProcessController extends Controller
      */
     public function show($id)
     {
-        $process = Process::where('id', $id)->first();
+        $process = Process::select('*')
+            ->addSelect([
+                'grouped_count' => TrackedObject::where('process_id', $id)->count(),
+                'identified_count' => TrackedObject::where('process_id', $id)->whereNull('identity_id')->count(),
+                'unidentified_count' => TrackedObject::where('process_id', $id)->whereNotNull('identity_id')->count(),
+            ])
+            ->where('id', $id)
+            ->first();
         if (!$process) {
             abort(404);
         }
