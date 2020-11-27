@@ -13,11 +13,11 @@ class UpdateObjectsAppear
      */
     public static function updateObject($data)
     {
-        //Response data AI
-        $mongoIds = Arr::collapse(Arr::pluck($data, 'appearances.*.mongo_id'));
+        // Response data AI
+        $mongoIds = Arr::collapse(Arr::pluck($data, 'appearances.*.object_id'));
         $objects = TrackedObject::whereIn('mongo_id', $mongoIds)->select(['id', 'mongo_id'])->get();
 
-        $identityMongoIds = array_filter(Arr::pluck($data, 'mongo_id'), function ($element) {
+        $identityMongoIds = array_filter(Arr::pluck($data, 'identity'), function ($element) {
             return $element != null;
         });
         $identities = Identity::whereIn('mongo_id', $identityMongoIds)->select(['id', 'mongo_id'])->get();
@@ -25,9 +25,9 @@ class UpdateObjectsAppear
         $identityData = [];
 
         foreach ($data as $element) {
-            $appearanceMongoIds = Arr::pluck((array) $element['appearances'], 'mongo_id');
-            $object = $objects->where('mongo_id', $element['mongo_id'])->first();
-            $identity = $identities->where('mongo_id', $element['identity'])->first();
+            $appearanceMongoIds = Arr::pluck((array) $element['appearances'], 'object_id');
+            $object = $objects->where('mongo_id', $element['object_id'])->first();
+            $identity = !empty($element['identity']) ? $identities->where('mongo_id', $element['identity'])->first() : null;
 
             if ($object) {
                 $appearanceIds = $objects->whereIn('mongo_id', $appearanceMongoIds)
@@ -45,7 +45,5 @@ class UpdateObjectsAppear
         }
         TrackedObject::whereIn('id', $deleteIds)->delete();
         DatabaseHelper::updateMultiple($identityData, 'id', 'objects');
-
-        return;
     }
 }
