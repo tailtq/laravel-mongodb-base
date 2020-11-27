@@ -65,6 +65,7 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('/stop-process', 'ProcessController@stopProcess')->name('processes.stop');
 
         Route::get('/{id}/objects', 'ProcessController@getObjects')->name('processes.objects');
+
     });
 
     Route::group(['prefix' => '/medias'], function () {
