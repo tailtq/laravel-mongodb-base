@@ -155,7 +155,7 @@ class ProcessController extends Controller
      */
     public function stopProcess(Request $request)
     {
-        $process = Process::find($request->processId);
+        $process = Process::findOrFail($request->processId);
 
         if (!$process) {
             return $this->error('Không tìm thấy luồng xử lý', 404);
@@ -193,11 +193,9 @@ class ProcessController extends Controller
      */
     public function delete($id)
     {
-        $process = Process::find($id);
+        $process = Process::findOrFail($id);
 
-        if (!$process) {
-            abort(404);
-        } else if ($process->status == Process::STATUS['detecting'] || $process->status == Process::STATUS['grouping']) {
+        if ($process->status == Process::STATUS['detecting'] || $process->status == Process::STATUS['grouping']) {
             abort(400);
         }
 
@@ -216,15 +214,17 @@ class ProcessController extends Controller
         return redirect()->route('processes');
     }
 
-    public function groupObjects($id)
+    /**
+     * @param Request $request
+     */
+    public function groupObjects(Request $request)
     {
-        $process = Process::find($id);
+        $process = Process::findOrFail($request->processId);
 
-        if (!$process) {
-            abort(404);
-        }
-        $response = $this->sendDELETERequest(
+        $response = $this->sendGETRequest(
             config('app.ai_server') . "/processes/$process->mongo_id/grouping", [], $this->getDefaultHeaders()
         );
+
+        return true;
     }
 }
