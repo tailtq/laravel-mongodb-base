@@ -177,9 +177,17 @@ class ProcessController extends Controller
      */
     public function getObjects($processId)
     {
-        $objects = TrackedObject::leftJoin('identities', 'objects.id', 'identities.id')
+        $objects = TrackedObject::leftJoin('identities', 'objects.identity_id', 'identities.id')
             ->where('process_id', $processId)
-            ->select(['objects.id', 'objects.process_id', 'objects.track_id', 'objects.image', 'identities.name', 'identities.images'])
+            ->select([
+                'objects.id',
+                'objects.process_id',
+                'objects.track_id',
+                'objects.identity_id',
+                'objects.image',
+                'identities.name',
+                'identities.images'
+            ])
             ->orderBy('objects.track_id')
             ->with('appearances')
             ->get();
