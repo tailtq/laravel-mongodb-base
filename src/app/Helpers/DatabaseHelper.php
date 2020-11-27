@@ -43,6 +43,7 @@ class DatabaseHelper
                 $value = in_array(gettype($row[$key]), ['string', 'object']) ? "'$row[$key]'" : $row[$key];
                 $value = $value === null ? 'NULL' : $value;
 
+                $condition = is_string($condition) ? "'$condition'" : $condition;
                 $set .= "WHEN $condition THEN $value";
             }
             $set .= ' END';

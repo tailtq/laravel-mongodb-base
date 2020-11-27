@@ -4,12 +4,15 @@ namespace App\Console\Commands;
 
 use App\Events\ProgressChange;
 use App\Models\Process;
+use App\Traits\RequestAPI;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 
 class ListenAIProgress extends Command
 {
+    use RequestAPI;
+
     /**
      * The name and signature of the console command.
      *
@@ -64,6 +67,13 @@ class ListenAIProgress extends Command
 
                     $data['status'] = $process->status;
                 }
+//                if ($process->status === Process::STATUS['detected']) {
+//                    $this->sendPOSTRequest(
+//                        config('app.ai_server') .  "/processes/$process->mongo_id/grouping",
+//                        [],
+//                        $this->getDefaultHeaders()
+//                    );
+//                }
                 broadcast(new ProgressChange($process->id, $data));
             }
         });

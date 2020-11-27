@@ -10,10 +10,12 @@ class Process extends Model
         'ready' => 'ready',
         'stopped' => 'stopped',
         'detecting' => 'detecting',
+        'detected' => 'detected',
         'grouping' => 'grouping',
+        'grouped' => 'grouped',
+        'rendering' => 'rendering',
         'done' => 'done',
         'error' => 'error',
-        'rendering' => 'rendering',
     ];
 
     /**

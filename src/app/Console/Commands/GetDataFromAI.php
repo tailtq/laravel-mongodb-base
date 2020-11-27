@@ -15,10 +15,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 use App\Traits\RequestAPI;
-use App\Traits\ResponseTrait;
+
 class GetDataFromAI extends Command
 {
-    use RequestAPI, ResponseTrait;
+    use RequestAPI;
 
     /**
      * The name and signature of the console command.
@@ -55,6 +55,7 @@ class GetDataFromAI extends Command
         Redis::subscribe('process', function ($objects) {
             $objects = json_decode($objects);
             Log::info($objects);
+
             if (!$objects) {
                 return;
             }
@@ -76,7 +77,6 @@ class GetDataFromAI extends Command
             $objectIds = [];
 
             foreach ($objects as $object) {
-                Log::info($object);
                 // Object begins being tracked
                 if ($object->finished_track === false) {
                     $process = Arr::first($processes, function ($process) use ($object) {
@@ -132,67 +132,92 @@ class GetDataFromAI extends Command
                         ->where('id', $process->id)
                         ->update([
                             'ungrouped_count' => DB::raw("(SELECT COUNT(*) FROM objects WHERE process_id = $process->id)"),
-                    ]);
+                        ]);
                 }
             }
-            $result = DB::table('objects')
-                ->leftJoin('identities', 'objects.identity_id', 'identities.id')
-                ->join('object_appearances', 'objects.id', 'object_appearances.object_id')
-                ->whereIn('objects.id', $objectIds)
-                ->select([
-                    'objects.id',
-                    'objects.process_id',
-                    'objects.track_id',
-                    'objects.image',
-                    'identities.name',
-                    'identities.images',
-                    'object_appearances.frame_from',
-                    'object_appearances.frame_to',
-                ])
-                ->get();
-            $groupedResult = $result->groupBy('process_id');
-            $attrs = [];
-
-            foreach ($groupedResult as $processId => $result) {
-                $attrs[$processId] = $result;
-            }
-            foreach ($attrs as $key => $value) {
-                broadcast(new ObjectsAppear($key, $value));
-            }
-
-            $mappingIdentityIds = [];
-            foreach ($result as $element) {
-                if ($element->frame_to) {
-                    $mappingIdentityIds[] = $element->mongo_id;
-                }
-            }
-
-            $response = $this->sendPOSTRequest(
-                config('app.ai_server') . "/objects/matching", [
-                'ids' => $mappingIdentityIds,
-                ], $this->getDefaultHeaders()
-            );
-
-            if (!$response->status) {
-                return $this->error($response->message, $response->statusCode);
-            }
-
-
-            $data = $response->data;
-
-            $identities = Identity::whereIn('mongo_id', $data);
-            $ids = $identities->pluck('id')->toArray();
-            $objects = TrackedObject::whereIn('mongo_id', $data)->get();
-
-            // goi api --> response --> list identity ids (mongo_id) in order
-            // map mysql mongo_id --> update db
-            // broadcast event
-
-            // description
-            // where not null frame_to --> goi api
-            // get dinh danh cua tung object
-            // unknown --> anh Nguyen
-
+            $result = $this->queryAndBroadcastResult('objects.id', $objectIds);
+            $this->runMatchingOnTrackedObjects($result);
         });
+    }
+
+    public function runMatchingOnTrackedObjects($result)
+    {
+        $mappingIdentityIds = [];
+
+        foreach ($result as $element) {
+            if ($element->frame_to) {
+                $mappingIdentityIds[] = $element->mongo_id;
+            }
+        }
+        if (count($mappingIdentityIds) == 0) {
+            return;
+        }
+
+        $response = $this->sendPOSTRequest(
+            config('app.ai_server') . '/objects/matching',
+            ['ids' => $mappingIdentityIds],
+            $this->getDefaultHeaders()
+        );
+
+        if (!$response->status) {
+            Log::error('Bug matching: ' . json_encode($response));
+            return;
+        }
+        Log::info('Success ' . json_encode($response));
+        $objectMongoIds = array_keys((array) $response->body);
+        $identityMongoIds = array_values((array) $response->body);
+        $updatingData = [];
+
+        $identities = Identity::whereIn('mongo_id', $identityMongoIds)->select(['id', 'mongo_id'])->get();
+
+        foreach ($objectMongoIds as $key => $mongoId) {
+            $identityMongoId = $identityMongoIds[$key];
+
+            $identity = $identities->first(function ($value) use ($identityMongoId) {
+                return $value->mongo_id == $identityMongoId;
+            });
+
+            if ($identity) {
+                $updatingData[] = [
+                    'mongo_id' => $mongoId,
+                    'identity_id' => $identity->id,
+                ];
+            }
+        }
+        if (count($updatingData) > 0) {
+            DatabaseHelper::updateMultiple($updatingData, 'mongo_id', 'objects');
+            $this->queryAndBroadcastResult('objects.mongo_id', Arr::pluck($updatingData, 'mongo_id'));
+        }
+    }
+
+    public function queryAndBroadcastResult($whereInColumn, $whereInValue)
+    {
+        $result = DB::table('objects')
+            ->leftJoin('identities', 'objects.identity_id', 'identities.id')
+            ->join('object_appearances', 'objects.id', 'object_appearances.object_id')
+            ->whereIn($whereInColumn, $whereInValue)
+            ->select([
+                'objects.id',
+                'objects.process_id',
+                'objects.track_id',
+                'objects.mongo_id',
+                'objects.image',
+                'identities.name',
+                'identities.images',
+                'object_appearances.frame_from',
+                'object_appearances.frame_to',
+            ])
+            ->get();
+        $groupedResult = $result->groupBy('process_id');
+        $attrs = [];
+
+        foreach ($groupedResult as $processId => $result) {
+            $attrs[$processId] = $result;
+        }
+        foreach ($attrs as $key => $value) {
+            broadcast(new ObjectsAppear($key, $value));
+        }
+
+        return $result;
     }
 }
