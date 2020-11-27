@@ -108,18 +108,6 @@
           </div>
         </div>
 
-        <p class="mt-4">Matching</p>
-        <div class="progress">
-          <div class="progress-bar progress-bar-striped progress-bar-animated bg-success progress-bar__grouping"
-               role="progressbar"
-               style="width: {{ $groupingPercentage }}%"
-               aria-valuenow="{{ $groupingPercentage }}"
-               aria-valuemin="0"
-               aria-valuemax="100">
-            {{ $groupingPercentage }}%
-          </div>
-        </div>
-
         <p class="mt-4">Nhất thể hoá</p>
         <div class="progress">
           <div class="progress-bar progress-bar-striped progress-bar-animated bg-success progress-bar__grouping"
@@ -130,6 +118,18 @@
                aria-valuemax="100">
             {{ $groupingPercentage }}%
           </div>
+        </div>
+      </div>
+
+      <p class="mt-4">Hiển thị kết quả</p>
+      <div class="progress">
+        <div class="progress-bar progress-bar-striped progress-bar-animated bg-success progress-bar__grouping"
+             role="progressbar"
+             style="width: {{ $groupingPercentage }}%"
+             aria-valuenow="{{ $groupingPercentage }}"
+             aria-valuemin="0"
+             aria-valuemax="100">
+          {{ $groupingPercentage }}%
         </div>
       </div>
 
@@ -400,6 +400,8 @@
               if (trackIds.indexOf(value.track_id) >= 0) {
                   $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:last-child`).html(`
               ${buildProgressBar([value], totalFrames, fps, renderHour, false)}
+
+              ${buildProgressBarRendering([value], totalFrames, fps, renderHour, false)}
               <div class="status-overlay position-absolute"></div>
             `);
               } else {

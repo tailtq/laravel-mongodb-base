@@ -14,6 +14,8 @@
 // Application layer
 
 use App\Helpers\UpdateObjectsAppear;
+use App\Models\Identity;
+use App\Models\TrackedObject;
 
 Auth::routes(['register' => false]);
 
@@ -23,7 +25,23 @@ Route::group(['middleware' => ['auth']], function () {
 
     // test update object appear
     Route::get('/test', function (){
-        UpdateObjectsAppear::updateObject('1');
+
+        $data = json_decode("{
+\"status\": true,
+\"status_code\": 200,
+\"message\": \"OK\",
+\"data\": {
+\"5fbe0e2b5b6dcca842448c07\": \"5fb238e59fd177aec28cf85f\",
+\"5fbf60145b6dcca84248396d\": \"5fb23a33875676d1fa0c2307\"
+}
+}");
+
+        $response = (array)$data->data;
+
+        $identities = Identity::whereIn('mongo_id', $response);
+        $ids = $identities->pluck('id')->toArray();
+        $objects = TrackedObject::whereIn('mongo_id', $response)->get();
+
     });
 
 

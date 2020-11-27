@@ -13,6 +13,7 @@ class Process extends Model
         'grouping' => 'grouping',
         'done' => 'done',
         'error' => 'error',
+        'rendering' => 'rendering',
     ];
 
     /**

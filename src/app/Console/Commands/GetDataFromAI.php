@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Events\ObjectsAppear;
 use App\Helpers\DatabaseHelper;
+use App\Models\Identity;
 use App\Models\ObjectAppearance;
 use App\Models\Process;
 use App\Models\TrackedObject;
@@ -13,9 +14,12 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
-
+use App\Traits\RequestAPI;
+use App\Traits\ResponseTrait;
 class GetDataFromAI extends Command
 {
+    use RequestAPI, ResponseTrait;
+
     /**
      * The name and signature of the console command.
      *
@@ -50,7 +54,7 @@ class GetDataFromAI extends Command
     {
         Redis::subscribe('process', function ($objects) {
             $objects = json_decode($objects);
-
+            Log::info($objects);
             if (!$objects) {
                 return;
             }
@@ -72,6 +76,7 @@ class GetDataFromAI extends Command
             $objectIds = [];
 
             foreach ($objects as $object) {
+                Log::info($object);
                 // Object begins being tracked
                 if ($object->finished_track === false) {
                     $process = Arr::first($processes, function ($process) use ($object) {
@@ -154,6 +159,40 @@ class GetDataFromAI extends Command
             foreach ($attrs as $key => $value) {
                 broadcast(new ObjectsAppear($key, $value));
             }
+
+            $mappingIdentityIds = [];
+            foreach ($result as $element) {
+                if ($element->frame_to) {
+                    $mappingIdentityIds[] = $element->mongo_id;
+                }
+            }
+
+            $response = $this->sendPOSTRequest(
+                config('app.ai_server') . "/objects/matching", [
+                'ids' => $mappingIdentityIds,
+                ], $this->getDefaultHeaders()
+            );
+
+            if (!$response->status) {
+                return $this->error($response->message, $response->statusCode);
+            }
+
+
+            $data = $response->data;
+
+            $identities = Identity::whereIn('mongo_id', $data);
+            $ids = $identities->pluck('id')->toArray();
+            $objects = TrackedObject::whereIn('mongo_id', $data)->get();
+
+            // goi api --> response --> list identity ids (mongo_id) in order
+            // map mysql mongo_id --> update db
+            // broadcast event
+
+            // description
+            // where not null frame_to --> goi api
+            // get dinh danh cua tung object
+            // unknown --> anh Nguyen
+
         });
     }
 }
