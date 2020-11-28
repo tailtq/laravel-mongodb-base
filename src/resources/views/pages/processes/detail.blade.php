@@ -23,7 +23,7 @@
     <nav class="page-breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ route('processes') }}">Luồng xử lý</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Chi tiết</li>
+            <li class="breadcrumb-item active" aria-current="page">{{ $process->name }}</li>
         </ol>
     </nav>
 
@@ -31,7 +31,7 @@
         <div class="card-body">
             <div class="d-flex justify-content-md-between align-items-center mb-3">
                 <h5 class="card-title">
-                    Luồng xử lý chi tiết &nbsp;
+                    {{ $process->name }}
                     <span class="
                         badge
                         @if($process->status == 'error' || $process->status == 'stopped')
