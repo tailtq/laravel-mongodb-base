@@ -65,7 +65,7 @@
                                     <i data-feather="eye"></i>
                                 </a>
 
-                                @if ($process->status !== 'detecting' && $process->status !== 'grouping')
+                                @if ($process->status !== 'detecting')
                                     <form onsubmit="return confirm('Bạn có chắc chắn không?');"
                                           action="{{ route('processes.delete', $process->id) }}"
                                           method="POST"

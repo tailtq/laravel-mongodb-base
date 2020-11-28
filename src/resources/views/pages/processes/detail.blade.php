@@ -40,6 +40,7 @@
                             badge-success
                         @endif
                         text-uppercase
+                        process__status
                     ">
                         {{ __('status.' . $process->status, [], 'vi') }}
                     </span>
@@ -55,7 +56,7 @@
                     </button>
 
                     <button type="button"
-                            @if($process->status != 'detecting' && $process->status != 'grouping')
+                            @if($process->status != 'detecting')
                             disabled
                             @endif
                             class="btn btn-danger btn-stop">
@@ -81,21 +82,27 @@
                     <table class="table table-bordered">
                         <tr>
                             <th>Số lượng đối tượng</th>
-                            <td class="process__total-objects" width="80">{{ $process->ungrouped_count }}</td>
+                            <td class="process__ungrouped-count" width="80">{{ $process->ungrouped_count }}</td>
                         </tr>
                         <tr>
-                            <th>Số lượng đối tượng đã gom nhóm</th>
-                            <td width="80">{{ $process->grouped_count }}</td>
+                            <th>Số lượng sau khi nhất thể hoá</th>
+                            <td class="process__grouped-count" width="80">{{ $process->grouped_count }}</td>
                         </tr>
                         <tr>
-                            <th>Số lượng đối tượng xác định</th>
-                            <td width="80">{{ $process->identified_count }}</td>
+                            <th>Số lượng được xác định</th>
+                            <td class="process__identified-count" width="80">{{ $process->identified_count }}</td>
                         </tr>
                         <tr>
-                            <th>Số lượng đối tượng không xác định</th>
-                            <td width="80">{{ $process->unidentified_count }}</td>
+                            <th>Số lượng không thể xác định</th>
+                            <td class="process__unidentified-count" width="80">{{ $process->unidentified_count }}</td>
                         </tr>
                     </table>
+
+                    <div class="video-rendering__btn mt-2 text-right">
+                        @if ($process->video_result)
+                            <a class="btn btn-primary" target="_blank" href="{{ $process->video_result }}">Video tái hiện</a>
+                        @endif
+                    </div>
                 </div>
             </div>
 
@@ -179,18 +186,18 @@
 @push('custom-scripts')
     <script src="{{ asset('assets/js/custom.js') }}"></script>
     <script>
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000,
+        });
+
         const processId = '{{ $process->id }}';
         const allStatus = <?= json_encode(__('status', [], 'vi'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
 
         // function for alert message when click action play, stop
         function processMessage(type) {
-            const Toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 2000,
-            });
-
             if (type === 'start') {
                 Toast.fire({
                     type: 'success',
@@ -224,12 +231,6 @@
                     processMessage(type);
                 },
                 error: function ({responseJSON: res}) {
-                    const Toast = Swal.mixin({
-                        toast: true,
-                        position: 'top-end',
-                        showConfirmButton: false,
-                        timer: 2000,
-                    });
                     Toast.fire({
                         type: 'error',
                         title: res.message
@@ -394,46 +395,58 @@
                 }
             });
 
-            $('.process__total-objects').html(trackIds.length);
+            $('.process__ungrouped-count').html(trackIds.length);
         });
 
         Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChange', (res) => {
-            const {status, progress, total, frame_index: frameIndex} = res.data;
-            const $detecting = $('.progress-bar__detecting');
+            const {
+                status,
+                progress,
+                total,
+                video_result: videoResult,
+                frame_index: frameIndex,
+            } = res.data;
 
             if (!isNaN(frameIndex)) {
                 currentFrame = frameIndex;
             }
-
+            console.log('status', status);
             if (allStatus[status]) {
-                $('.process__status').text(allStatus[status]);
-            }
+                const $processStatus = $('.process__status');
+                $processStatus.text(allStatus[status]);
 
-            if (status === 'grouping' && parseFloat($detecting.attr('aria-valuenow')) === 0) {
-                $detecting.css({width: '100%'});
-                $detecting.attr('aria-valuenow', '100');
-                $detecting.text('100%');
-
-                setTimeout(() => $detecting.popover('show'), 400);
+                if (status === 'error' || status === 'stopped') {
+                    $processStatus.removeClass('badge-success').addClass('badge-error');
+                }
             }
-            if (status === 'detecting' || status === 'rendering') {
+            if (status === 'done' && videoResult) {
+                Toast.fire({
+                    type: 'success',
+                    title: 'Tiến trình đã hoàn thành',
+                });
+
+                $('.video-rendering__btn').html(`
+                    <a class="btn btn-primary" target="_blank" href="${videoResult}">Video tái hiện</a>
+                `);
+            } else if (status === 'detecting' || status === 'rendering') {
                 const $element = $(`.progress-bar__${status}`);
 
                 $element.css({width: `${progress}%`});
                 $element.attr('aria-valuenow', progress);
                 $element.text(`${progress}%`);
-
-                setTimeout(() => $element.popover('show'), 400);
-            }
-            if (status === 'matching') {
+            } else if (status === 'matching') {
                 const $element = $(`.progress-bar__${status}`);
                 const percentage = trackIds.length > 0 ? total / trackIds.length * 100 : 0;
 
                 $element.css({width: `${percentage}%`});
                 $element.attr('aria-valuenow', progress);
                 $element.text(`${parseInt(percentage, 10)}%`);
-            }
-            if (status === 'grouped') {
+            } else if (status === 'grouped') {
+                Toast.fire({
+                    type: 'success',
+                    title: 'Nhất thể hoá thành công',
+                });
+
                 $.ajax({
                     url: `/processes/${processId}/objects`,
                     type: 'GET',
@@ -450,8 +463,11 @@
                                 }
                             });
                         });
+                        $('.process__grouped-count').html(res.data.length);
+                        $('.process__identified-count').html(res.data.filter(e => !!e.identity_id).length);
+                        $('.process__unidentified-count').html(res.data.filter(e => !e.identity_id).length);
                     },
-                })
+                });
             }
         });
 
