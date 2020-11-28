@@ -58,8 +58,9 @@ class ListenAIProgress extends Command
                     'progress' => $event->progress ?? 0,
                     'frame_index' => $event->frame_index ?? null,
                 ];
-                if (!empty($event->stream_url)) {
-                    $process->video_result = $event->stream_url;
+                if (!empty($event->video_url)) {
+                    $process->video_result = $event->video_url;
+                    $data['video_result'] = $process->video_result;
                 }
                 if ($process->status != $event->status) {
                     $process->status = $event->status;
@@ -67,15 +68,19 @@ class ListenAIProgress extends Command
 
                     $data['status'] = $process->status;
                 }
-//                if ($process->status === Process::STATUS['detected']) {
-//                    $this->sendPOSTRequest(
-//                        config('app.ai_server') .  "/processes/$process->mongo_id/grouping",
-//                        [],
-//                        $this->getDefaultHeaders()
-//                    );
-//                }
+                if ($process->status === Process::STATUS['grouped']) {
+                    $this->renderData($process);
+                }
                 broadcast(new ProgressChange($process->id, $data));
             }
         });
+    }
+
+    public function renderData($process)
+    {
+        $url = config('app.ai_server') .  "/processes/$process->mongo_id/rendering";
+        $response = $this->sendGETRequest($url, [], $this->getDefaultHeaders());
+
+        Log::info("Rendering result $process->id: " . json_encode($response));
     }
 }
