@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Events\ObjectsAppear;
+use App\Events\ProgressChange;
 use App\Helpers\DatabaseHelper;
 use App\Models\Identity;
 use App\Models\ObjectAppearance;
@@ -160,10 +161,12 @@ class GetDataFromAI extends Command
     public function runMatchingOnTrackedObjects($result)
     {
         $mappingIdentityIds = [];
+        $processIds = [];
 
         foreach ($result as $element) {
             if ($element->frame_to) {
                 $mappingIdentityIds[] = $element->mongo_id;
+                $processIds[] = $element->process_id;
             }
         }
         if (count($mappingIdentityIds) == 0) {
@@ -204,6 +207,17 @@ class GetDataFromAI extends Command
         }
         DatabaseHelper::updateMultiple($updatingData, 'mongo_id', 'objects');
         $this->queryAndBroadcastResult('objects.mongo_id', $matchedIdentityMongoIds);
+
+        foreach ($processIds as $processId) {
+            broadcast(new ProgressChange($processId, [
+                'id' => $processId,
+                'status' => 'matching',
+                'total' => DB::table('objects')->where([
+                    'process_id' => $processId,
+                    'matching_status' => TrackedObject::MATCHING_STATUS['identified']
+                ])->count(),
+            ]));
+        }
     }
 
     public function queryAndBroadcastResult($whereInColumn, $whereInValue)
@@ -250,7 +264,7 @@ class GetDataFromAI extends Command
         }
     }
 
-    public static function updateObject($data)
+    public function updateObject($data)
     {
         // Response data AI
         $mongoIds = Arr::collapse(Arr::pluck($data, 'appearances.*.mongo_id'));

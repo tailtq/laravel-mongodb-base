@@ -32,8 +32,17 @@
             <div class="d-flex justify-content-md-between align-items-center mb-3">
                 <h5 class="card-title">
                     Luồng xử lý chi tiết &nbsp;
-                    <span
-                            class="badge badge-success text-uppercase process__status">{{ __('status.' . $process->status, [], 'vi') }}</span>
+                    <span class="
+                        badge
+                        @if($process->status == 'error' || $process->status == 'stopped')
+                            badge-danger
+                        @else
+                            badge-success
+                        @endif
+                        text-uppercase
+                    ">
+                        {{ __('status.' . $process->status, [], 'vi') }}
+                    </span>
                 </h5>
                 <div style="display: inline-block">
                     <button type="button"
@@ -93,13 +102,7 @@
             <div class="process__progress-bar mt-4">
                 <h5 class="mb-2">Tiến trình thực hiện</h5>
 
-                @php
-                    $detectingPercentage = 0;
-                    $groupingPercentage = 0;
-                @endphp
-                @if ($process->status == 'done')
-                    @php $detectingPercentage = 100; @endphp
-                @endif
+
 
                 <p>Nhận diện đối tượng</p>
                 <div class="progress">
@@ -113,28 +116,28 @@
                     </div>
                 </div>
 
-                <p class="mt-4">Nhất thể hoá</p>
+                <p class="mt-4">Kiểm tra định danh</p>
                 <div class="progress">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-success progress-bar__grouping"
+                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-success progress-bar__matching"
                          role="progressbar"
-                         style="width: {{ $groupingPercentage }}%"
-                         aria-valuenow="{{ $groupingPercentage }}"
+                         style="width: {{ $matchingPercentage }}%"
+                         aria-valuenow="{{ $matchingPercentage }}"
                          aria-valuemin="0"
                          aria-valuemax="100">
-                        {{ $groupingPercentage }}%
+                        {{ $matchingPercentage }}%
                     </div>
                 </div>
             </div>
 
-            <p class="mt-4">Hiển thị kết quả</p>
+            <p class="mt-4">Tổng hợp video</p>
             <div class="progress">
-                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success progress-bar__grouping"
+                <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning progress-bar__rendering"
                      role="progressbar"
-                     style="width: {{ $groupingPercentage }}%"
-                     aria-valuenow="{{ $groupingPercentage }}"
+                     style="width: {{ $renderingPercentage }}%"
+                     aria-valuenow="{{ $renderingPercentage }}"
                      aria-valuemin="0"
                      aria-valuemax="100">
-                    {{ $groupingPercentage }}%
+                    {{ $renderingPercentage }}%
                 </div>
             </div>
 
@@ -261,17 +264,17 @@
 
                 // for shouldIncreasing case, we just render a red slice of the bar
                 bars += `
-            <div class="progress-bar bg-transparent" role="progressbar"
-                 data-toggle="tooltip"
-                 style="width: ${transparentLength / totalFrames * 100}%"
-                 title="hello"></div>
+                    <div class="progress-bar bg-transparent" role="progressbar"
+                         data-toggle="tooltip"
+                         style="width: ${transparentLength / totalFrames * 100}%"
+                         title="hello"></div>
 
-            <div class="progress-bar progress-bar-striped progress-bar-animated ${shouldIncreasing ? 'bg-danger' : 'bg-success'}" role="progressbar"
-                 data-toggle="tooltip"
-                 data-frame-from="${frameFrom}"
-                 style="width: ${shouldIncreasing ? 1 : (length / totalFrames * 100)}%"
-                 title="${getTimeString(frameFrom, frameTo, fps, renderHour)}"></div>
-            `;
+                    <div class="progress-bar progress-bar-striped progress-bar-animated ${shouldIncreasing ? 'bg-danger' : 'bg-success'}" role="progressbar"
+                         data-toggle="tooltip"
+                         data-frame-from="${frameFrom}"
+                         style="width: ${shouldIncreasing ? 1 : (length / totalFrames * 100)}%"
+                         title="${getTimeString(frameFrom, frameTo, fps, renderHour)}"></div>
+                    `;
 
                 currentTime += frameTo;
             });
@@ -395,14 +398,16 @@
         });
 
         Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChange', (res) => {
-            const {status, progress, frame_index: frameIndex} = res.data;
+            const {status, progress, total, frame_index: frameIndex} = res.data;
             const $detecting = $('.progress-bar__detecting');
 
             if (!isNaN(frameIndex)) {
                 currentFrame = frameIndex;
             }
 
-            $('.process__status').text(allStatus[status]);
+            if (allStatus[status]) {
+                $('.process__status').text(allStatus[status]);
+            }
 
             if (status === 'grouping' && parseFloat($detecting.attr('aria-valuenow')) === 0) {
                 $detecting.css({width: '100%'});
@@ -411,7 +416,7 @@
 
                 setTimeout(() => $detecting.popover('show'), 400);
             }
-            if (status === 'detecting' || status === 'grouping') {
+            if (status === 'detecting' || status === 'rendering') {
                 const $element = $(`.progress-bar__${status}`);
 
                 $element.css({width: `${progress}%`});
@@ -419,6 +424,14 @@
                 $element.text(`${progress}%`);
 
                 setTimeout(() => $element.popover('show'), 400);
+            }
+            if (status === 'matching') {
+                const $element = $(`.progress-bar__${status}`);
+                const percentage = trackIds.length > 0 ? total / trackIds.length * 100 : 0;
+
+                $element.css({width: `${percentage}%`});
+                $element.attr('aria-valuenow', progress);
+                $element.text(`${parseInt(percentage, 10)}%`);
             }
             if (status === 'grouped') {
                 $.ajax({
@@ -433,7 +446,7 @@
 
                             value.appearances.forEach((appearance) => {
                                 if (appearance.object_id !== appearance.old_object_id) {
-                                    $(`.socket-render tbody tr[data-id="${appearance.old_object_id}"]`).fadeOut(1000);
+                                    $(`.socket-render tbody tr[data-id="${appearance.old_object_id}"]`).fadeOut(3000);
                                 }
                             });
                         });

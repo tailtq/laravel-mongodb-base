@@ -6,7 +6,6 @@ use App\Http\Requests\ProcessCreateRequest;
 use App\Models\ObjectAppearance;
 use App\Models\Process;
 use App\Models\TrackedObject;
-use App\Models\User;
 use App\Traits\RequestAPI;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -36,28 +35,25 @@ class ProcessController extends Controller
     {
         $process = Process::select('*',
             DB::raw("
-            (SELECT COUNT(objects.process_id) FROM objects
-             WHERE objects.process_id = $id
-             GROUP BY objects.process_id) as grouped_count"),
+                (SELECT COUNT(*) FROM objects
+                 WHERE objects.process_id = $id) as grouped_count"),
             DB::raw("
-            (SELECT COUNT(objects.process_id) FROM objects
-             WHERE objects.process_id = $id 
-             AND objects.identity_id is NULL
-             GROUP BY objects.process_id) as identified_count"),
+                (SELECT COUNT(objects.process_id) FROM objects
+                 WHERE objects.process_id = $id 
+                 AND objects.identity_id is not NULL
+                 AND objects.matching_status = '" . TrackedObject::MATCHING_STATUS['identified'] . "') as identified_count"),
             DB::raw("
-            (SELECT COUNT(objects.process_id) FROM objects
-             WHERE objects.process_id = $id 
-             AND objects.identity_id is NOT NULL
-             GROUP BY objects.process_id) as unidentified_count")
+                (SELECT COUNT(objects.process_id) FROM objects
+                 WHERE objects.process_id = $id 
+                 AND objects.identity_id is NULL
+                 AND objects.matching_status = '" . TrackedObject::MATCHING_STATUS['identified'] . "') as unidentified_count")
         )->where('id', $id)->first();
 
         if (!$process) {
             abort(404);
         }
-        if ($process->status !== 'done') {
+        if (!in_array($process->status, ['done', 'grouped', 'rendering'])) {
             $process->grouped_count = 0;
-            $process->identified_count = 0;
-            $process->unidentified_count = 0;
         }
 
         $processData = $this->sendGETRequest(
@@ -66,9 +62,9 @@ class ProcessController extends Controller
 
         $process->mongoData = $processData->status ? $processData->body : null;
 
-        return view('pages.processes.detail', [
+        return view('pages.processes.detail', array_merge([
             'process' => $process,
-        ]);
+        ], $this->getProgressing($process->status)));
     }
 
     /**
@@ -223,16 +219,30 @@ class ProcessController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param $status
+     * @return array
      */
-    public function groupObjects(Request $request)
+    public function getProgressing($status)
     {
-        $process = Process::findOrFail($request->processId);
+        $detectingPercentage = 0;
+        $matchingPercentage = 0;
+        $renderingPercentage = 0;
 
-        $response = $this->sendGETRequest(
-            config('app.ai_server') . "/processes/$process->mongo_id/grouping", [], $this->getDefaultHeaders()
-        );
+        if ($status === 'done') {
+            $detectingPercentage = 100;
+            $matchingPercentage = 100;
+            $renderingPercentage = 100;
+        } else if ($status === 'grouped' || $status === 'rendering') {
+            $detectingPercentage = 100;
+            $matchingPercentage = 100;
+        } else if ($status === 'detected') {
+            $detectingPercentage = 100;
+        }
 
-        return true;
+        return [
+            'detectingPercentage' => $detectingPercentage,
+            'matchingPercentage' => $matchingPercentage,
+            'renderingPercentage' => $renderingPercentage,
+        ];
     }
 }
