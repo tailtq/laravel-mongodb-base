@@ -14,6 +14,11 @@ class TrackedObject extends Model
         'image',
     ];
 
+    const MATCHING_STATUS = [
+        'ready' => 'ready',
+        'identified' => 'identified',
+    ];
+
     protected $table = 'objects';
 
     public function appearances()

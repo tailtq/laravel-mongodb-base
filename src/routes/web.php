@@ -16,6 +16,7 @@
 use App\Helpers\UpdateObjectsAppear;
 use App\Models\Identity;
 use App\Models\TrackedObject;
+use Illuminate\Support\Facades\DB;
 
 Auth::routes(['register' => false]);
 
@@ -24,23 +25,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/', 'DashboardController@index')->name('dashboard.index');
 
     // test update object appear
-    Route::get('/test', function (){
-
-        $data = json_decode("{
-\"status\": true,
-\"status_code\": 200,
-\"message\": \"OK\",
-\"data\": {
-\"5fbe0e2b5b6dcca842448c07\": \"5fb238e59fd177aec28cf85f\",
-\"5fbf60145b6dcca84248396d\": \"5fb23a33875676d1fa0c2307\"
-}
-}");
-
-        $response = (array)$data->data;
-
-        $identities = Identity::whereIn('mongo_id', $response);
-        $ids = $identities->pluck('id')->toArray();
-        $objects = TrackedObject::whereIn('mongo_id', $response)->get();
+    Route::get('/test', function () {
 
     });
 
@@ -182,6 +167,6 @@ Route::group(['middleware' => ['auth']], function () {
 //});
 
 // 404 for undefined routes
-Route::any('/{page?}',function(){
+Route::any('/{page?}', function () {
     return View::make('pages.template.error.404');
-})->where('page','.*');
+})->where('page', '.*');

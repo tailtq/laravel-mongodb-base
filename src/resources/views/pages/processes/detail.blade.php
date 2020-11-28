@@ -179,27 +179,6 @@
         const processId = '{{ $process->id }}';
         const allStatus = <?= json_encode(__('status', [], 'vi'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
 
-        // let timerID = setInterval(function () {
-        //     $.ajax({
-        //         url: `/processes/group`,
-        //         type: 'POST',
-        //         dataType: 'json',
-        //         contentType: 'application/json; charset=UTF-8',
-        //         data: JSON.stringify({
-        //             _token: $('meta[name="_token"]').attr('content'),
-        //             processId: processId
-        //         }),
-        //         success: function (res) {
-        //             console.log(res);
-        //             // handle view
-        //         },
-        //         error: function ({responseJSON: res}) {
-        //             console.log(res);
-        //             // handle view
-        //         }
-        //     });
-        // }, 1000);
-
         // function for alert message when click action play, stop
         function processMessage(type) {
             const Toast = Swal.mixin({
@@ -322,24 +301,24 @@
 
         function renderBlock(object, appearances, fps, renderHour, shouldIncreasing) {
             return (`
-            <tr data-track-id="${object.track_id}">
-                <td class="text-center">${object.track_id}</td>
-                <td class="py-1 text-center">
-                    <img src="${object.image}" alt="image" style="width: 40px; height: 40px;">
-                </td>
-                <td>${object.name || 'Unknown'}</td>
-                <td class="position-relative">
-                    ${buildProgressBar(appearances, totalFrames, fps, renderHour, shouldIncreasing)}
-                    <div class="status-overlay position-absolute ${shouldIncreasing ? 'increasing' : ''}">
-                        ${shouldIncreasing ? 'Đang nhận diện' : ''}
-                    </div>
-                </td>
-            </tr>
-        `);
+                <tr data-track-id="${object.track_id}" data-id="${object.id}">
+                    <td class="text-center">${object.track_id}</td>
+                    <td class="py-1 text-center">
+                        <img src="${object.image}" alt="image" style="width: 40px; height: 40px;">
+                    </td>
+                    <td>${object.name || 'Unknown'}</td>
+                    <td class="position-relative">
+                        ${buildProgressBar(appearances, totalFrames, fps, renderHour, shouldIncreasing)}
+                        <div class="status-overlay position-absolute ${shouldIncreasing ? 'increasing' : ''}">
+                            ${shouldIncreasing ? 'Đang nhận diện' : ''}
+                        </div>
+                    </td>
+                </tr>
+            `);
         }
 
         function renderBlockInOrder(html, order, trackIds) {
-          let index;
+            let index;
 
             if (order !== 0) {
                 index = order - 1;
@@ -372,6 +351,10 @@
                 url: `/processes/${processId}/objects`,
                 type: 'GET',
                 success: function (res) {
+                    if (res.data.length > 0) {
+                        $('.socket__message').remove();
+                    }
+
                     res.data.forEach((value) => {
                         [trackIds, trackIndex] = insertInOrder(value.track_id, trackIds);
 
@@ -382,12 +365,11 @@
                         );
                     });
                 },
-            })
+            });
         }
 
         Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectsAppear', (res) => {
             $('.socket__message').remove();
-            console.log(res.data);
 
             res.data.forEach((value) => {
                 if (trackIds.indexOf(value.track_id) >= 0) {
@@ -437,6 +419,26 @@
                 $element.text(`${progress}%`);
 
                 setTimeout(() => $element.popover('show'), 400);
+            }
+            if (status === 'grouped') {
+                $.ajax({
+                    url: `/processes/${processId}/objects`,
+                    type: 'GET',
+                    success: function (res) {
+                        res.data.forEach((value) => {
+                            $(`.socket-render tbody tr[data-id="${value.id}"] td:last-child`).html(`
+                                ${buildProgressBar(value.appearances, totalFrames, fps, renderHour, false)}
+                                <div class="status-overlay position-absolute"></div>
+                            `);
+
+                            value.appearances.forEach((appearance) => {
+                                if (appearance.object_id !== appearance.old_object_id) {
+                                    $(`.socket-render tbody tr[data-id="${appearance.old_object_id}"]`).fadeOut(1000);
+                                }
+                            });
+                        });
+                    },
+                })
             }
         });
 

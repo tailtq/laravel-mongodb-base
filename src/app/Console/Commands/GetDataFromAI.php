@@ -53,8 +53,8 @@ class GetDataFromAI extends Command
     public function handle()
     {
         Redis::subscribe('process', function ($objects) {
-            $objects = json_decode($objects);
             Log::info($objects);
+            $objects = json_decode($objects);
 
             if (!$objects) {
                 return;
@@ -90,6 +90,7 @@ class GetDataFromAI extends Command
                             'image' => $object->image,
                         ]);
                         array_push($insertingAppearances, [
+                            'old_object_id' => $trackedObject->id,
                             'object_id' => $trackedObject->id,
                             'frame_from' => $object->frame_from,
                             'time_from' => object_get($object, 'time_from'),
@@ -102,9 +103,7 @@ class GetDataFromAI extends Command
                     $track = Arr::first($tracks, function ($track) use ($object) {
                         return $track->process_id === $object->process_id;
                     });
-
                     if ($track) {
-                        //
                         array_push($updatingObjects, [
                             'id' => $track->id,
                             'mongo_id' => $object->mongo_id,
@@ -137,9 +136,27 @@ class GetDataFromAI extends Command
             }
             $result = $this->queryAndBroadcastResult('objects.id', $objectIds);
             $this->runMatchingOnTrackedObjects($result);
+
+            foreach ($processes as $process) {
+                if ($process->status != Process::STATUS['detected']) {
+                    continue;
+                }
+
+                $process = DB::table('processes')
+                    ->where('id', $process->id)
+                    ->select(['id', 'mongo_id', 'ungrouped_count'])
+                    ->addSelect(DB::raw("(SELECT COUNT(*) FROM objects WHERE process_id = $process->id and matching_status = '" . TrackedObject::MATCHING_STATUS['identified'] . "') as identified_count"))
+                    ->first();
+                Log::info("Detected with ungrouped count: $process->ungrouped_count, identified count: $process->identified_count");
+
+                if ($process->ungrouped_count == $process->identified_count) {
+                    $this->groupData($process);
+                }
+            }
         });
     }
 
+    // match identity handler
     public function runMatchingOnTrackedObjects($result)
     {
         $mappingIdentityIds = [];
@@ -160,13 +177,12 @@ class GetDataFromAI extends Command
         );
 
         if (!$response->status) {
-            Log::error('Bug matching: ' . json_encode($response));
             return;
         }
-        Log::info('Success ' . json_encode($response));
         $objectMongoIds = array_keys((array) $response->body);
         $identityMongoIds = array_values((array) $response->body);
         $updatingData = [];
+        $matchedIdentityMongoIds = [];
 
         $identities = Identity::whereIn('mongo_id', $identityMongoIds)->select(['id', 'mongo_id'])->get();
 
@@ -176,18 +192,18 @@ class GetDataFromAI extends Command
             $identity = $identities->first(function ($value) use ($identityMongoId) {
                 return $value->mongo_id == $identityMongoId;
             });
+            $updatingData[] = [
+                'mongo_id' => $mongoId,
+                'identity_id' => $identity->id ?? null,
+                'matching_status' => TrackedObject::MATCHING_STATUS['identified'],
+            ];
 
             if ($identity) {
-                $updatingData[] = [
-                    'mongo_id' => $mongoId,
-                    'identity_id' => $identity->id,
-                ];
+                $matchedIdentityMongoIds[] = $mongoId;
             }
         }
-        if (count($updatingData) > 0) {
-            DatabaseHelper::updateMultiple($updatingData, 'mongo_id', 'objects');
-            $this->queryAndBroadcastResult('objects.mongo_id', Arr::pluck($updatingData, 'mongo_id'));
-        }
+        DatabaseHelper::updateMultiple($updatingData, 'mongo_id', 'objects');
+        $this->queryAndBroadcastResult('objects.mongo_id', $matchedIdentityMongoIds);
     }
 
     public function queryAndBroadcastResult($whereInColumn, $whereInValue)
@@ -219,5 +235,54 @@ class GetDataFromAI extends Command
         }
 
         return $result;
+    }
+
+    // group data handler
+    public function groupData($process)
+    {
+        $url = config('app.ai_server') . "/processes/$process->mongo_id/grouping2";
+        $response = $this->sendPOSTRequest($url, [], $this->getDefaultHeaders());
+        Log::info("Grouping $process->id response " . json_encode($response));
+
+        if ($response->status) {
+            $data = json_decode(json_encode($response->body), true);
+            $this->updateObject($data);
+        }
+    }
+
+    public static function updateObject($data)
+    {
+        // Response data AI
+        $mongoIds = Arr::collapse(Arr::pluck($data, 'appearances.*.mongo_id'));
+        $objects = TrackedObject::whereIn('mongo_id', $mongoIds)->select(['id', 'mongo_id'])->get();
+
+        $identityMongoIds = array_filter(Arr::pluck($data, 'identity'), function ($element) {
+            return $element != null;
+        });
+        $identities = Identity::whereIn('mongo_id', $identityMongoIds)->select(['id', 'mongo_id'])->get();
+        $deleteIds = [];
+        $identityData = [];
+
+        foreach ($data as $element) {
+            $appearanceMongoIds = Arr::pluck($element['appearances'], 'mongo_id');
+            $object = $objects->where('mongo_id', $element['mongo_id'])->first();
+            $identity = !empty($element['identity']) ? $identities->where('mongo_id', $element['identity'])->first() : null;
+
+            if ($object) {
+                $appearanceIds = $objects->whereIn('mongo_id', $appearanceMongoIds)
+                    ->where('mongo_id', '!=', $object->mongo_id)
+                    ->pluck('id')
+                    ->all();
+                ObjectAppearance::whereIn('object_id', $appearanceIds)->update(['object_id' => $object->id]);
+
+                $identityData[] = [
+                    'id' => $object->id,
+                    'identity_id' => $identity->id ?? null
+                ];
+                $deleteIds = array_merge($deleteIds, $appearanceIds);
+            }
+        }
+        TrackedObject::whereIn('id', $deleteIds)->delete();
+        DatabaseHelper::updateMultiple($identityData, 'id', 'objects');
     }
 }

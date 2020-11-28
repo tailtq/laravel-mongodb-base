@@ -44,7 +44,7 @@ class DatabaseHelper
                 $value = $value === null ? 'NULL' : $value;
 
                 $condition = is_string($condition) ? "'$condition'" : $condition;
-                $set .= "WHEN $condition THEN $value";
+                $set .= "WHEN $condition THEN $value ";
             }
             $set .= ' END';
             $sets[] = $set;
