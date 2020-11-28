@@ -3,11 +3,10 @@
 return [
     'ready' => 'Sẵn sàng',
     'stopped' => 'Đã dừng',
-    'detecting' => 'Đang tìm kiếm',
+    'detecting' => 'Tìm kiếm',
     'detected' => 'Tìm kiếm thành công',
-    'grouping' => 'Đang gom nhóm',
-    'grouped' => 'Gom nhóm thành công',
-    'rendering' => 'Đang tổng hợp dữ liệu',
+    'grouped' => 'Đã nhất thể hoá',
+    'rendering' => 'Tổng hợp dữ liệu',
     'done' => 'Hoàn thành',
     'error' => 'Lỗi',
 ];
