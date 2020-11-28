@@ -54,6 +54,8 @@ class ProcessController extends Controller
         }
         if (!in_array($process->status, ['done', 'grouped', 'rendering'])) {
             $process->grouped_count = 0;
+            $process->identified_count = 0;
+            $process->unidentified_count = 0;
         }
 
         $processData = $this->sendGETRequest(
@@ -199,7 +201,7 @@ class ProcessController extends Controller
     {
         $process = Process::findOrFail($id);
 
-        if ($process->status == Process::STATUS['detecting'] || $process->status == Process::STATUS['grouping']) {
+        if ($process->status == Process::STATUS['detecting']) {
             abort(400);
         }
 
