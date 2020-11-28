@@ -127,7 +127,7 @@ class GetDataFromAI extends Command
                 DatabaseHelper::updateMultiple($updatingAppearances, 'object_id', 'object_appearances');
             }
             foreach ($processes as $process) {
-                if ($process->status === Process::STATUS['detecting']) {
+                if (in_array($process->status, [Process::STATUS['detecting'], Process::STATUS['detected']])) {
                     DB::table('processes')
                         ->where('id', $process->id)
                         ->update([
@@ -182,15 +182,15 @@ class GetDataFromAI extends Command
         if (!$response->status) {
             return;
         }
-        $objectMongoIds = array_keys((array) $response->body);
+        $body = (array) $response->body;
         $identityMongoIds = array_values((array) $response->body);
         $updatingData = [];
         $matchedIdentityMongoIds = [];
 
         $identities = Identity::whereIn('mongo_id', $identityMongoIds)->select(['id', 'mongo_id'])->get();
 
-        foreach ($objectMongoIds as $key => $mongoId) {
-            $identityMongoId = $identityMongoIds[$key];
+        foreach ($mappingIdentityIds as $key => $mongoId) {
+            $identityMongoId = $body[$mongoId] ?? null;
 
             $identity = $identities->first(function ($value) use ($identityMongoId) {
                 return $value->mongo_id == $identityMongoId;
@@ -206,8 +206,10 @@ class GetDataFromAI extends Command
             }
         }
         DatabaseHelper::updateMultiple($updatingData, 'mongo_id', 'objects');
-        $this->queryAndBroadcastResult('objects.mongo_id', $matchedIdentityMongoIds);
 
+        if (count($matchedIdentityMongoIds) > 0) {
+            $this->queryAndBroadcastResult('objects.mongo_id', $matchedIdentityMongoIds);
+        }
         foreach ($processIds as $processId) {
             broadcast(new ProgressChange($processId, [
                 'id' => $processId,

@@ -410,7 +410,7 @@
             if (!isNaN(frameIndex)) {
                 currentFrame = frameIndex;
             }
-            console.log('status', status);
+            console.log('status', status, trackIds.length, total);
             if (allStatus[status]) {
                 const $processStatus = $('.process__status');
                 $processStatus.text(allStatus[status]);
