@@ -201,7 +201,7 @@ class ProcessController extends Controller
     {
         $process = Process::findOrFail($id);
 
-        if ($process->status == Process::STATUS['detecting']) {
+        if ($process->status == Process::STATUS['detecting'] || $process->status == Process::STATUS['grouping']) {
             abort(400);
         }
 

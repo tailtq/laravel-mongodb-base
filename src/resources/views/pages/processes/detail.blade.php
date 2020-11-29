@@ -32,6 +32,7 @@
             <div class="d-flex justify-content-md-between align-items-center mb-3">
                 <h5 class="card-title">
                     {{ $process->name }}
+                    &nbsp;
                     <span class="
                         badge
                         @if($process->status == 'error' || $process->status == 'stopped')
@@ -56,7 +57,7 @@
                     </button>
 
                     <button type="button"
-                            @if($process->status != 'detecting')
+                            @if($process->status != 'detecting' && $process->status != 'grouping')
                             disabled
                             @endif
                             class="btn btn-danger btn-stop">
@@ -399,6 +400,8 @@
         });
 
         Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChange', (res) => {
+            console.log('Socket data', res.data);
+
             const {
                 status,
                 progress,
@@ -410,7 +413,6 @@
             if (!isNaN(frameIndex)) {
                 currentFrame = frameIndex;
             }
-            console.log('status', status, trackIds.length, total);
             if (allStatus[status]) {
                 const $processStatus = $('.process__status');
                 $processStatus.text(allStatus[status]);
@@ -441,6 +443,11 @@
                 $element.css({width: `${percentage}%`});
                 $element.attr('aria-valuenow', progress);
                 $element.text(`${parseInt(percentage, 10)}%`);
+            } else if (status === 'grouping') {
+                Toast.fire({
+                    type: 'success',
+                    title: 'Đang nhất thể hoá',
+                });
             } else if (status === 'grouped') {
                 Toast.fire({
                     type: 'success',

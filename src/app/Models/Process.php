@@ -11,6 +11,7 @@ class Process extends Model
         'stopped' => 'stopped',
         'detecting' => 'detecting',
         'detected' => 'detected',
+        'grouping' => 'grouping',
         'grouped' => 'grouped',
         'rendering' => 'rendering',
         'done' => 'done',
