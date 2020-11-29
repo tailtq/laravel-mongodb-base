@@ -50,8 +50,13 @@ trait RequestAPI
         if ($result->status) {
             $result->body = $result->body->data;
         } else {
-            Log::error(json_encode($response->toPsrResponse()));
-            $result->message = 'HTTP Request: ' . $response->toPsrResponse()->getReasonPhrase();
+            Log::error(json_encode($result));
+
+            if (object_get($result, 'body.message')) {
+                $result->message = $result->body->message;
+            } else {
+                $result->message = 'HTTP Request: ' . $response->toPsrResponse()->getReasonPhrase();
+            }
         }
 
         return $result;
