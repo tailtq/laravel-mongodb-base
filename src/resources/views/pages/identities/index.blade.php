@@ -29,7 +29,7 @@
                             <th class="text-center">{{ ++$index }}</th>
                             <td><img src="{{ !empty($identity->images[0]['url'] ) ? $identity->images[0]['url'] : asset('img/icon-avatar-default.png')}}" alt=""></td>
                             <td>{{ $identity->name }}</td>
-                            <td>{{ $identity->created_at }}</td>
+                            <td>{{ $identity->created_at->format('h:i Y-m-d') }}</td>
                             <td>
                                 <a class="btn btn-warning btn-icon" href="{{ route('identities.edit', $identity->id) }}" style="line-height: 2">
                                     <i data-feather="edit"></i>
