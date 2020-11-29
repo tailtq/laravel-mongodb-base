@@ -58,9 +58,6 @@ class ListenAIProgress extends Command
                     'progress' => $event->progress ?? 0,
                     'frame_index' => $event->frame_index ?? null,
                 ];
-                if ($data['frame_index'] == -1) {
-                    $data['progress'] = 100;
-                }
                 if (!empty($event->video_url)) {
                     $process->video_result = $event->video_url;
                     $data['video_result'] = $process->video_result;

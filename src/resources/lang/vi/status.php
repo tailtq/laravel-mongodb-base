@@ -3,7 +3,7 @@
 return [
     'ready' => 'Sẵn sàng',
     'stopped' => 'Đã dừng',
-    'detecting' => 'Tìm kiếm',
+    'detecting' => 'Đang tìm kiếm',
     'detected' => 'Tìm kiếm thành công',
     'grouped' => 'Đã nhất thể hoá',
     'rendering' => 'Tổng hợp dữ liệu',

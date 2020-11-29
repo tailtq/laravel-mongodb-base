@@ -209,7 +209,7 @@ class ProcessController extends Controller
             config('app.ai_server') . "/processes/$process->mongo_id", [], $this->getDefaultHeaders()
         );
         if (!$response->status) {
-            abort(400, 'Cannot sync AI server');
+            abort(400, $response->message);
         }
         $objectIds = TrackedObject::where('process_id', $id)->pluck('id');
 
