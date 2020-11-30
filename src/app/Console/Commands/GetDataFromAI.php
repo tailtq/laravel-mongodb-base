@@ -169,6 +169,7 @@ class GetDataFromAI extends Command
                 $processIds[] = $element->process_id;
             }
         }
+        Log::info(json_encode($mappingIdentityIds));
         if (count($mappingIdentityIds) == 0) {
             return;
         }
@@ -178,6 +179,7 @@ class GetDataFromAI extends Command
             ['ids' => $mappingIdentityIds],
             $this->getDefaultHeaders()
         );
+        Log::info(config('app.ai_server') . '/objects/matching' . "   " . json_encode($response));
 
         if (!$response->status) {
             return;
