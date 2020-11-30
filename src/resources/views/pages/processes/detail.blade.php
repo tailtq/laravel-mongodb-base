@@ -418,7 +418,7 @@
                 $processStatus.text(allStatus[status]);
 
                 if (status === 'error' || status === 'stopped') {
-                    $processStatus.removeClass('badge-success').addClass('badge-error');
+                    $processStatus.removeClass('badge-success').addClass('badge-danger');
                 }
             }
             if (status === 'done' && videoResult) {
