@@ -290,7 +290,7 @@
             minFrom = (minFrom % 60).toString().padStart(2, '0');
             secondFrom = (secondFrom % 60).toString().padStart(2, '0');
 
-            if (!frameTo) {
+            if (!isNaN(frameTo)) {
                 return `${renderHour ? `${hourFrom}:` : ''}${minFrom}:${secondFrom} - now`;
             }
 
