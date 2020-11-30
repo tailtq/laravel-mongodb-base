@@ -258,6 +258,15 @@ class GetDataFromAI extends Command
     // group data handler
     public function groupData($process)
     {
+        $url = config('app.ai_server') . "/processes/$process->mongo_id/grouping/unidentified";
+        $response = $this->sendPOSTRequest($url, [], $this->getDefaultHeaders());
+        Log::info("Grouping unidentified $process->id response " . json_encode($response));
+
+        if ($response->status) {
+            $data = json_decode(json_encode($response->body), true);
+            $this->updateObject($data);
+        }
+
         $url = config('app.ai_server') . "/processes/$process->mongo_id/grouping2";
         $response = $this->sendPOSTRequest($url, [], $this->getDefaultHeaders());
         Log::info("Grouping $process->id response " . json_encode($response));
