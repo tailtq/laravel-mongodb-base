@@ -164,7 +164,7 @@ class GetDataFromAI extends Command
         $processIds = [];
 
         foreach ($result as $element) {
-            if ($element->frame_to) {
+            if ($element->frame_to >= 0) {
                 $mappingIdentityIds[] = $element->mongo_id;
                 $processIds[] = $element->process_id;
             }

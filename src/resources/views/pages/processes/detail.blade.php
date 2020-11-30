@@ -268,8 +268,7 @@
                 bars += `
                     <div class="progress-bar bg-transparent" role="progressbar"
                          data-toggle="tooltip"
-                         style="width: ${transparentLength / totalFrames * 100}%"
-                         title="hello"></div>
+                         style="width: ${transparentLength / totalFrames * 100}%"></div>
 
                     <div class="progress-bar progress-bar-striped progress-bar-animated ${shouldIncreasing ? 'bg-danger' : 'bg-success'}" role="progressbar"
                          data-toggle="tooltip"
