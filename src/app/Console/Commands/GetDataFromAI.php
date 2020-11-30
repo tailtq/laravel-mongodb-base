@@ -139,15 +139,14 @@ class GetDataFromAI extends Command
             $this->runMatchingOnTrackedObjects($result);
 
             foreach ($processes as $process) {
+                $process = DB::table('processes')
+                    ->where('id', $process->id)
+                    ->select(['id', 'status', 'mongo_id', 'ungrouped_count'])
+                    ->addSelect(DB::raw("(SELECT COUNT(*) FROM objects WHERE process_id = $process->id and matching_status = '" . TrackedObject::MATCHING_STATUS['identified'] . "') as identified_count"))
+                    ->first();
                 if ($process->status != Process::STATUS['detected']) {
                     continue;
                 }
-
-                $process = DB::table('processes')
-                    ->where('id', $process->id)
-                    ->select(['id', 'mongo_id', 'ungrouped_count'])
-                    ->addSelect(DB::raw("(SELECT COUNT(*) FROM objects WHERE process_id = $process->id and matching_status = '" . TrackedObject::MATCHING_STATUS['identified'] . "') as identified_count"))
-                    ->first();
                 Log::info("Detected with ungrouped count: $process->ungrouped_count, identified count: $process->identified_count");
 
                 if ($process->ungrouped_count == $process->identified_count) {
