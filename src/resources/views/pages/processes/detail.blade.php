@@ -2,6 +2,7 @@
 
 @push('plugin-styles')
     <link href="{{ asset('assets/plugins/jquery-steps/jquery.steps.css') }}" rel="stylesheet"/>
+    <link href="{{ asset('assets/plugins/lightbox/css/lightbox.min.css') }}" rel="stylesheet"/>
     <link rel="stylesheet" href="{{ asset('assets/plugins/@mdi/css/materialdesignicons.min.css') }}">
     <style>
         .status-overlay {
@@ -73,7 +74,7 @@
             </div>
 
             <div class="table-responsive d-flex">
-                <video controls class="w-60" preload="auto">
+                <video controls class="w-60 h-100" preload="auto">
                     <source src="{{ $process->video_url }}" type="video/mp4">
                 </video>
 
@@ -114,7 +115,7 @@
 
                 <p>Nhận diện đối tượng</p>
                 <div class="progress">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated progress-bar__detecting"
+                    <div class="progress-bar progress-bar-striped progress-bar__detecting"
                          role="progressbar"
                          style="width: {{ $detectingPercentage }}%"
                          aria-valuenow="{{ $detectingPercentage }}"
@@ -126,7 +127,7 @@
 
                 <p class="mt-4">Kiểm tra định danh</p>
                 <div class="progress">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-success progress-bar__matching"
+                    <div class="progress-bar progress-bar-striped bg-success progress-bar__matching"
                          role="progressbar"
                          style="width: {{ $matchingPercentage }}%"
                          aria-valuenow="{{ $matchingPercentage }}"
@@ -139,7 +140,7 @@
 
             <p class="mt-4">Tổng hợp video</p>
             <div class="progress">
-                <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning progress-bar__rendering"
+                <div class="progress-bar progress-bar-striped bg-warning progress-bar__rendering"
                      role="progressbar"
                      style="width: {{ $renderingPercentage }}%"
                      aria-valuenow="{{ $renderingPercentage }}"
@@ -159,7 +160,8 @@
                             <tr>
                                 <th width="5%" class="text-center">Id</th>
                                 <th width="7%" class="text-center">Ảnh</th>
-                                <th width="25%">Tên đối tượng</th>
+                                <th width="15%" class="text-center">Ảnh CMND đối chiếu</th>
+                                <th width="20%">Tên đối tượng</th>
                                 <th>Thời gian xuất hiện</th>
                             </tr>
                             </thead>
@@ -179,9 +181,9 @@
 
 @push('plugin-scripts')
     <script src="{{ asset('assets/plugins/jquery-steps/jquery.steps.min.js') }}"></script>
+    <script src="{{ asset('assets/plugins/lightbox/js/lightbox.min.js') }}"></script>
     {{--<script src="https://cdnjs.cloudflare.com/ajax/libs/dashjs/3.1.3/dash.all.min.js"></script>--}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@8.15.3/dist/sweetalert2.all.min.js"></script>
-
 @endpush
 
 @push('custom-scripts')
@@ -249,9 +251,9 @@
         });
 
         // render objects
-        const frameStep = {{ object_get($process->mongoData, 'frame_step', 1) }};
-        const totalFrames = Math.round(parseInt({{ $process->total_frames }}, 10) / frameStep);
-        const fps = Math.round(parseInt('{{ $process->fps }}', 10) / frameStep);
+        const frameDrop = {{ object_get($process->mongoData, 'frame_drop', 1) }};
+        const totalFrames = Math.round(parseInt({{ $process->total_frames }}, 10) / frameDrop);
+        const fps = Math.round(parseInt('{{ $process->fps }}', 10) / frameDrop);
         const renderHour = totalFrames / 3600 >= 1;
         let currentFrame = 0;
         let trackIds = [];
@@ -270,7 +272,7 @@
                          data-toggle="tooltip"
                          style="width: ${transparentLength / totalFrames * 100}%"></div>
 
-                    <div class="progress-bar progress-bar-striped progress-bar-animated ${shouldIncreasing ? 'bg-danger' : 'bg-success'}" role="progressbar"
+                    <div class="progress-bar progress-bar-striped ${shouldIncreasing ? 'bg-danger' : 'bg-success'}" role="progressbar"
                          data-toggle="tooltip"
                          data-frame-from="${frameFrom}"
                          style="width: ${shouldIncreasing ? 1 : (length / totalFrames * 100)}%"
@@ -303,13 +305,25 @@
             return `${renderHour ? `${hourFrom}:` : ''}${minFrom}:${secondFrom} - ${renderHour ? `${hourTo}:` : ''}${minTo}:${secondTo}`;
         }
 
+        function getLightboxBlock(images, id) {
+            images = images ? JSON.parse(images) : null;
+
+            return images ? `
+                <a href="${images[0].url}" data-lightbox="object-${id}">
+                    <img src="${images[0].url}" style="width: 60px; height: 60px;" alt="">
+                </a>
+            ` : ``;
+        }
+
         function renderBlock(object, appearances, fps, renderHour, shouldIncreasing) {
             return (`
                 <tr data-track-id="${object.track_id}" data-id="${object.id}">
                     <td class="text-center">${object.track_id}</td>
                     <td class="py-1 text-center">
-                        <img src="${object.image}" alt="image" style="width: 40px; height: 40px;">
+                        <img src="${object.image}" alt="image" data-lightbox="${object.image}"
+                             style="width: 40px; height: 40px;">
                     </td>
+                    <td class="text-center">${getLightboxBlock(object.images)}</td>
                     <td>${object.name || 'Unknown'}</td>
                     <td class="position-relative">
                         ${buildProgressBar(appearances, totalFrames, fps, renderHour, shouldIncreasing)}
@@ -382,7 +396,8 @@
                         <div class="status-overlay position-absolute"></div>
                     `);
                     if (value.name) {
-                        $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(3)`).text(value.name);
+                        $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(3)`).html(getLightboxBlock(value.images, value.id));
+                        $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(4)`).text(value.name);
                     }
                 } else {
                     [trackIds, trackIndex] = insertInOrder(value.track_id, trackIds);
