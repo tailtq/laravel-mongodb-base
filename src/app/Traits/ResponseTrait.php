@@ -4,7 +4,7 @@ namespace App\Traits;
 
 trait ResponseTrait
 {
-    public function success($data)
+    public function success($data = [])
     {
         return response()->json([
             'status' => true,
