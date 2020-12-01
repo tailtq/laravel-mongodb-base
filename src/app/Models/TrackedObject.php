@@ -25,4 +25,9 @@ class TrackedObject extends Model
     {
         return $this->hasMany(ObjectAppearance::class, 'object_id');
     }
+
+    public function process()
+    {
+        return $this->belongsTo(Process::class, 'process_id');
+    }
 }

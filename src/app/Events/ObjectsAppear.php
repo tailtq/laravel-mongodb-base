@@ -35,7 +35,7 @@ class ObjectsAppear implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new Channel('process.' . $this->processId . '.objects');
+        return new Channel("process.$this->processId.objects");
     }
 
     public function broadcastWith()

@@ -58,6 +58,10 @@ trait GroupDataTrait
         }
     }
 
+    /**
+     * AI API combines data using identity_id and also other algorithms then map to app's database
+     * @param $data
+     */
     public function syncObjects($data)
     {
         // Response data AI

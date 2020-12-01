@@ -183,6 +183,7 @@ class ProcessController extends Controller
                 'objects.track_id',
                 'objects.identity_id',
                 'objects.image',
+                'objects.video_result',
                 'identities.name',
                 'identities.images'
             ])
@@ -200,14 +201,9 @@ class ProcessController extends Controller
     public function delete($id)
     {
         $process = Process::findOrFail($id);
+        $url = config('app.ai_server') . "/processes/$process->mongo_id";
+        $response = $this->sendDELETERequest($url, [], $this->getDefaultHeaders());
 
-        if ($process->status == Process::STATUS['detecting'] || $process->status == Process::STATUS['grouping']) {
-            abort(400);
-        }
-
-        $response = $this->sendDELETERequest(
-            config('app.ai_server') . "/processes/$process->mongo_id", [], $this->getDefaultHeaders()
-        );
         if (!$response->status) {
             abort(400, $response->message);
         }
