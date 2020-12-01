@@ -1,1 +1,22 @@
 // Write your custom css/scss here
+.status-overlay {
+	top: 3px;
+	padding: inherit;
+	width: calc(100% - 1.875rem);
+	text-align: center;
+	font-size: 12px;
+	z-index: -1;
+}
+
+.status-overlay.increasing {
+	z-index: 100;
+}
+
+a.disabled {
+	pointer-events: none;
+}
+
+.icon__normal-size {
+	width: 20px;
+	height: 20px;
+}

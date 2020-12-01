@@ -5,22 +5,7 @@
     <link href="{{ asset('assets/plugins/lightbox/css/lightbox.min.css') }}" rel="stylesheet"/>
     <link rel="stylesheet" href="{{ my_asset('assets/plugins/@mdi/css/materialdesignicons.min.css') }}">
     <style>
-        .status-overlay {
-            top: 3px;
-            padding: inherit;
-            width: calc(100% - 1.875rem);
-            text-align: center;
-            font-size: 12px;
-            z-index: -1;
-        }
 
-        .status-overlay.increasing {
-            z-index: 100;
-        }
-
-        a.disabled {
-            pointer-events: none;
-        }
     </style>
 @endpush
 
@@ -57,7 +42,7 @@
                             disabled
                             @endif
                             class="btn btn-success btn-start">
-                        <i class="link-icon" data-feather="play" style="width: 15px; height: 15px;"></i>
+                        <i class="link-icon icon__normal-size" data-feather="play"></i>
                         Bắt đầu
                     </button>
 
@@ -71,7 +56,7 @@
                     </button>
 
                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal">
-                        <i class="link-icon" data-feather="settings" style="width: 15px; height: 15px;"></i>
+                        <i class="link-icon icon__normal-size" data-feather="settings"></i>
                         Cấu hình
                     </button>
                 </div>
@@ -351,11 +336,12 @@
                         </div>
                     </td>
                     <td width="50px" class="text-center">
-                        <a href="#"
-                           data-video-result="${object.video_result || ''}"
-                           class="render-single-object ${object.video_result ? 'text-success' : ''}">
-                            <i class="link-icon" data-feather="play" style="width: 15px; height: 15px;"></i>
-                        </a>
+                        ${object.identity_id ? `
+                            <a href="#"
+                               data-video-result="${object.video_result || ''}"
+                               class="render-single-object ${object.video_result ? 'text-success' : ''}">
+                                <i class="link-icon icon__normal-size" data-feather="play"></i>
+                            </a>` : ''}
                     </td>
                 </tr>
             `);
@@ -532,7 +518,8 @@
                 }
                 const id = $(this).parent().closest('tr').data('id');
 
-                $(this).html(`<i data-feather="rotate-cw" style="width: 15px; height: 15px"></i>`);
+                $(this).addClass('disabled');
+                $(this).html(`<i class="icon__normal-size" data-feather="rotate-cw"></i>`);
                 feather.replace();
                 $(this).find('svg').addClass('infinite-spin');
 
@@ -549,8 +536,9 @@
             const { data } = res;
 
             $(`.socket-render tbody tr[data-id="${data.id}"] td:last-child a`)
-                .html('<i class="link-icon" data-feather="play" style="width: 15px; height: 15px;"></i>')
+                .html('<i class="link-icon icon__normal-size" data-feather="play"></i>')
                 .addClass('text-success')
+                .removeClass('disabled')
                 .data('video-result', data.video_result);
             feather.replace();
         });
