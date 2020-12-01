@@ -73,7 +73,9 @@ class ListenAIProgress extends Command
                 }
                 broadcast(new ProgressChange($process->id, $data));
 
-                $this->callGroupingData([$process]);
+                if ($process->status === Process::STATUS['detected']) {
+                    $this->callGroupingData([$process]);
+                }
             }
         });
     }

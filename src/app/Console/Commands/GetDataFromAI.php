@@ -69,7 +69,6 @@ class GetDataFromAI extends Command
             if (count($processes) == 0) {
                 return;
             }
-            Log::info(json_encode($processes) . " jasldkfja skldfjasl kdfjklas djfl");
 
             // Get existing tracks for updating mongo_id and frame_to
             $trackIds = Arr::pluck($objects, 'track_id');
