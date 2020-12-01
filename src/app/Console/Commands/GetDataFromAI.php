@@ -50,6 +50,11 @@ class GetDataFromAI extends Command
      * When finished_track = false, we insert data without MongoId (due to AI process).
      * Then when finished_track = true, based on track_id + process_id, we map frame_to and mongo_id to our data
      * Currently we handle multiple processes (create many + update many + publish many events) in the same time for optimization
+     *
+     * 1. Begin tracking object
+     * 2. Finish tracking object
+     * 3. Matching object to identity
+     * 4. Grouping multiple objects
      */
     public function handle()
     {
@@ -88,6 +93,7 @@ class GetDataFromAI extends Command
                     });
 
                     if ($process) {
+                        Log::info(json_encode($object));
                         $trackedObject = TrackedObject::create([
                             'process_id' => $process->id,
                             'track_id' => $object->track_id,
@@ -156,7 +162,6 @@ class GetDataFromAI extends Command
                 $processIds[] = $element->process_id;
             }
         }
-        Log::info(json_encode($mappingIdentityIds));
         if (count($mappingIdentityIds) == 0) {
             return;
         }
@@ -211,6 +216,12 @@ class GetDataFromAI extends Command
         }
     }
 
+    /**
+     * Broadcast results after matching or tracking objects
+     * @param $whereInColumn
+     * @param $whereInValue
+     * @return \Illuminate\Support\Collection
+     */
     public function queryAndBroadcastResult($whereInColumn, $whereInValue)
     {
         $result = DB::table('objects')

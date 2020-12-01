@@ -2,8 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Events\ObjectVideoRendered;
 use App\Events\ProgressChange;
 use App\Models\Process;
+use App\Models\TrackedObject;
 use App\Traits\GroupDataTrait;
 use App\Traits\RequestAPI;
 use Illuminate\Console\Command;
@@ -44,6 +46,7 @@ class ListenAIProgress extends Command
     public function handle()
     {
         Redis::subscribe('progress', function ($event) {
+            Log::info($event);
             $event = json_decode($event);
 
             if (!$event) {
@@ -52,6 +55,12 @@ class ListenAIProgress extends Command
             $process = Process::where('mongo_id', $event->process_id)->first();
 
             if ($process) {
+                if (!empty($event->mongo_id)) {
+                    if ($event->status === 'rendered') {
+                        $this->getRenderingObjectEvent($event, $process);
+                    }
+                    return;
+                }
                 // Update status
                 $data = [
                     'id' => $process->id,
@@ -84,5 +93,15 @@ class ListenAIProgress extends Command
                 }
             }
         });
+    }
+
+    public function getRenderingObjectEvent($event, $process)
+    {
+        TrackedObject::where('mongo_id', $event->mongo_id)->update([
+            'video_result' => $event->url
+        ]);
+        $object = TrackedObject::where('mongo_id', $event->mongo_id)->first();
+
+        broadcast(new ObjectVideoRendered($process->id, $object));
     }
 }

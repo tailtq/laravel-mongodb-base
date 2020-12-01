@@ -17,6 +17,10 @@
         .status-overlay.increasing {
             z-index: 100;
         }
+
+        a.disabled {
+            pointer-events: none;
+        }
     </style>
 @endpush
 
@@ -331,6 +335,13 @@
                             ${shouldIncreasing ? 'Đang nhận diện' : ''}
                         </div>
                     </td>
+                    <td width="50px" class="text-center">
+                        <a href="#"
+                            data-video-result="${object.video_result}"
+                           class="render-single-object ${object.video_result ? 'text-success' : ''}">
+                            <i class="link-icon" data-feather="play" style="width: 15px; height: 15px;"></i>
+                        </a>
+                    </td>
                 </tr>
             `);
         }
@@ -382,6 +393,7 @@
                             trackIds
                         );
                     });
+                    feather.replace();
                 },
             });
         }
@@ -391,7 +403,7 @@
 
             res.data.forEach((value) => {
                 if (trackIds.indexOf(value.track_id) >= 0) {
-                    $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:last-child`).html(`
+                    $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(5)`).html(`
                         ${buildProgressBar([value], totalFrames, fps, renderHour, false)}
                         <div class="status-overlay position-absolute"></div>
                     `);
@@ -473,7 +485,7 @@
                     type: 'GET',
                     success: function (res) {
                         res.data.forEach((value) => {
-                            $(`.socket-render tbody tr[data-id="${value.id}"] td:last-child`).html(`
+                            $(`.socket-render tbody tr[data-id="${value.id}"] td:nth-child(5)`).html(`
                                 ${buildProgressBar(value.appearances, totalFrames, fps, renderHour, false)}
                                 <div class="status-overlay position-absolute"></div>
                             `);
@@ -492,8 +504,29 @@
             }
         });
 
+        function listenObjectRenderingEvent() {
+            $(document).on('click', '.render-single-object', function (e) {
+                e.preventDefault();
+                const id = $(this).parent().closest('tr').data('id');
+
+                $.post(`/objects/${id}/rendering`, {
+                    _token: $('meta[name="_token"]').attr('content'),
+                }).then((res) => {
+                    console.log(res);
+                });
+            });
+        }
+
+        Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectVideoRendered', function (res) {
+            const { data } = res;
+            $(`.socket-render tbody tr[data-id="${data.id}"] td:last-child a`)
+                .addClass('text-success')
+                .attr('data-video-result', data.video_result);
+        });
+
         $(document).ready(function () {
             renderData();
+            listenObjectRenderingEvent();
         });
     </script>
 @endpush
