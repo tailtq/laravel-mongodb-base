@@ -13,7 +13,8 @@ function show_class($path) {
 }
 
 function my_asset($path) {
-    $isHttps = strpos(env('APP_URL'), 'https');
+    return asset($path);
+//    $isHttps = strpos(env('APP_URL'), 'https');
 
-    return app('url')->asset($path, $isHttps);
+//    return app('url')->asset($path, $isHttps);
 }

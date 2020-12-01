@@ -441,6 +441,7 @@
             });
 
             $('.process__ungrouped-count').html(trackIds.length);
+            feather.replace();
         });
 
         Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChange', (res) => {
@@ -525,11 +526,20 @@
         function listenObjectRenderingEvent() {
             $(document).on('click', '.render-single-object', function (e) {
                 e.preventDefault();
+                const videoResult = $(this).data('video-result');
+
+                if (videoResult) {
+                    return;
+                }
                 const id = $(this).parent().closest('tr').data('id');
+
+                $(this).html(`<i data-feather="rotate-cw infinite-spin"></i>`);
+                feather.replace();
 
                 $.post(`/objects/${id}/rendering`, {
                     _token: $('meta[name="_token"]').attr('content'),
                 }).then((res) => {
+                    // TODO: add spinning icon
                     console.log(res);
                 });
             });
@@ -537,6 +547,7 @@
 
         Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectVideoRendered', function (res) {
             const { data } = res;
+
             $(`.socket-render tbody tr[data-id="${data.id}"] td:last-child a`)
                 .addClass('text-success')
                 .attr('data-video-result', data.video_result);
