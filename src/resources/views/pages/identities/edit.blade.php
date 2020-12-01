@@ -1,7 +1,7 @@
 @extends('layout.master')
 
 @push('plugin-styles')
-    <link href="{{ asset('assets/plugins/dropzone/dropzone.min.css') }}" rel="stylesheet"/>
+    <link href="{{ my_asset('assets/plugins/dropzone/dropzone.min.css') }}" rel="stylesheet"/>
 @endpush
 
 @section('content')
@@ -129,9 +129,9 @@
 @endsection
 
 @push('plugin-scripts')
-    <script src="{{ asset('assets/plugins/dropzone/dropzone.min.js') }}"></script>
+    <script src="{{ my_asset('assets/plugins/dropzone/dropzone.min.js') }}"></script>
 @endpush
 
 @push('custom-scripts')
-    <script src="{{ asset('assets/js/custom.js') }}"></script>
+    <script src="{{ my_asset('assets/js/custom.js') }}"></script>
 @endpush

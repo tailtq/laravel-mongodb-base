@@ -1,9 +1,9 @@
 @extends('layout.master')
 
 @push('plugin-styles')
-    <link href="{{ asset('assets/plugins/jquery-steps/jquery.steps.css') }}" rel="stylesheet"/>
-    <link href="{{ asset('assets/plugins/lightbox/css/lightbox.min.css') }}" rel="stylesheet"/>
-    <link rel="stylesheet" href="{{ asset('assets/plugins/@mdi/css/materialdesignicons.min.css') }}">
+    <link href="{{ my_asset('assets/plugins/jquery-steps/jquery.steps.css') }}" rel="stylesheet"/>
+    <link href="{{ my_asset('assets/plugins/lightbox/css/lightbox.min.css') }}" rel="stylesheet"/>
+    <link rel="stylesheet" href="{{ my_asset('assets/plugins/@mdi/css/materialdesignicons.min.css') }}">
     <style>
         .status-overlay {
             top: 3px;
@@ -179,19 +179,37 @@
         </div>
     </div>
 
+    <div class="modal fade" id="videoModel" tabindex="-1" role="dialog" aria-labelledby="videoModel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <video controls class="w-100 h-100" preload="auto">
+                        <source src="{{ $process->video_url }}" type="video/mp4">
+                    </video>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal -->
     @include('pages.processes.modal_process')
 @endsection
 
 @push('plugin-scripts')
-    <script src="{{ asset('assets/plugins/jquery-steps/jquery.steps.min.js') }}"></script>
-    <script src="{{ asset('assets/plugins/lightbox/js/lightbox.min.js') }}"></script>
+    <script src="{{ my_asset('assets/plugins/jquery-steps/jquery.steps.min.js') }}"></script>
+    <script src="{{ my_asset('assets/plugins/lightbox/js/lightbox.min.js') }}"></script>
     {{--<script src="https://cdnjs.cloudflare.com/ajax/libs/dashjs/3.1.3/dash.all.min.js"></script>--}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@8.15.3/dist/sweetalert2.all.min.js"></script>
 @endpush
 
 @push('custom-scripts')
-    <script src="{{ asset('assets/js/custom.js') }}"></script>
+    <script src="{{ my_asset('assets/js/custom.js') }}"></script>
     <script>
         const Toast = Swal.mixin({
             toast: true,
