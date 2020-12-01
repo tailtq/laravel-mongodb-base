@@ -9,17 +9,17 @@ use App\Models\Identity;
 use App\Models\ObjectAppearance;
 use App\Models\Process;
 use App\Models\TrackedObject;
+use App\Traits\GroupDataTrait;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
-use App\Traits\RequestAPI;
 
 class GetDataFromAI extends Command
 {
-    use RequestAPI;
+    use GroupDataTrait;
 
     /**
      * The name and signature of the console command.
@@ -54,7 +54,6 @@ class GetDataFromAI extends Command
     public function handle()
     {
         Redis::subscribe('process', function ($objects) {
-            Log::info($objects);
             $objects = json_decode($objects);
 
             if (!$objects) {
@@ -66,6 +65,11 @@ class GetDataFromAI extends Command
 
             $processMongoIds = Arr::pluck($objects, 'process_id');
             $processes = DB::table('processes')->where('mongo_id', $processMongoIds)->get();
+
+            if (count($processes) == 0) {
+                return;
+            }
+            Log::info(json_encode($processes) . " jasldkfja skldfjasl kdfjklas djfl");
 
             // Get existing tracks for updating mongo_id and frame_to
             $trackIds = Arr::pluck($objects, 'track_id');
@@ -137,22 +141,7 @@ class GetDataFromAI extends Command
             }
             $result = $this->queryAndBroadcastResult('objects.id', $objectIds);
             $this->runMatchingOnTrackedObjects($result);
-
-            foreach ($processes as $process) {
-                $process = DB::table('processes')
-                    ->where('id', $process->id)
-                    ->select(['id', 'status', 'mongo_id', 'ungrouped_count'])
-                    ->addSelect(DB::raw("(SELECT COUNT(*) FROM objects WHERE process_id = $process->id and matching_status = '" . TrackedObject::MATCHING_STATUS['identified'] . "') as identified_count"))
-                    ->first();
-                if ($process->status != Process::STATUS['detected']) {
-                    continue;
-                }
-                Log::info("Detected with ungrouped count: $process->ungrouped_count, identified count: $process->identified_count");
-
-                if ($process->ungrouped_count == $process->identified_count) {
-                    $this->groupData($process);
-                }
-            }
+            $this->callGroupingData($processes);
         });
     }
 
@@ -252,63 +241,5 @@ class GetDataFromAI extends Command
         }
 
         return $result;
-    }
-
-    // group data handler
-    public function groupData($process)
-    {
-        $url = config('app.ai_server') . "/processes/$process->mongo_id/grouping/unidentified";
-        $response = $this->sendPOSTRequest($url, [], $this->getDefaultHeaders());
-        Log::info("Grouping unidentified $process->id response " . json_encode($response));
-
-        if ($response->status) {
-            $data = json_decode(json_encode($response->body), true);
-            $this->updateObject($data);
-        }
-
-        $url = config('app.ai_server') . "/processes/$process->mongo_id/grouping2";
-        $response = $this->sendPOSTRequest($url, [], $this->getDefaultHeaders());
-        Log::info("Grouping $process->id response " . json_encode($response));
-
-        if ($response->status) {
-            $data = json_decode(json_encode($response->body), true);
-            $this->updateObject($data);
-        }
-    }
-
-    public function updateObject($data)
-    {
-        // Response data AI
-        $mongoIds = Arr::collapse(Arr::pluck($data, 'appearances.*.mongo_id'));
-        $objects = TrackedObject::whereIn('mongo_id', $mongoIds)->select(['id', 'mongo_id'])->get();
-
-        $identityMongoIds = array_filter(Arr::pluck($data, 'identity'), function ($element) {
-            return $element != null;
-        });
-        $identities = Identity::whereIn('mongo_id', $identityMongoIds)->select(['id', 'mongo_id'])->get();
-        $deleteIds = [];
-        $identityData = [];
-
-        foreach ($data as $element) {
-            $appearanceMongoIds = Arr::pluck($element['appearances'], 'mongo_id');
-            $object = $objects->where('mongo_id', $element['mongo_id'])->first();
-            $identity = !empty($element['identity']) ? $identities->where('mongo_id', $element['identity'])->first() : null;
-
-            if ($object) {
-                $appearanceIds = $objects->whereIn('mongo_id', $appearanceMongoIds)
-                    ->where('mongo_id', '!=', $object->mongo_id)
-                    ->pluck('id')
-                    ->all();
-                ObjectAppearance::whereIn('object_id', $appearanceIds)->update(['object_id' => $object->id]);
-
-                $identityData[] = [
-                    'id' => $object->id,
-                    'identity_id' => $identity->id ?? null
-                ];
-                $deleteIds = array_merge($deleteIds, $appearanceIds);
-            }
-        }
-        TrackedObject::whereIn('id', $deleteIds)->delete();
-        DatabaseHelper::updateMultiple($identityData, 'id', 'objects');
     }
 }

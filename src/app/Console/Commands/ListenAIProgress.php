@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Events\ProgressChange;
 use App\Models\Process;
+use App\Traits\GroupDataTrait;
 use App\Traits\RequestAPI;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\Redis;
 
 class ListenAIProgress extends Command
 {
-    use RequestAPI;
+    use GroupDataTrait;
 
     /**
      * The name and signature of the console command.
@@ -43,7 +44,6 @@ class ListenAIProgress extends Command
     public function handle()
     {
         Redis::subscribe('progress', function ($event) {
-            Log::info($event);
             $event = json_decode($event);
 
             if (!$event) {
@@ -72,6 +72,8 @@ class ListenAIProgress extends Command
                     $this->renderData($process);
                 }
                 broadcast(new ProgressChange($process->id, $data));
+
+                $this->callGroupingData([$process]);
             }
         });
     }
