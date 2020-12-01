@@ -179,19 +179,16 @@
         </div>
     </div>
 
-    <div class="modal fade" id="videoModel" tabindex="-1" role="dialog" aria-labelledby="videoModel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+    <div class="modal fade" id="videoModal" tabindex="-1" role="dialog" aria-labelledby="videoModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <video controls class="w-100 h-100" preload="auto">
-                        <source src="{{ $process->video_url }}" type="video/mp4">
-                    </video>
+                    <video controls class="w-100 h-100" preload="auto" autoplay></video>
                 </div>
             </div>
         </div>
@@ -355,7 +352,7 @@
                     </td>
                     <td width="50px" class="text-center">
                         <a href="#"
-                            data-video-result="${object.video_result}"
+                           data-video-result="${object.video_result || ''}"
                            class="render-single-object ${object.video_result ? 'text-success' : ''}">
                             <i class="link-icon" data-feather="play" style="width: 15px; height: 15px;"></i>
                         </a>
@@ -529,12 +526,15 @@
                 const videoResult = $(this).data('video-result');
 
                 if (videoResult) {
+                    $('#videoModal').modal('show');
+                    $('#videoModal video').attr('src', videoResult);
                     return;
                 }
                 const id = $(this).parent().closest('tr').data('id');
 
-                $(this).html(`<i data-feather="rotate-cw infinite-spin"></i>`);
+                $(this).html(`<i data-feather="rotate-cw" style="width: 15px; height: 15px"></i>`);
                 feather.replace();
+                $(this).find('svg').addClass('infinite-spin');
 
                 $.post(`/objects/${id}/rendering`, {
                     _token: $('meta[name="_token"]').attr('content'),
@@ -549,8 +549,10 @@
             const { data } = res;
 
             $(`.socket-render tbody tr[data-id="${data.id}"] td:last-child a`)
+                .html('<i class="link-icon" data-feather="play" style="width: 15px; height: 15px;"></i>')
                 .addClass('text-success')
-                .attr('data-video-result', data.video_result);
+                .data('video-result', data.video_result);
+            feather.replace();
         });
 
         $(document).ready(function () {
