@@ -52,6 +52,7 @@ class ListenAIProgress extends Command
             $process = Process::where('mongo_id', $event->process_id)->first();
 
             if ($process) {
+                // Update status
                 $data = [
                     'id' => $process->id,
                     'status' => $process->status,
@@ -68,23 +69,20 @@ class ListenAIProgress extends Command
 
                     $data['status'] = $process->status;
                 }
+                // Call rendering API if status is grouped
                 if ($process->status === Process::STATUS['grouped']) {
-                    $this->renderData($process);
+                    $url = config('app.ai_server') .  "/processes/$process->mongo_id/rendering";
+                    $response = $this->sendGETRequest($url, [], $this->getDefaultHeaders());
+
+                    Log::info("Rendering result $process->id: " . json_encode($response));
                 }
                 broadcast(new ProgressChange($process->id, $data));
 
+                // Grouping in case GetDataFromAI event doesn't trigger grouping API
                 if ($process->status === Process::STATUS['detected']) {
                     $this->callGroupingData([$process]);
                 }
             }
         });
-    }
-
-    public function renderData($process)
-    {
-        $url = config('app.ai_server') .  "/processes/$process->mongo_id/rendering";
-        $response = $this->sendGETRequest($url, [], $this->getDefaultHeaders());
-
-        Log::info("Rendering result $process->id: " . json_encode($response));
     }
 }
