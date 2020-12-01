@@ -13,7 +13,7 @@ function show_class($path) {
 }
 
 function my_asset($path) {
-    $isHttps = \Request::getScheme() == 'https';
+    $isHttps = strpos(env('APP_URL'), 'https') >= 0;
 
-    return app('url')->asset($path . '/asset', $isHttps);
+    return app('url')->asset($path, $isHttps);
 }
