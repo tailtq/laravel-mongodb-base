@@ -9,11 +9,11 @@
     <!-- CSRF Token -->
     <meta name="_token" content="{{ csrf_token() }}">
 
-    <link rel="shortcut icon" href="{{ asset('/favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ my_asset('/favicon.ico') }}">
 
     <!-- plugin css -->
-    <link href="{{ asset('assets/fonts/feather-font/css/iconfont.css') }}" rel="stylesheet"/>
-    <link href="{{ asset('assets/plugins/perfect-scrollbar/perfect-scrollbar.css') }}" rel="stylesheet"/>
+    <link href="{{ my_asset('assets/fonts/feather-font/css/iconfont.css') }}" rel="stylesheet"/>
+    <link href="{{ my_asset('assets/plugins/perfect-scrollbar/perfect-scrollbar.css') }}" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css" id="theme-styles">
 
     <!-- end plugin css -->
@@ -21,7 +21,7 @@
     @stack('plugin-styles')
 
 <!-- common css -->
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet"/>
+    <link href="{{ my_asset('css/app.css') }}" rel="stylesheet"/>
 
     <!-- end common css -->
 
@@ -44,18 +44,18 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
-<script src="{{ asset('js/app.js') }}"></script>
-<script src="{{ asset('assets/plugins/feather-icons/feather.min.js') }}"></script>
-<script src="{{ asset('assets/plugins/perfect-scrollbar/perfect-scrollbar.min.js') }}"></script>
+<script src="{{ my_asset('js/app.js') }}"></script>
+<script src="{{ my_asset('assets/plugins/feather-icons/feather.min.js') }}"></script>
+<script src="{{ my_asset('assets/plugins/perfect-scrollbar/perfect-scrollbar.min.js') }}"></script>
 <!-- end base js -->
-<script src="{{ asset('assets/js/spinner.js') }}"></script>
+<script src="{{ my_asset('assets/js/spinner.js') }}"></script>
 
 <!-- plugin js -->
 @stack('plugin-scripts')
 <!-- end plugin js -->
 
 <!-- common js -->
-<script src="{{ asset('assets/js/template.js') }}"></script>
+<script src="{{ my_asset('assets/js/template.js') }}"></script>
 <!-- base js -->
 <!-- end common js -->
 
