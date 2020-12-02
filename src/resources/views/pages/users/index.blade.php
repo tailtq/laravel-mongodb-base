@@ -29,7 +29,7 @@
                             <th class="text-center">{{ ++$index }}</th>
                             <td>{{ $user->name }}</td>
                             <td>{{ $user->email }}</td>
-                            <td>{{ $user->created_at->format('h:i Y-m-d') }}</td>
+                            <td>{{ $user->created_at->format('H:i d-m-Y') }}</td>
                             <td>
                                 <form action="{{ route('users.delete', $user->id) }}" method="POST">
                                     @csrf

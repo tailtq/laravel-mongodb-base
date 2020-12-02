@@ -58,7 +58,7 @@
                                     {{ __('status.' . $process->status, [], 'vi') }}
                                 </span>
                             </td>
-                            <td>{{ $process->created_at->format('h:i Y-m-d') }}</td>
+                            <td>{{ $process->created_at->format('H:i d-m-Y') }}</td>
                             <td>
                                 <a class="btn btn-primary btn-icon" role="button"
                                    href="{{ route('processes.detail', $process->id) }}" style="line-height: 2">

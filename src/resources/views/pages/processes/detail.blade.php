@@ -91,18 +91,26 @@
                         </tr>
                     </table>
 
-                    <div class="video-rendering__btn mt-2 text-right">
-                        @if ($process->video_result)
-                            <a class="btn btn-primary" target="_blank" href="{{ $process->video_result }}">Video tái hiện</a>
-                        @endif
+                    <div class="d-flex justify-content-between mt-3">
+                        <div class="form-check form-check-flat form-check-primary my-2">
+                            <label class="form-check-label">
+                                <input type="checkbox" class="form-check-input" name="hide-unknown">
+                                Ẩn đối tượng không xác định
+                                <i class="input-frame"></i>
+                            </label>
+                        </div>
+
+                        <div class="video-rendering__btn text-right">
+                            @if ($process->video_result)
+                                <a class="btn btn-primary" target="_blank" href="{{ $process->video_result }}">Video tái hiện</a>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="process__progress-bar mt-4">
                 <h5 class="mb-2">Tiến trình thực hiện</h5>
-
-
 
                 <p>Nhận diện đối tượng</p>
                 <div class="progress">
@@ -301,7 +309,7 @@
             minFrom = (minFrom % 60).toString().padStart(2, '0');
             secondFrom = (secondFrom % 60).toString().padStart(2, '0');
 
-            if (isNaN(frameTo)) {
+            if (!Number.isInteger(frameTo)) {
                 return `${renderHour ? `${hourFrom}:` : ''}${minFrom}:${secondFrom} - now`;
             }
 
@@ -326,20 +334,19 @@
 
         function renderBlock(object, appearances, fps, renderHour, shouldIncreasing) {
             return (`
-                <tr data-track-id="${object.track_id}" data-id="${object.id}">
+                <tr data-track-id="${object.track_id}" data-id="${object.id}" data-identity-id="${object.identity_id}"
+                    ${!object.identity_id && $('[name="hide-unknown"]').is(':checked') ? 'style="display: none"' : ''}>
                     <td class="text-center">${object.track_id}</td>
                     <td class="text-center">
-                        <img src="${object.image}" alt="image" data-lightbox="${object.image}"
+                        <img src="${object.image}" alt="image"
                              style="width: inherit; height: 60px;">
                     </td>
-                    <td class="text-center">${getLightboxBlock(object.images)}</td>
-                    <td>${object.name || 'Unknown'}</td>
-                    <td>
+                    <td class="text-center">${getLightboxBlock(object.images, object.id)}</td>
+                    <td>${object.name || 'Không nhận diện được'}</td>
+                    <td class="position-relative">
                         ${buildProgressBar(appearances, totalFrames, fps, renderHour, shouldIncreasing)}
-                        <div class="position-relative status-overlay">
-                            <div class="position-absolute ${shouldIncreasing ? 'increasing' : ''}">
-                                ${shouldIncreasing ? 'Đang nhận diện' : ''}
-                            </div>
+                        <div class="position-absolute status-overlay ${shouldIncreasing ? 'increasing' : ''}">
+                            ${shouldIncreasing ? 'Đang nhận diện' : ''}
                         </div>
                     </td>
                     <td width="50px" class="text-center">
@@ -396,7 +403,7 @@
                         [trackIds, trackIndex] = insertInOrder(value.track_id, trackIds);
 
                         renderBlockInOrder(
-                            renderBlock(value, value.appearances, fps, renderHour, value.appearances[0].frameTo === null),
+                            renderBlock(value, value.appearances, fps, renderHour, !value.appearances[0].frame_to),
                             trackIndex,
                             trackIds
                         );
@@ -414,11 +421,10 @@
                 if (trackIds.indexOf(value.track_id) >= 0) {
                     $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(5)`).html(`
                         ${buildProgressBar([value], totalFrames, fps, renderHour, false)}
-                        <div class="position-relative status-overlay">
-                            <div class="position-absolute"></div>
-                        </div>
+                        <div class="position-absolute status-overlay"></div>
                     `);
                     if (value.name) {
+                        $(`.socket-render tbody tr[data-track-id="${value.track_id}"]`).data('identity-id', value.identity_id).removeAttr('style');
                         $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(3)`).html(getLightboxBlock(value.images, value.id));
                         $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(4)`).text(value.name);
                         $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(6)`).html(`
@@ -507,9 +513,7 @@
                         res.data.forEach((value) => {
                             $(`.socket-render tbody tr[data-id="${value.id}"] td:nth-child(5)`).html(`
                                 ${buildProgressBar(value.appearances, totalFrames, fps, renderHour, false)}
-                                <div class="position-relative status-overlay">
-                                    <div class="position-absolute"></div>
-                                </div>
+                                <div class="position-absolute status-overlay"></div>
                             `);
 
                             value.appearances.forEach((appearance) => {
@@ -562,6 +566,20 @@
                 .blur()
                 .data('video-result', data.video_result);
             feather.replace();
+        });
+
+        $('[name="hide-unknown"]').on('change', function () {
+            const shouldHide = $(this).is(':checked');
+            const $null = $(`.socket-render tbody tr[data-identity-id="null"]`);
+            const $undefined = $(`.socket-render tbody tr[data-identity-id="undefined"]`);
+
+            if (shouldHide) {
+                $null.fadeOut(1000);
+                $undefined.fadeOut(1000);
+            } else {
+                $null.fadeIn(1000);
+                $undefined.fadeIn(1000);
+            }
         });
 
         $(document).ready(function () {

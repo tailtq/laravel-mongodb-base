@@ -230,7 +230,7 @@ class ProcessController extends Controller
             $detectingPercentage = 100;
             $matchingPercentage = 100;
             $renderingPercentage = 100;
-        } else if ($status === 'grouped' || $status === 'rendering') {
+        } else if ($status === 'grouping' || $status === 'grouped' || $status === 'rendering') {
             $detectingPercentage = 100;
             $matchingPercentage = 100;
         } else if ($status === 'detected') {

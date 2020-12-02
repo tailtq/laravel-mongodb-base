@@ -234,6 +234,7 @@ class GetDataFromAI extends Command
                 'objects.process_id',
                 'objects.track_id',
                 'objects.mongo_id',
+                'objects.identity_id',
                 'objects.image',
                 'identities.name',
                 'identities.images',
