@@ -362,9 +362,9 @@
                 $('.socket-render tbody').prepend(html);
             } else {
                 const prevTrackId = trackIds[index];
-                const $element = $(`.socket-render tbody tr[data-track-id="${prevTrackId}"]`);
+                const $element = $(`.socket-render tbody tr[data-track-id="${prevTrackId}"]`)[0];
 
-                if ($element.length === 0) {
+                if ($element) {
                     $('.socket-render tbody').append(html);
                 } else {
                     $element.after(html);
