@@ -366,7 +366,7 @@
                 const prevTrackId = trackIds[index];
                 const $element = $(`.socket-render tbody tr[track-id="${prevTrackId}"]`);
 
-                if ($element.length) {
+                if ($element.length === 0) {
                     $('.socket-render tbody').append(html);
                 } else {
                     element.after(html);
