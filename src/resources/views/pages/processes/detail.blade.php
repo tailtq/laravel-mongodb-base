@@ -326,7 +326,7 @@
 
         function renderBlock(object, appearances, fps, renderHour, shouldIncreasing) {
             return (`
-                <tr track-id="${object.track_id}" object-id="${object.id}">
+                <tr data-track-id="${object.track_id}" data-id="${object.id}">
                     <td class="text-center">${object.track_id}</td>
                     <td class="text-center">
                         <img src="${object.image}" alt="image" data-lightbox="${object.image}"
@@ -364,7 +364,7 @@
                 $('.socket-render tbody').prepend(html);
             } else {
                 const prevTrackId = trackIds[index];
-                const $element = $(`.socket-render tbody tr[track-id="${prevTrackId}"]`);
+                const $element = $(`.socket-render tbody tr[data-track-id="${prevTrackId}"]`);
 
                 if ($element.length === 0) {
                     $('.socket-render tbody').append(html);
@@ -412,16 +412,16 @@
 
             res.data.forEach((value) => {
                 if (trackIds.indexOf(value.track_id) >= 0) {
-                    $(`.socket-render tbody tr[track-id="${value.track_id}"] td:nth-child(5)`).html(`
+                    $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(5)`).html(`
                         ${buildProgressBar([value], totalFrames, fps, renderHour, false)}
                         <div class="position-relative status-overlay">
                             <div class="position-absolute"></div>
                         </div>
                     `);
                     if (value.name) {
-                        $(`.socket-render tbody tr[track-id="${value.track_id}"] td:nth-child(3)`).html(getLightboxBlock(value.images, value.id));
-                        $(`.socket-render tbody tr[track-id="${value.track_id}"] td:nth-child(4)`).text(value.name);
-                        $(`.socket-render tbody tr[track-id="${value.track_id}"] td:nth-child(6)`).html(`
+                        $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(3)`).html(getLightboxBlock(value.images, value.id));
+                        $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(4)`).text(value.name);
+                        $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(6)`).html(`
                             <a href="#"
                                data-video-result=""
                                class="render-single-object icon__normal-font-size text-secondary">
@@ -505,7 +505,7 @@
                     type: 'GET',
                     success: function (res) {
                         res.data.forEach((value) => {
-                            $(`.socket-render tbody tr[object-id="${value.id}"] td:nth-child(5)`).html(`
+                            $(`.socket-render tbody tr[data-id="${value.id}"] td:nth-child(5)`).html(`
                                 ${buildProgressBar(value.appearances, totalFrames, fps, renderHour, false)}
                                 <div class="position-relative status-overlay">
                                     <div class="position-absolute"></div>
@@ -514,7 +514,7 @@
 
                             value.appearances.forEach((appearance) => {
                                 if (appearance.object_id !== appearance.old_object_id) {
-                                    $(`.socket-render tbody tr[object-id="${appearance.old_object_id}"]`).fadeOut(3000);
+                                    $(`.socket-render tbody tr[data-id="${appearance.old_object_id}"]`).fadeOut(3000);
                                 }
                             });
                         });
@@ -555,7 +555,7 @@
         Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectVideoRendered', function (res) {
             const { data } = res;
 
-            $(`.socket-render tbody tr[object-id="${data.id}"] td:last-child a`)
+            $(`.socket-render tbody tr[data-id="${data.id}"] td:last-child a`)
                 .html('<i class="mdi mdi-play"></i>')
                 .addClass('text-success')
                 .removeClass('disabled')
