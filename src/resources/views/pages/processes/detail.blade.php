@@ -411,6 +411,13 @@
                     if (value.name) {
                         $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(3)`).html(getLightboxBlock(value.images, value.id));
                         $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(4)`).text(value.name);
+                        $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(6)`).html(`
+                            <a href="#"
+                               data-video-result=""
+                               class="render-single-object">
+                                <i class="link-icon icon__normal-size" data-feather="play"></i>
+                            </a>
+                        `);
                     }
                 } else {
                     [trackIds, trackIndex] = insertInOrder(value.track_id, trackIds);
