@@ -403,7 +403,7 @@
                         [trackIds, trackIndex] = insertInOrder(value.track_id, trackIds);
 
                         renderBlockInOrder(
-                            renderBlock(value, value.appearances, fps, renderHour, !value.appearances[0].frame_to),
+                            renderBlock(value, value.appearances, fps, renderHour, !Number.isInteger(value.appearances[0].frame_to)),
                             trackIndex,
                             trackIds
                         );
