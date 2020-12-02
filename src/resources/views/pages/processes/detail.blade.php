@@ -51,7 +51,7 @@
                             disabled
                             @endif
                             class="btn btn-danger btn-stop">
-                        <i class="mdi mdi-stop" style="font-size: 15px;"></i>
+                        <i class="link-icon icon__normal-size" data-feather="stop-circle"></i>
                         Kết thúc
                     </button>
 

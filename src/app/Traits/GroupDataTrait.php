@@ -10,6 +10,7 @@ use App\Models\TrackedObject;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
 
 trait GroupDataTrait
 {
@@ -56,6 +57,10 @@ trait GroupDataTrait
             $data = json_decode(json_encode($response->body), true);
             $this->syncObjects($data);
         }
+        Redis::connection('client-publisher')->publish('progress', json_encode([
+            'process_id' => $process->mongo_id,
+            'status' => 'grouped',
+        ]));
     }
 
     /**
