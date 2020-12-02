@@ -40,27 +40,30 @@ trait GroupDataTrait
     // group data handler
     public function groupData($process)
     {
-        $url = config('app.ai_server') . "/processes/$process->mongo_id/grouping/unidentified";
-        $response = $this->sendPOSTRequest($url, [], $this->getDefaultHeaders());
-        Log::info("Grouping unidentified $process->id response " . json_encode($response));
+        $groupingIdentified = config('app.ai_server') . "/processes/$process->mongo_id/grouping2";
+        $this->callGroupingAPI($process, $groupingIdentified);
 
-        if ($response->status) {
-            $data = json_decode(json_encode($response->body), true);
-            $this->syncObjects($data);
-        }
+        $groupingIdentifiedNUnidentified = config('app.ai_server') . "/processes/$process->mongo_id/grouping/unidentified-identified";
+        $this->callGroupingAPI($process, $groupingIdentifiedNUnidentified);
 
-        $url = config('app.ai_server') . "/processes/$process->mongo_id/grouping2";
-        $response = $this->sendPOSTRequest($url, [], $this->getDefaultHeaders());
-        Log::info("Grouping $process->id response " . json_encode($response));
+        $groupingUnidentified = config('app.ai_server') . "/processes/$process->mongo_id/grouping/unidentified";
+        $this->callGroupingAPI($process, $groupingUnidentified);
 
-        if ($response->status) {
-            $data = json_decode(json_encode($response->body), true);
-            $this->syncObjects($data);
-        }
         Redis::connection('client-publisher')->publish('progress', json_encode([
             'process_id' => $process->mongo_id,
             'status' => 'grouped',
         ]));
+    }
+
+    private function callGroupingAPI($process, $url)
+    {
+        $response = $this->sendPOSTRequest($url, [], $this->getDefaultHeaders());
+        Log::info("$url  ----  $process->id response: " . json_encode($response));
+
+        if ($response->status) {
+            $data = json_decode(json_encode($response->body), true);
+            $this->syncObjects($data);
+        }
     }
 
     /**
