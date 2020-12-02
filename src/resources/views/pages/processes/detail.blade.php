@@ -326,7 +326,7 @@
 
         function renderBlock(object, appearances, fps, renderHour, shouldIncreasing) {
             return (`
-                <tr data-track-id="${object.track_id}" data-id="${object.id}">
+                <tr track-id="${object.track_id}" object-id="${object.id}">
                     <td class="text-center">${object.track_id}</td>
                     <td class="text-center">
                         <img src="${object.image}" alt="image" data-lightbox="${object.image}"
@@ -334,10 +334,12 @@
                     </td>
                     <td class="text-center">${getLightboxBlock(object.images)}</td>
                     <td>${object.name || 'Unknown'}</td>
-                    <td class="position-relative">
+                    <td>
                         ${buildProgressBar(appearances, totalFrames, fps, renderHour, shouldIncreasing)}
-                        <div class="status-overlay position-absolute ${shouldIncreasing ? 'increasing' : ''}">
-                            ${shouldIncreasing ? 'Đang nhận diện' : ''}
+                        <div class="position-relative status-overlay">
+                            <div class="position-absolute ${shouldIncreasing ? 'increasing' : ''}">
+                                ${shouldIncreasing ? 'Đang nhận diện' : ''}
+                            </div>
                         </div>
                     </td>
                     <td width="50px" class="text-center">
@@ -362,12 +364,12 @@
                 $('.socket-render tbody').prepend(html);
             } else {
                 const prevTrackId = trackIds[index];
-                const $element = $(`.socket-render tbody tr[data-track-id="${prevTrackId}"]`)[0];
+                const $element = $(`.socket-render tbody tr[track-id="${prevTrackId}"]`);
 
-                if ($element) {
+                if ($element.length) {
                     $('.socket-render tbody').append(html);
                 } else {
-                    $element.after(html);
+                    element.after(html);
                 }
             }
         }
@@ -410,14 +412,16 @@
 
             res.data.forEach((value) => {
                 if (trackIds.indexOf(value.track_id) >= 0) {
-                    $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(5)`).html(`
+                    $(`.socket-render tbody tr[track-id="${value.track_id}"] td:nth-child(5)`).html(`
                         ${buildProgressBar([value], totalFrames, fps, renderHour, false)}
-                        <div class="status-overlay position-absolute"></div>
+                        <div class="position-relative status-overlay">
+                            <div class="position-absolute"></div>
+                        </div>
                     `);
                     if (value.name) {
-                        $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(3)`).html(getLightboxBlock(value.images, value.id));
-                        $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(4)`).text(value.name);
-                        $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(6)`).html(`
+                        $(`.socket-render tbody tr[track-id="${value.track_id}"] td:nth-child(3)`).html(getLightboxBlock(value.images, value.id));
+                        $(`.socket-render tbody tr[track-id="${value.track_id}"] td:nth-child(4)`).text(value.name);
+                        $(`.socket-render tbody tr[track-id="${value.track_id}"] td:nth-child(6)`).html(`
                             <a href="#"
                                data-video-result=""
                                class="render-single-object icon__normal-font-size text-secondary">
@@ -501,14 +505,16 @@
                     type: 'GET',
                     success: function (res) {
                         res.data.forEach((value) => {
-                            $(`.socket-render tbody tr[data-id="${value.id}"] td:nth-child(5)`).html(`
+                            $(`.socket-render tbody tr[object-id="${value.id}"] td:nth-child(5)`).html(`
                                 ${buildProgressBar(value.appearances, totalFrames, fps, renderHour, false)}
-                                <div class="status-overlay position-absolute"></div>
+                                <div class="position-relative status-overlay">
+                                    <div class="position-absolute"></div>
+                                </div>
                             `);
 
                             value.appearances.forEach((appearance) => {
                                 if (appearance.object_id !== appearance.old_object_id) {
-                                    $(`.socket-render tbody tr[data-id="${appearance.old_object_id}"]`).fadeOut(3000);
+                                    $(`.socket-render tbody tr[object-id="${appearance.old_object_id}"]`).fadeOut(3000);
                                 }
                             });
                         });
@@ -549,7 +555,7 @@
         Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectVideoRendered', function (res) {
             const { data } = res;
 
-            $(`.socket-render tbody tr[data-id="${data.id}"] td:last-child a`)
+            $(`.socket-render tbody tr[object-id="${data.id}"] td:last-child a`)
                 .html('<i class="mdi mdi-play"></i>')
                 .addClass('text-success')
                 .removeClass('disabled')
