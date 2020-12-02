@@ -369,7 +369,7 @@
                 if ($element.length === 0) {
                     $('.socket-render tbody').append(html);
                 } else {
-                    element.after(html);
+                    $element.after(html);
                 }
             }
         }
