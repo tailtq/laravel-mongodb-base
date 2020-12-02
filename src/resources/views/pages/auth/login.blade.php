@@ -34,7 +34,7 @@
                                     <div class="form-group">
                                         <label>Mật khẩu</label>
                                         <input type="password" class="form-control" name="password"
-                                               autocomplete="current-password" placeholder="Password"
+                                               autocomplete="current-password" placeholder="Mật khẩu"
                                                value="{{ old('password') }}">
 
                                         @error('password')

@@ -42,7 +42,7 @@
                         </div>
                         <div class="form-group">
                             <label>Mật khẩu</label>
-                            <input type="password" class="form-control" placeholder="Enter Password"
+                            <input type="password" class="form-control" placeholder="Nhập mật khẩu"
                                    name="password"
                                    value="{{ old('password') }}">
 
@@ -54,7 +54,7 @@
                         </div>
                         <div class="form-group">
                             <label>Xác nhận mật khẩu</label>
-                            <input type="password" class="form-control" placeholder="Confirm Password"
+                            <input type="password" class="form-control" placeholder="Xác nhận mật khẩu"
                                    name="password_confirmation"
                                    value="{{ old('password_confirmation') }}">
 
