@@ -22,7 +22,7 @@
     <div class="row">
         <div class="card-body">
             <div class="d-flex justify-content-md-between align-items-center mb-3">
-                <h5 class="card-title">
+                <h5 class="card-title" data-mongo-id="{{ $process->mongo_id }}">
                     {{ $process->name }}
                     &nbsp;
                     <span class="
