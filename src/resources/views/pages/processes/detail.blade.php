@@ -5,7 +5,9 @@
     <link href="{{ asset('assets/plugins/lightbox/css/lightbox.min.css') }}" rel="stylesheet"/>
     <link rel="stylesheet" href="{{ my_asset('assets/plugins/@mdi/css/materialdesignicons.min.css') }}">
     <style>
-
+        .popover .popover-body {
+            padding: 2px 5px;
+        }
     </style>
 @endpush
 
@@ -152,6 +154,7 @@
                                 <th width="15%" class="text-center">Ảnh CMND đối chiếu</th>
                                 <th width="20%">Tên đối tượng</th>
                                 <th>Thời gian xuất hiện</th>
+                                <th></th>
                             </tr>
                             </thead>
                             <tbody></tbody>
@@ -277,10 +280,12 @@
                          style="width: ${transparentLength / totalFrames * 100}%"></div>
 
                     <div class="progress-bar progress-bar-striped ${shouldIncreasing ? 'bg-danger' : 'bg-success'}" role="progressbar"
-                         data-toggle="tooltip"
                          data-frame-from="${frameFrom}"
                          style="width: ${shouldIncreasing ? 1 : (length / totalFrames * 100)}%"
-                         title="${getTimeString(frameFrom, frameTo, fps, renderHour)}"></div>
+                         data-toggle="popover"
+                         data-placement="bottom"
+                         data-trigger="hover"
+                         data-content="${getTimeString(frameFrom, frameTo, fps, renderHour)}"></div>
                     `;
 
                 currentTime += frameTo;
@@ -296,7 +301,7 @@
             minFrom = (minFrom % 60).toString().padStart(2, '0');
             secondFrom = (secondFrom % 60).toString().padStart(2, '0');
 
-            if (!isNaN(frameTo)) {
+            if (isNaN(frameTo)) {
                 return `${renderHour ? `${hourFrom}:` : ''}${minFrom}:${secondFrom} - now`;
             }
 
@@ -314,7 +319,7 @@
 
             return images ? `
                 <a href="${images[0].url}" data-lightbox="object-${id}">
-                    <img src="${images[0].url}" style="width: 60px; height: 60px;" alt="">
+                    <img src="${images[0].url}" style="width: inherit; height: 60px;" alt="">
                 </a>
             ` : ``;
         }
@@ -323,9 +328,9 @@
             return (`
                 <tr data-track-id="${object.track_id}" data-id="${object.id}">
                     <td class="text-center">${object.track_id}</td>
-                    <td class="py-1 text-center">
+                    <td class="text-center">
                         <img src="${object.image}" alt="image" data-lightbox="${object.image}"
-                             style="width: 40px; height: 40px;">
+                             style="width: inherit; height: 60px;">
                     </td>
                     <td class="text-center">${getLightboxBlock(object.images)}</td>
                     <td>${object.name || 'Unknown'}</td>
@@ -339,8 +344,8 @@
                         ${object.identity_id ? `
                             <a href="#"
                                data-video-result="${object.video_result || ''}"
-                               class="render-single-object ${object.video_result ? 'text-success' : ''}">
-                                <i class="link-icon icon__normal-size" data-feather="play"></i>
+                               class="render-single-object icon__normal-font-size ${object.video_result ? 'text-success' : 'text-secondary'}">
+                                ${object.video_result ? `<i class="mdi mdi-play"></i>` : '<i class="mdi mdi-video-switch"></i>'}
                             </a>` : ''}
                     </td>
                 </tr>
@@ -395,6 +400,7 @@
                         );
                     });
                     feather.replace();
+                    $('[data-toggle="popover"]').popover();
                 },
             });
         }
@@ -414,8 +420,8 @@
                         $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(6)`).html(`
                             <a href="#"
                                data-video-result=""
-                               class="render-single-object">
-                                <i class="link-icon icon__normal-size" data-feather="play"></i>
+                               class="render-single-object icon__normal-font-size text-secondary">
+                                <i class="mdi mdi-video-switch"></i>
                             </a>
                         `);
                     }
@@ -432,6 +438,7 @@
 
             $('.process__ungrouped-count').html(trackIds.length);
             feather.replace();
+            $('[data-toggle="popover"]').popover();
         });
 
         Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChange', (res) => {
@@ -543,9 +550,10 @@
             const { data } = res;
 
             $(`.socket-render tbody tr[data-id="${data.id}"] td:last-child a`)
-                .html('<i class="link-icon icon__normal-size" data-feather="play"></i>')
+                .html('<i class="mdi mdi-play"></i>')
                 .addClass('text-success')
                 .removeClass('disabled')
+                .blur()
                 .data('video-result', data.video_result);
             feather.replace();
         });
