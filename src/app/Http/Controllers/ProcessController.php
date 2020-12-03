@@ -48,10 +48,14 @@ class ProcessController extends Controller
                  AND objects.identity_id is NULL
                  AND objects.matching_status = '" . TrackedObject::MATCHING_STATUS['identified'] . "') as unidentified_count")
         )->where('id', $id)->first();
+//        $matchingPercentage = 0;
 
         if (!$process) {
             abort(404);
         }
+//        if ($process->ungrouped_count != 0) {
+//            $matchingPercentage = ($process->identified_count + $process->unidentified_count) / $process->ungrouped_count;
+//        }
         if (!in_array($process->status, ['done', 'grouped', 'rendering'])) {
             $process->grouped_count = 0;
             $process->identified_count = 0;
@@ -66,6 +70,7 @@ class ProcessController extends Controller
 
         return view('pages.processes.detail', array_merge([
             'process' => $process,
+//        ], $this->getProgressing($process->status, $matchingPercentage)));
         ], $this->getProgressing($process->status)));
     }
 
@@ -220,6 +225,7 @@ class ProcessController extends Controller
      * @param $status
      * @return array
      */
+//    public function getProgressing($status, $matchingPercentage)
     public function getProgressing($status)
     {
         $detectingPercentage = 0;
