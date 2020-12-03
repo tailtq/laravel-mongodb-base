@@ -75,19 +75,19 @@
                     <table class="table table-bordered">
                         <tr>
                             <th>Số lượng đối tượng</th>
-                            <td class="process__ungrouped-count" width="80">{{ $process->ungrouped_count }}</td>
+                            <td class="process__ungrouped-count" width="40%">{{ $process->ungrouped_count }}</td>
                         </tr>
                         <tr>
                             <th>Số lượng sau khi nhất thể hoá</th>
-                            <td class="process__grouped-count" width="80">{{ $process->grouped_count }}</td>
+                            <td class="process__grouped-count" width="40%">{{ $process->grouped_count }}</td>
                         </tr>
                         <tr>
                             <th>Số lượng được xác định</th>
-                            <td class="process__identified-count" width="80">{{ $process->identified_count }}</td>
+                            <td class="process__identified-count" width="40%">{{ $process->identified_count }}</td>
                         </tr>
                         <tr>
                             <th>Số lượng không thể xác định</th>
-                            <td class="process__unidentified-count" width="80">{{ $process->unidentified_count }}</td>
+                            <td class="process__unidentified-count" width="40%">{{ $process->unidentified_count }}</td>
                         </tr>
                     </table>
 
@@ -269,9 +269,11 @@
         const frameDrop = {{ object_get($process->mongoData, 'frame_drop', 1) }};
         const totalFrames = Math.round(parseInt({{ $process->total_frames }}, 10) / frameDrop);
         const fps = Math.round(parseInt('{{ $process->fps }}', 10) / frameDrop);
-        const renderHour = totalFrames / 3600 >= 1;
+        // const renderHour = totalFrames / fps / 3600 >= 1;
+        const renderHour = false;
         let currentFrame = 0;
         let trackIds = [];
+        let globalStatus = '{{ $process->status }}';
 
         function buildProgressBar(times, totalFrames, fps, renderHour, shouldIncreasing = false) {
             let bars = ``;
@@ -342,7 +344,7 @@
                              style="width: inherit; height: 60px;">
                     </td>
                     <td class="text-center">${getLightboxBlock(object.images, object.id)}</td>
-                    <td>${object.name || 'Không nhận diện được'}</td>
+                    <td>${object.name || 'Không xác định'}</td>
                     <td class="position-relative">
                         ${buildProgressBar(appearances, totalFrames, fps, renderHour, shouldIncreasing)}
                         <div class="position-absolute status-overlay ${shouldIncreasing ? 'increasing' : ''}">
@@ -353,6 +355,7 @@
                         ${object.identity_id ? `
                             <a href="#"
                                data-video-result="${object.video_result || ''}"
+                               style="display: ${globalStatus === 'done' ? 'inline' : 'none'}"
                                class="render-single-object icon__normal-font-size ${object.video_result ? 'text-success' : 'text-secondary'}">
                                 ${object.video_result ? `<i class="mdi mdi-play"></i>` : '<i class="mdi mdi-video-switch"></i>'}
                             </a>` : ''}
@@ -431,6 +434,7 @@
                         $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(6)`).html(`
                             <a href="#"
                                data-video-result=""
+                               style="display: ${globalStatus === 'done' ? 'inline' : 'none'}"
                                class="render-single-object icon__normal-font-size text-secondary">
                                 <i class="mdi mdi-video-switch"></i>
                             </a>
@@ -463,6 +467,8 @@
                 frame_index: frameIndex,
             } = res.data;
 
+            globalStatus = status;
+
             if (!isNaN(frameIndex)) {
                 currentFrame = frameIndex;
             }
@@ -483,6 +489,7 @@
                 $('.video-rendering__btn').html(`
                     <a class="btn btn-primary" target="_blank" href="${videoResult}">Video tái hiện</a>
                 `);
+                $('.render-single-object').removeAttr('style');
             } else if (status === 'detecting' || status === 'rendering') {
                 const $element = $(`.progress-bar__${status}`);
 
