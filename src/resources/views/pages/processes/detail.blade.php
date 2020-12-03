@@ -340,8 +340,7 @@
                     ${!object.identity_id && $('[name="hide-unknown"]').is(':checked') ? 'style="display: none"' : ''}>
                     <td class="text-center">${object.track_id}</td>
                     <td class="text-center">
-                        <img src="${object.image}" alt="image"
-                             style="width: inherit; height: 60px;">
+                        <img src="${object.image}" alt="image" style="width: inherit; height: 60px;">
                     </td>
                     <td class="text-center">${getLightboxBlock(object.images, object.id)}</td>
                     <td>${object.name || 'Không xác định'}</td>
@@ -429,6 +428,9 @@
                     `);
                     if (value.name) {
                         $(`.socket-render tbody tr[data-track-id="${value.track_id}"]`).attr('data-identity-id', value.identity_id).removeAttr('style');
+                        $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(2)`).html(`
+                            <img src="${value.image}" alt="image" style="width: inherit; height: 60px;">
+                        `);
                         $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(3)`).html(getLightboxBlock(value.images, value.id));
                         $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(4)`).text(value.name);
                         $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(6)`).html(`
