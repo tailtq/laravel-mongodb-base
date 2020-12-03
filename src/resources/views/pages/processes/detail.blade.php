@@ -416,6 +416,7 @@
 
         Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectsAppear', (res) => {
             $('.socket__message').remove();
+            console.log(res);
 
             res.data.forEach((value) => {
                 if (trackIds.indexOf(value.track_id) >= 0) {
@@ -424,7 +425,7 @@
                         <div class="position-absolute status-overlay"></div>
                     `);
                     if (value.name) {
-                        $(`.socket-render tbody tr[data-track-id="${value.track_id}"]`).data('identity-id', value.identity_id).removeAttr('style');
+                        $(`.socket-render tbody tr[data-track-id="${value.track_id}"]`).attr('data-identity-id', value.identity_id).removeAttr('style');
                         $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(3)`).html(getLightboxBlock(value.images, value.id));
                         $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(4)`).text(value.name);
                         $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(6)`).html(`
