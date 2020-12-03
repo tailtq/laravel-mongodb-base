@@ -11,35 +11,36 @@ trait RequestAPI
     {
         $response = Http::withHeaders($headers)->get($url, $params);
 
-        return $this->getResponse($response);
+        return $this->getResponse($response, $url);
     }
 
     public function sendPOSTRequest($url, $body, $headers = [])
     {
         $response = Http::withHeaders($headers)->post($url, $body);
 
-        return $this->getResponse($response);
+        return $this->getResponse($response, $url);
     }
 
     public function sendPUTRequest($url, $body, $headers = [])
     {
         $response = Http::withHeaders($headers)->put($url, $body);
 
-        return $this->getResponse($response);
+        return $this->getResponse($response, $url);
     }
 
     public function sendDELETERequest($url, $body = [], $headers = [])
     {
         $response = Http::withHeaders($headers)->delete($url, $body);
 
-        return $this->getResponse($response);
+        return $this->getResponse($response, $url);
     }
 
     /**
      * @param \Illuminate\Http\Client\Response $response
+     * @param string $url
      * @return \stdClass
      */
-    private function getResponse($response)
+    private function getResponse($response, $url = '')
     {
         $result = new \stdClass();
         $result->status = $response->successful();
@@ -50,7 +51,7 @@ trait RequestAPI
         if ($result->status) {
             $result->body = $result->body->data;
         } else {
-            Log::error(json_encode($result));
+            Log::error($url . "       ----------       " . json_encode($result));
 
             if (object_get($result, 'body.message')) {
                 $result->message = $result->body->message;
