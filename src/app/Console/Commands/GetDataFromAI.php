@@ -94,7 +94,6 @@ class GetDataFromAI extends Command
                     });
 
                     if ($process) {
-                        Log::info(json_encode($object));
                         $trackedObject = TrackedObject::create([
                             'process_id' => $process->id,
                             'track_id' => $object->track_id,
@@ -178,14 +177,16 @@ class GetDataFromAI extends Command
             return;
         }
         $body = (array) $response->body;
-        $identityMongoIds = array_values((array) $response->body);
+        $identityMongoIds = Arr::pluck(array_values($body), 'identity_id');
         $updatingData = [];
         $matchedIdentityMongoIds = [];
 
         $identities = Identity::whereIn('mongo_id', $identityMongoIds)->select(['id', 'mongo_id'])->get();
 
         foreach ($mappingIdentityIds as $key => $mongoId) {
-            $identityMongoId = $body[$mongoId] ?? null;
+            $mongoIdentity = $body[$mongoId] ?? null;
+            $identityMongoId = $mongoIdentity->identity_id ?? null;
+            $newImage = $mongoIdentity->image_url ?? null;
 
             $identity = $identities->first(function ($value) use ($identityMongoId) {
                 return $value->mongo_id == $identityMongoId;
@@ -194,6 +195,7 @@ class GetDataFromAI extends Command
                 'mongo_id' => $mongoId,
                 'identity_id' => $identity->id ?? null,
                 'matching_status' => TrackedObject::MATCHING_STATUS['identified'],
+                'image' => $newImage ? $newImage : 'false',
             ];
 
             if ($identity) {
