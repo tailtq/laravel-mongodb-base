@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DatabaseHelper
 {
@@ -37,6 +38,7 @@ class DatabaseHelper
 
         foreach ($keys as $key) {
             $set = "`$key` = CASE `$conditionColumn` ";
+            $updatingString = "";
 
             foreach ($data as $row) {
                 $condition = $row[$conditionColumn];
@@ -44,10 +46,16 @@ class DatabaseHelper
                 $value = $value === null ? 'NULL' : $value;
 
                 $condition = is_string($condition) ? "'$condition'" : $condition;
-                $set .= "WHEN $condition THEN $value ";
+
+                if ($value !== "'false'") {
+                    $updatingString .= "WHEN $condition THEN $value ";
+                }
             }
-            $set .= ' END';
-            $sets[] = $set;
+            if ($updatingString) {
+                $set .= $updatingString;
+                $set .= ' END';
+                $sets[] = $set;
+            }
         }
 
         $query .= implode(', ', $sets);
