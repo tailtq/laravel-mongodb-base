@@ -257,7 +257,7 @@
                                                    required
                                                    placeholder="Nhập thông số"
                                                    name="biometric_threshold"
-                                                   value="{{ old('biometric_threshold', 50) }}">
+                                                   value="{{ old('biometric_threshold', 60) }}">
                                         </div>
                                     </div>
                                 </div>
