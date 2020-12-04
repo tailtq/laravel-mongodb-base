@@ -7,7 +7,9 @@ use App\Models\ObjectAppearance;
 use App\Models\Process;
 use App\Models\TrackedObject;
 use App\Traits\RequestAPI;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use DB;
 
@@ -48,14 +50,18 @@ class ProcessController extends Controller
                  AND objects.identity_id is NULL
                  AND objects.matching_status = '" . TrackedObject::MATCHING_STATUS['identified'] . "') as unidentified_count")
         )->where('id', $id)->first();
-//        $matchingPercentage = 0;
+        $matchingPercentage = 0;
+        $matchingText = '(0/0)';
 
         if (!$process) {
             abort(404);
         }
-//        if ($process->ungrouped_count != 0) {
-//            $matchingPercentage = ($process->identified_count + $process->unidentified_count) / $process->ungrouped_count;
-//        }
+        if ($process->ungrouped_count != 0) {
+            $totalMatched = $process->identified_count + $process->unidentified_count;
+
+            $matchingText = "($totalMatched/$process->ungrouped_count)";
+            $matchingPercentage = (int) (100 * $totalMatched / $process->ungrouped_count);
+        }
         if (!in_array($process->status, ['done', 'grouped', 'rendering'])) {
             $process->grouped_count = 0;
             $process->identified_count = 0;
@@ -70,8 +76,8 @@ class ProcessController extends Controller
 
         return view('pages.processes.detail', array_merge([
             'process' => $process,
-//        ], $this->getProgressing($process->status, $matchingPercentage)));
-        ], $this->getProgressing($process->status)));
+            'matchingText' => $matchingText,
+        ], $this->getProgressing($process->status, $matchingPercentage)));
     }
 
     /**
@@ -147,7 +153,10 @@ class ProcessController extends Controller
         if (!$processData->status) {
             return $this->error($processData->body->message, 400);
         }
-        $process->update(['status' => Process::STATUS['detecting']]);
+        $process->update([
+            'detecting_start_time' => Carbon::now(),
+            'status' => Process::STATUS['detecting'],
+        ]);
 
         return $this->success('Bắt đầu thành công');
     }
@@ -221,15 +230,57 @@ class ProcessController extends Controller
         return redirect()->route('processes');
     }
 
+    public function searchFace(Request $request)
+    {
+        $ids = json_decode($request->get('process_ids'));
+        $processes = Process::whereIn('id', $ids)->get();
+
+        $file = $request->file('file');
+        $imageUrl = $this->uploadFile($file);
+
+        $url = config('app.ai_server') . "/processes/faces/searching";
+        $requestBody = [
+            'image_url' => $imageUrl,
+            'process_ids' => $processes->pluck('mongo_id')->all(),
+        ];
+        $response = $this->sendPOSTRequest($url, $requestBody, $this->getDefaultHeaders());
+        $searchedObjects = $response->body;
+        $objectMongoIds = Arr::pluck($searchedObjects, 'object_id');
+
+        // handle error cases
+        // laravel receive image --> save to min_io + search
+
+        $objects = TrackedObject::leftJoin('identities', 'objects.identity_id', 'identities.id')
+            ->whereIn('objects.mongo_id', $objectMongoIds)
+            ->select([
+                'objects.id',
+                'objects.identity_id',
+                'objects.mongo_id',
+                'objects.image',
+                'identities.name',
+                'identities.images'
+            ])
+            ->orderBy('objects.track_id')
+            ->with('appearances')
+            ->get();
+
+        foreach ($objects as &$object) {
+            $searchedObject = Arr::first($searchedObjects, function ($searchedObject) use ($object) {
+                return $searchedObject->object_id === $object->mongo_id;
+            });
+            $object->confidence = ($searchedObject->confidence ?? 0) * 100;
+        }
+
+        return $this->success($objects);
+    }
+
     /**
      * @param $status
      * @return array
      */
-//    public function getProgressing($status, $matchingPercentage)
-    public function getProgressing($status)
+    public function getProgressing($status, $matchingPercentage)
     {
         $detectingPercentage = 0;
-        $matchingPercentage = 0;
         $renderingPercentage = 0;
 
         if ($status === 'done') {

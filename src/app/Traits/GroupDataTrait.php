@@ -7,6 +7,7 @@ use App\Models\Identity;
 use App\Models\ObjectAppearance;
 use App\Models\Process;
 use App\Models\TrackedObject;
+use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -32,6 +33,9 @@ trait GroupDataTrait
             Log::info("Detected with ungrouped count: $process->ungrouped_count, identified count: $process->identified_count");
 
             if ($process->ungrouped_count == $process->identified_count) {
+                Process::where('id', $process->id)->update([
+                    'grouping_start_time' => Carbon::now(),
+                ]);
                 $this->groupData($process);
             }
         }

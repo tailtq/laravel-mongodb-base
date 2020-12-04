@@ -34,5 +34,9 @@ class Process extends Model
         'total_time',
         'total_frames',
         'fps',
+        'detecting_start_time',
+        'grouping_start_time',
+        'rendering_start_time',
+        'done_time',
     ];
 }

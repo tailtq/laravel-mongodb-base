@@ -4,6 +4,7 @@
     <link href="{{ my_asset('assets/plugins/jquery-steps/jquery.steps.css') }}" rel="stylesheet"/>
     <link href="{{ asset('assets/plugins/lightbox/css/lightbox.min.css') }}" rel="stylesheet"/>
     <link rel="stylesheet" href="{{ my_asset('assets/plugins/@mdi/css/materialdesignicons.min.css') }}">
+    <link href="{{ my_asset('assets/plugins/dropzone/dropzone.min.css') }}" rel="stylesheet"/>
     <style>
         .popover .popover-body {
             padding: 2px 5px;
@@ -22,7 +23,9 @@
     <div class="row">
         <div class="card-body">
             <div class="d-flex justify-content-md-between align-items-center mb-3">
-                <h5 class="card-title" data-mongo-id="{{ $process->mongo_id }}">
+                <h5 class="card-title process"
+                    data-id="{{ $process->id }}"
+                    data-mongo-id="{{ $process->mongo_id }}">
                     {{ $process->name }}
                     &nbsp;
                     <span class="
@@ -39,6 +42,17 @@
                     </span>
                 </h5>
                 <div style="display: inline-block">
+                    <button type="button"
+                            @if($process->status != 'done')
+                            disabled
+                            @endif
+                            data-toggle="modal"
+                            data-target="#searchFaceModal"
+                            class="btn btn-info btn-search text-white search-face__btn">
+                        <i class="link-icon icon__normal-size" data-feather="search"></i>
+                        Tìm kiếm
+                    </button>
+
                     <button type="button"
                             @if($process->status != 'ready')
                             disabled
@@ -132,7 +146,7 @@
                          aria-valuenow="{{ $matchingPercentage }}"
                          aria-valuemin="0"
                          aria-valuemax="100">
-                        {{ $matchingPercentage }}%
+                        {{ $matchingText }} {{ $matchingPercentage }}%
                     </div>
                 </div>
             </div>
@@ -156,14 +170,14 @@
                     <div class="table-responsive pt-3">
                         <table class="table table-bordered">
                             <thead>
-                            <tr>
-                                <th width="5%" class="text-center">Id</th>
-                                <th width="7%" class="text-center">Ảnh</th>
-                                <th width="15%" class="text-center">Ảnh CMND đối chiếu</th>
-                                <th width="20%">Tên đối tượng</th>
-                                <th>Thời gian xuất hiện</th>
-                                <th></th>
-                            </tr>
+                                <tr>
+                                    <th width="5%" class="text-center">Id</th>
+                                    <th width="7%" class="text-center">Ảnh</th>
+                                    <th width="15%" class="text-center">Ảnh CMND đối chiếu</th>
+                                    <th width="20%">Tên đối tượng</th>
+                                    <th>Thời gian xuất hiện</th>
+                                    <th></th>
+                                </tr>
                             </thead>
                             <tbody></tbody>
                         </table>
@@ -179,6 +193,7 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
+                    <h5></h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -190,11 +205,42 @@
         </div>
     </div>
 
+    <div class="modal fade" id="searchFaceModal" tabindex="-1" role="dialog" aria-labelledby="searchFaceModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>Tìm kiếm đối tượng</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="dropzone search-face__dropzone">
+                        <div class="dz-message">Kéo ảnh vào đây để tải lên</div>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <button class="btn btn-primary dropzone-submit">Tìm kiếm</button>
+                    </div>
+
+                    <div class="search-face__result" style="display: none">
+                        <hr>
+
+                        <h5 class="mb-4">Kết quả tìm kiếm:</h5>
+
+                        <ul class="list-unstyled"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal -->
     @include('pages.processes.modal_process')
 @endsection
 
 @push('plugin-scripts')
+    <script src="{{ my_asset('assets/plugins/dropzone/dropzone.min.js') }}"></script>
     <script src="{{ my_asset('assets/plugins/jquery-steps/jquery.steps.min.js') }}"></script>
     <script src="{{ my_asset('assets/plugins/lightbox/js/lightbox.min.js') }}"></script>
     {{--<script src="https://cdnjs.cloudflare.com/ajax/libs/dashjs/3.1.3/dash.all.min.js"></script>--}}
@@ -204,397 +250,17 @@
 @push('custom-scripts')
     <script src="{{ my_asset('assets/js/custom.js') }}"></script>
     <script>
-        const Toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 2000,
-        });
-
+        // define global variables
         const processId = '{{ $process->id }}';
         const allStatus = <?= json_encode(__('status', [], 'vi'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
-
-        // function for alert message when click action play, stop
-        function processMessage(type) {
-            if (type === 'start') {
-                Toast.fire({
-                    type: 'success',
-                    title: 'Bắt đầu thực thi'
-                });
-            } else {
-                Toast.fire({
-                    type: 'success',
-                    title: 'Kết thúc thực thi'
-                });
-            }
-        }
-
-        function sendStartStopRequest(processId, type) {
-            $.ajax({
-                url: `/processes/${type}-process`,
-                type: 'POST',
-                dataType: 'json',
-                contentType: 'application/json; charset=UTF-8',
-                data: JSON.stringify({
-                    _token: $('meta[name="_token"]').attr('content'),
-                    processId: processId
-                }),
-                success: function (res) {
-                    if (type === 'start') {
-                        $('.btn-start').attr('disabled', true);
-                        $('.btn-stop').attr('disabled', false);
-                    } else if (type === 'stop') {
-                        $('.btn-stop').attr('disabled', true);
-                    }
-                    processMessage(type);
-                },
-                error: function ({responseJSON: res}) {
-                    Toast.fire({
-                        type: 'error',
-                        title: res.message
-                    });
-                }
-            });
-        }
-
-        $('.btn-start').click(function () {
-            sendStartStopRequest(processId, 'start');
-        });
-
-        $('.btn-stop').click(function () {
-            sendStartStopRequest(processId, 'stop');
-        });
-
         // render objects
         const frameDrop = {{ object_get($process->mongoData, 'frame_drop', 1) }};
         const totalFrames = Math.round(parseInt({{ $process->total_frames }}, 10) / frameDrop);
         const fps = Math.round(parseInt('{{ $process->fps }}', 10) / frameDrop);
         // const renderHour = totalFrames / fps / 3600 >= 1;
         const renderHour = false;
-        let currentFrame = 0;
-        let trackIds = [];
+
         let globalStatus = '{{ $process->status }}';
-
-        function buildProgressBar(times, totalFrames, fps, renderHour, shouldIncreasing = false) {
-            let bars = ``;
-            let currentTime = 0;
-
-            times.forEach(({frame_from: frameFrom, frame_to: frameTo}) => {
-                const length = frameTo - frameFrom;
-                const transparentLength = frameFrom - currentTime;
-
-                // for shouldIncreasing case, we just render a red slice of the bar
-                bars += `
-                    <div class="progress-bar bg-transparent" role="progressbar"
-                         data-toggle="tooltip"
-                         style="width: ${transparentLength / totalFrames * 100}%"></div>
-
-                    <div class="progress-bar progress-bar-striped ${shouldIncreasing ? 'bg-danger' : 'bg-success'}" role="progressbar"
-                         data-frame-from="${frameFrom}"
-                         style="width: ${shouldIncreasing ? 1 : (length / totalFrames * 100)}%"
-                         data-toggle="popover"
-                         data-placement="bottom"
-                         data-trigger="hover"
-                         data-content="${getTimeString(frameFrom, frameTo, fps, renderHour)}"></div>
-                    `;
-
-                currentTime += frameTo;
-            });
-
-            return `<div class="progress ht-15">${bars}</div>`;
-        }
-
-        function getTimeString(frameFrom, frameTo, fps, renderHour) {
-            let secondFrom = Math.floor(frameFrom / fps);
-            let minFrom = Math.floor(secondFrom / 60);
-            const hourFrom = (Math.floor(minFrom / 60)).toString().padStart(2, '0');
-            minFrom = (minFrom % 60).toString().padStart(2, '0');
-            secondFrom = (secondFrom % 60).toString().padStart(2, '0');
-
-            if (!Number.isInteger(frameTo)) {
-                return `${renderHour ? `${hourFrom}:` : ''}${minFrom}:${secondFrom} - now`;
-            }
-
-            let secondTo = Math.floor(frameTo / fps);
-            let minTo = Math.floor(secondTo / 60);
-            const hourTo = (Math.floor(minTo / 60)).toString().padStart(2, '0');
-            minTo = (minTo % 60).toString().padStart(2, '0');
-            secondTo = (secondTo % 60).toString().padStart(2, '0');
-
-            return `${renderHour ? `${hourFrom}:` : ''}${minFrom}:${secondFrom} - ${renderHour ? `${hourTo}:` : ''}${minTo}:${secondTo}`;
-        }
-
-        function getLightboxBlock(images, id) {
-            images = images ? JSON.parse(images) : null;
-
-            return images ? `
-                <a href="${images[0].url}" data-lightbox="object-${id}">
-                    <img src="${images[0].url}" style="width: inherit; height: 60px;" alt="">
-                </a>
-            ` : ``;
-        }
-
-        function renderBlock(object, appearances, fps, renderHour, shouldIncreasing) {
-            return (`
-                <tr data-track-id="${object.track_id}" data-id="${object.id}" data-identity-id="${object.identity_id}"
-                    ${!object.identity_id && $('[name="hide-unknown"]').is(':checked') ? 'style="display: none"' : ''}>
-                    <td class="text-center">${object.track_id}</td>
-                    <td class="text-center">
-                        <img src="${object.image}" alt="image" style="width: inherit; height: 60px;">
-                    </td>
-                    <td class="text-center">${getLightboxBlock(object.images, object.id)}</td>
-                    <td>${object.name || 'Không xác định'}</td>
-                    <td class="position-relative">
-                        ${buildProgressBar(appearances, totalFrames, fps, renderHour, shouldIncreasing)}
-                        <div class="position-absolute status-overlay ${shouldIncreasing ? 'increasing' : ''}">
-                            ${shouldIncreasing ? 'Đang nhận diện' : ''}
-                        </div>
-                    </td>
-                    <td width="50px" class="text-center">
-                        ${object.identity_id ? `
-                            <a href="#"
-                               data-video-result="${object.video_result || ''}"
-                               style="display: ${globalStatus === 'done' ? 'inline' : 'none'}"
-                               class="render-single-object icon__normal-font-size ${object.video_result ? 'text-success' : 'text-secondary'}">
-                                ${object.video_result ? `<i class="mdi mdi-play"></i>` : '<i class="mdi mdi-video-switch"></i>'}
-                            </a>` : ''}
-                    </td>
-                </tr>
-            `);
-        }
-
-        function renderBlockInOrder(html, order, trackIds) {
-            let index;
-
-            if (order !== 0) {
-                index = order - 1;
-            }
-            if (order === 0) {
-                $('.socket-render tbody').prepend(html);
-            } else {
-                const prevTrackId = trackIds[index];
-                const $element = $(`.socket-render tbody tr[data-track-id="${prevTrackId}"]`);
-
-                if ($element.length === 0) {
-                    $('.socket-render tbody').append(html);
-                } else {
-                    $element.after(html);
-                }
-            }
-        }
-
-        function insertInOrder(element, array) {
-            array.push(element);
-            array.sort(function (a, b) {
-                return a - b;
-            });
-
-            return [array, array.indexOf(element)];
-        }
-
-        function renderData() {
-            $.ajax({
-                url: `/processes/${processId}/objects`,
-                type: 'GET',
-                success: function (res) {
-                    if (res.data.length > 0) {
-                        $('.socket__message').remove();
-                    }
-
-                    res.data.forEach((value) => {
-                        [trackIds, trackIndex] = insertInOrder(value.track_id, trackIds);
-
-                        renderBlockInOrder(
-                            renderBlock(value, value.appearances, fps, renderHour, !Number.isInteger(value.appearances[0].frame_to)),
-                            trackIndex,
-                            trackIds
-                        );
-                    });
-                    feather.replace();
-                    $('[data-toggle="popover"]').popover();
-                },
-            });
-        }
-
-        Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectsAppear', (res) => {
-            $('.socket__message').remove();
-            console.log(res);
-
-            res.data.forEach((value) => {
-                if (trackIds.indexOf(value.track_id) >= 0) {
-                    $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(5)`).html(`
-                        ${buildProgressBar([value], totalFrames, fps, renderHour, false)}
-                        <div class="position-absolute status-overlay"></div>
-                    `);
-                    if (value.name) {
-                        $(`.socket-render tbody tr[data-track-id="${value.track_id}"]`).attr('data-identity-id', value.identity_id).removeAttr('style');
-                        $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(2)`).html(`
-                            <img src="${value.image}" alt="image" style="width: inherit; height: 60px;">
-                        `);
-                        $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(3)`).html(getLightboxBlock(value.images, value.id));
-                        $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(4)`).text(value.name);
-                        $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(6)`).html(`
-                            <a href="#"
-                               data-video-result=""
-                               style="display: ${globalStatus === 'done' ? 'inline' : 'none'}"
-                               class="render-single-object icon__normal-font-size text-secondary">
-                                <i class="mdi mdi-video-switch"></i>
-                            </a>
-                        `);
-                    }
-                } else {
-                    [trackIds, trackIndex] = insertInOrder(value.track_id, trackIds);
-
-                    renderBlockInOrder(
-                        renderBlock(value, [value], fps, renderHour, true),
-                        trackIndex,
-                        trackIds
-                    );
-                }
-            });
-
-            $('.process__ungrouped-count').html(trackIds.length);
-            feather.replace();
-            $('[data-toggle="popover"]').popover();
-        });
-
-        Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChange', (res) => {
-            console.log('Socket data', res.data);
-
-            const {
-                status,
-                progress,
-                total,
-                video_result: videoResult,
-                frame_index: frameIndex,
-            } = res.data;
-
-            globalStatus = status;
-
-            if (!isNaN(frameIndex)) {
-                currentFrame = frameIndex;
-            }
-            if (allStatus[status]) {
-                const $processStatus = $('.process__status');
-                $processStatus.text(allStatus[status]);
-
-                if (status === 'error' || status === 'stopped') {
-                    $processStatus.removeClass('badge-success').addClass('badge-danger');
-                }
-            }
-            if (status === 'done' && videoResult) {
-                Toast.fire({
-                    type: 'success',
-                    title: 'Tiến trình đã hoàn thành',
-                });
-
-                $('.video-rendering__btn').html(`
-                    <a class="btn btn-primary" target="_blank" href="${videoResult}">Video tái hiện</a>
-                `);
-                $('.render-single-object').removeAttr('style');
-            } else if (status === 'detecting' || status === 'rendering') {
-                const $element = $(`.progress-bar__${status}`);
-
-                $element.css({width: `${progress}%`});
-                $element.attr('aria-valuenow', progress);
-                $element.text(`${progress}%`);
-            } else if (status === 'matching') {
-                const $element = $(`.progress-bar__${status}`);
-                const percentage = trackIds.length > 0 ? total / trackIds.length * 100 : 0;
-
-                $element.css({width: `${percentage}%`});
-                $element.attr('aria-valuenow', progress);
-                $element.text(`${parseInt(percentage, 10)}%`);
-            } else if (status === 'grouping') {
-                Toast.fire({
-                    type: 'success',
-                    title: 'Đang nhất thể hoá',
-                });
-            } else if (status === 'grouped') {
-                Toast.fire({
-                    type: 'success',
-                    title: 'Nhất thể hoá thành công',
-                });
-
-                $.ajax({
-                    url: `/processes/${processId}/objects`,
-                    type: 'GET',
-                    success: function (res) {
-                        res.data.forEach((value) => {
-                            $(`.socket-render tbody tr[data-id="${value.id}"] td:nth-child(5)`).html(`
-                                ${buildProgressBar(value.appearances, totalFrames, fps, renderHour, false)}
-                                <div class="position-absolute status-overlay"></div>
-                            `);
-
-                            value.appearances.forEach((appearance) => {
-                                if (appearance.object_id !== appearance.old_object_id) {
-                                    $(`.socket-render tbody tr[data-id="${appearance.old_object_id}"]`).fadeOut(3000);
-                                }
-                            });
-                        });
-                        $('.process__grouped-count').html(res.data.length);
-                        $('.process__identified-count').html(res.data.filter(e => !!e.identity_id).length);
-                        $('.process__unidentified-count').html(res.data.filter(e => !e.identity_id).length);
-                    },
-                });
-            }
-        });
-
-        function listenObjectRenderingEvent() {
-            $(document).on('click', '.render-single-object', function (e) {
-                e.preventDefault();
-                const videoResult = $(this).data('video-result');
-
-                if (videoResult) {
-                    $('#videoModal').modal('show');
-                    $('#videoModal video').attr('src', videoResult);
-                    return;
-                }
-                const id = $(this).parent().closest('tr').data('id');
-
-                $(this).addClass('disabled');
-                $(this).html(`<i class="icon__normal-size" data-feather="rotate-cw"></i>`);
-                feather.replace();
-                $(this).find('svg').addClass('infinite-spin');
-
-                $.post(`/objects/${id}/rendering`, {
-                    _token: $('meta[name="_token"]').attr('content'),
-                }).then((res) => {
-                    // TODO: add spinning icon
-                    console.log(res);
-                });
-            });
-        }
-
-        Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectVideoRendered', function (res) {
-            const { data } = res;
-
-            $(`.socket-render tbody tr[data-id="${data.id}"] td:last-child a`)
-                .html('<i class="mdi mdi-play"></i>')
-                .addClass('text-success')
-                .removeClass('disabled')
-                .blur()
-                .data('video-result', data.video_result);
-            feather.replace();
-        });
-
-        $('[name="hide-unknown"]').on('change', function () {
-            const shouldHide = $(this).is(':checked');
-            const $null = $(`.socket-render tbody tr[data-identity-id="null"]`);
-            const $undefined = $(`.socket-render tbody tr[data-identity-id="undefined"]`);
-
-            if (shouldHide) {
-                $null.fadeOut(1000);
-                $undefined.fadeOut(1000);
-            } else {
-                $null.fadeIn(1000);
-                $undefined.fadeIn(1000);
-            }
-        });
-
-        $(document).ready(function () {
-            renderData();
-            listenObjectRenderingEvent();
-        });
     </script>
+    <script src="{{ my_asset('js/detail.js') }}"></script>
 @endpush

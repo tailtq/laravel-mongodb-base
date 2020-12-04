@@ -8,6 +8,7 @@ use App\Models\Process;
 use App\Models\TrackedObject;
 use App\Traits\GroupDataTrait;
 use App\Traits\RequestAPI;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
@@ -61,7 +62,7 @@ class ListenAIProgress extends Command
                     }
                     return;
                 }
-                // Update status
+
                 $data = [
                     'id' => $process->id,
                     'status' => $process->status,
@@ -72,6 +73,12 @@ class ListenAIProgress extends Command
                     $process->video_result = $event->video_url;
                     $data['video_result'] = $process->video_result;
                 }
+                if ($event->status === Process::STATUS['grouped']) {
+                    $data['rendering_start_time'] = Carbon::now();
+                }
+                if ($event->status === Process::STATUS['done']) {
+                    $data['done_time'] = Carbon::now();
+                }
                 if ($process->status != $event->status) {
                     $process->status = $event->status;
                     $process->save();
@@ -79,7 +86,7 @@ class ListenAIProgress extends Command
                     $data['status'] = $process->status;
                 }
                 // Call rendering API if status is grouped
-                if ($process->status === Process::STATUS['grouped']) {
+                if ($event->status === Process::STATUS['grouped']) {
                     $url = config('app.ai_server') .  "/processes/$process->mongo_id/rendering";
                     $response = $this->sendGETRequest($url, [], $this->getDefaultHeaders());
 
