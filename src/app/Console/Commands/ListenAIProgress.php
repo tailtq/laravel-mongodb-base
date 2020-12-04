@@ -74,10 +74,10 @@ class ListenAIProgress extends Command
                     $data['video_result'] = $process->video_result;
                 }
                 if ($event->status === Process::STATUS['grouped']) {
-                    $data['rendering_start_time'] = Carbon::now();
+                    $process->rendering_start_time = Carbon::now();
                 }
                 if ($event->status === Process::STATUS['done']) {
-                    $data['done_time'] = Carbon::now();
+                    $process->done_time = Carbon::now();
                 }
                 if ($process->status != $event->status) {
                     $process->status = $event->status;
