@@ -58,9 +58,10 @@ class ProcessController extends Controller
         }
         if ($process->ungrouped_count != 0) {
             $totalMatched = $process->identified_count + $process->unidentified_count;
+            $totalObjects = $process->grouped_count > 0 ? $process->grouped_count : $process->ungrouped_count;
 
-            $matchingText = "($totalMatched/$process->ungrouped_count)";
-            $matchingPercentage = (int) (100 * $totalMatched / $process->ungrouped_count);
+            $matchingText = "($totalMatched/$totalObjects)";
+            $matchingPercentage = (int) (100 * $totalMatched / ($totalObjects));
         }
         if (!in_array($process->status, ['done', 'grouped', 'rendering'])) {
             $process->grouped_count = 0;
