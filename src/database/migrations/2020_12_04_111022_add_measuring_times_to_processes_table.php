@@ -15,6 +15,8 @@ class AddMeasuringTimesToProcessesTable extends Migration
     {
         Schema::table('processes', function (Blueprint $table) {
             $table->dateTime('detecting_start_time')->nullable();
+            $table->dateTime('detecting_end_time')->nullable();
+            $table->dateTime('matching_start_time')->nullable();
             $table->dateTime('grouping_start_time')->nullable();
             $table->dateTime('rendering_start_time')->nullable();
             $table->dateTime('done_time')->nullable();
@@ -31,6 +33,8 @@ class AddMeasuringTimesToProcessesTable extends Migration
         Schema::table('processes', function (Blueprint $table) {
             $table->dropColumn([
                 'detecting_start_time',
+//                'detecting_end_time',
+//                'matching_start_time',
                 'grouping_start_time',
                 'rendering_start_time',
                 'done_time',
