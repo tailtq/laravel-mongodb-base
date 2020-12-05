@@ -208,13 +208,18 @@ class GetDataFromAI extends Command
             $this->queryAndBroadcastResult('objects.mongo_id', $matchedIdentityMongoIds);
         }
         foreach ($processIds as $processId) {
+            $totalMatched = DB::table('objects')->where([
+                'process_id' => $processId,
+                'matching_status' => TrackedObject::MATCHING_STATUS['identified']
+            ])->count();
+
+            if ($totalMatched === 1) {
+                Process::where('id', $processId)->update(['matching_start_time' => Carbon::now()]);
+            }
             broadcast(new ProgressChange($processId, [
                 'id' => $processId,
                 'status' => 'matching',
-                'total' => DB::table('objects')->where([
-                    'process_id' => $processId,
-                    'matching_status' => TrackedObject::MATCHING_STATUS['identified']
-                ])->count(),
+                'total' => $totalMatched,
             ]));
         }
     }

@@ -65,6 +65,8 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::get('/{id}/objects', 'ProcessController@getObjects')->name('processes.objects');
 
+        Route::get('/{id}/detail', 'ProcessController@getDetail')->name('processes.durations');
+
         Route::post('/search-faces', 'ProcessController@searchFace')->name('processes.search-face');
     });
 

@@ -68,7 +68,11 @@ class ProcessController extends Controller
             $process->identified_count = 0;
             $process->unidentified_count = 0;
         }
-
+        if ($process->status === Process::STATUS['done']) {
+            $process->detecting_duration = $this->parseTime($process->detecting_start_time, $process->detecting_end_time);
+            $process->matching_duration = $this->parseTime($process->matching_start_time, $process->grouping_start_time);
+            $process->rendering_duration = $this->parseTime($process->rendering_start_time, $process->done_time);
+        }
         $processData = $this->sendGETRequest(
             config('app.ai_server') . "/processes/$process->mongo_id", [], $this->getDefaultHeaders()
         );
@@ -276,10 +280,31 @@ class ProcessController extends Controller
     }
 
     /**
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getDetail($id)
+    {
+        $process = Process::find($id);
+
+        if (!$process) {
+            return $this->error('RESOURCE_NOT_FOUND', 404);
+        }
+        if ($process->status === Process::STATUS['done']) {
+            $process->detecting_duration = $this->parseTime($process->detecting_start_time, $process->detecting_end_time);
+            $process->matching_duration = $this->parseTime($process->matching_start_time, $process->grouping_start_time);
+            $process->rendering_duration = $this->parseTime($process->rendering_start_time, $process->done_time);
+        }
+
+        return $this->success($process);
+    }
+
+    /**
      * @param $status
+     * @param $matchingPercentage
      * @return array
      */
-    public function getProgressing($status, $matchingPercentage)
+    private function getProgressing($status, $matchingPercentage)
     {
         $detectingPercentage = 0;
         $renderingPercentage = 0;
@@ -300,5 +325,13 @@ class ProcessController extends Controller
             'matchingPercentage' => $matchingPercentage,
             'renderingPercentage' => $renderingPercentage,
         ];
+    }
+
+    private function parseTime($timeFrom, $timeTo)
+    {
+        if ($timeFrom && $timeTo) {
+            return Carbon::parse($timeFrom)->diff($timeTo)->format('%I:%S');
+        }
+        return '';
     }
 }

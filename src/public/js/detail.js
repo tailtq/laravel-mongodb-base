@@ -213,6 +213,24 @@ function renderData() {
     });
 }
 
+function renderTime() {
+    $.ajax({
+        url: `/processes/${processId}/detail`,
+        type: 'GET',
+        success: function (res) {
+            const {
+                detecting_duration: detectingDuration,
+                matching_duration: matchingDuration,
+                rendering_duration: renderingDuration,
+            } = res.data;
+
+            $('.process__detecting-duration').html(detectingDuration);
+            $('.process__matching-duration').html(matchingDuration);
+            $('.process__rendering-duration').html(renderingDuration);
+        },
+    });
+}
+
 Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectsAppear', (res) => {
     $('.socket__message').remove();
     console.log(res);
@@ -231,13 +249,13 @@ Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectsAppear
                 $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(3)`).html(getLightboxBlock(value.images, value.id));
                 $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(4)`).text(value.name);
                 $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(6)`).html(`
-                            <a href="#"
-                               data-video-result=""
-                               style="display: ${globalStatus === 'done' ? 'inline' : 'none'}"
-                               class="render-single-object icon__normal-font-size text-secondary">
-                                <i class="mdi mdi-video-switch"></i>
-                            </a>
-                        `);
+                    <a href="#"
+                       data-video-result=""
+                       style="display: ${globalStatus === 'done' ? 'inline' : 'none'}"
+                       class="render-single-object icon__normal-font-size text-secondary">
+                        <i class="mdi mdi-video-switch"></i>
+                    </a>
+                `);
             }
         } else {
             [trackIds, trackIndex] = insertInOrder(value.track_id, trackIds);
@@ -290,6 +308,7 @@ Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChan
         `);
         $('.search-face__btn').removeAttr('disabled');
         $('.render-single-object').removeAttr('style');
+        renderTime();
     } else if (status === 'detecting' || status === 'rendering') {
         const $element = $(`.progress-bar__${status}`);
 
