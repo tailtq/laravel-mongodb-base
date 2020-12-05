@@ -19,8 +19,6 @@ trait GroupDataTrait
 
     public function callGroupingData($processes)
     {
-        Log::info(json_encode($processes));
-
         foreach ($processes as $process) {
             $process = DB::table('processes')
                 ->where('id', $process->id)

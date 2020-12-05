@@ -84,7 +84,7 @@
                 </video>
 
                 <div class="w-100 ml-4">
-                    <h5 class="mb-2">Thống kê</h5>
+                    <h5 class="mt-1 mb-2">Thống kê</h5>
 
                     <table class="table table-bordered">
                         <tr>
@@ -102,6 +102,24 @@
                         <tr>
                             <th>Số lượng không thể xác định</th>
                             <td class="process__unidentified-count" width="40%">{{ $process->unidentified_count }}</td>
+                        </tr>
+                        <tr>
+                            <th>Thời gian nhận diện</th>
+                            <td class="process__detecting-duration" width="40%">
+                                {{ $process->detecting_duration }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Thời gian kiểm tra định danh</th>
+                            <td class="process__matching-duration" width="40%">
+                                {{ $process->matching_duration }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Thời gian tổng hợp video</th>
+                            <td class="process__rendering-duration" width="40%">
+                                {{ $process->rendering_duration }}
+                            </td>
                         </tr>
                     </table>
 
