@@ -222,11 +222,13 @@ function renderTime() {
                 detecting_duration: detectingDuration,
                 matching_duration: matchingDuration,
                 rendering_duration: renderingDuration,
+                total_duration: totalDuration,
             } = res.data;
 
             $('.process__detecting-duration').html(detectingDuration);
             $('.process__matching-duration').html(matchingDuration);
             $('.process__rendering-duration').html(renderingDuration);
+            $('.process__total-duration').html(totalDuration);
         },
     });
 }

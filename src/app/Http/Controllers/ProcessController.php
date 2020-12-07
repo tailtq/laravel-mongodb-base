@@ -72,6 +72,7 @@ class ProcessController extends Controller
             $process->detecting_duration = $this->parseTime($process->detecting_start_time, $process->detecting_end_time);
             $process->matching_duration = $this->parseTime($process->matching_start_time, $process->grouping_start_time);
             $process->rendering_duration = $this->parseTime($process->rendering_start_time, $process->done_time);
+            $process->total_duration = $this->parseTime($process->detecting_start_time, $process->done_time);
         }
         $processData = $this->sendGETRequest(
             config('app.ai_server') . "/processes/$process->mongo_id", [], $this->getDefaultHeaders()
@@ -294,6 +295,7 @@ class ProcessController extends Controller
             $process->detecting_duration = $this->parseTime($process->detecting_start_time, $process->detecting_end_time);
             $process->matching_duration = $this->parseTime($process->matching_start_time, $process->grouping_start_time);
             $process->rendering_duration = $this->parseTime($process->rendering_start_time, $process->done_time);
+            $process->total_duration = $this->parseTime($process->detecting_start_time, $process->done_time);
         }
 
         return $this->success($process);
