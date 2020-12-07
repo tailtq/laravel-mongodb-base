@@ -43,17 +43,6 @@
                 </h5>
                 <div style="display: inline-block">
                     <button type="button"
-                            @if($process->status != 'done')
-                            disabled
-                            @endif
-                            data-toggle="modal"
-                            data-target="#searchFaceModal"
-                            class="btn btn-info btn-search text-white search-face__btn">
-                        <i class="link-icon icon__normal-size" data-feather="search"></i>
-                        Tìm kiếm
-                    </button>
-
-                    <button type="button"
                             @if($process->status != 'ready')
                             disabled
                             @endif
@@ -75,55 +64,66 @@
                         <i class="link-icon icon__normal-size" data-feather="settings"></i>
                         Cấu hình
                     </button>
+
+                    <button type="button"
+                            @if($process->status != 'done')
+                            disabled
+                            @endif
+                            data-toggle="modal"
+                            data-target="#searchFaceModal"
+                            class="btn btn-primary btn-search text-white search-face__btn">
+                        <i class="link-icon icon__normal-size" data-feather="search"></i>
+                        Tìm kiếm
+                    </button>
                 </div>
             </div>
 
             <div class="table-responsive d-flex">
-                <video controls class="w-60 h-100" preload="auto">
+                <video controls class="w-50 h-100" preload="auto">
                     <source src="{{ $process->video_url }}" type="video/mp4">
                 </video>
 
                 <div class="w-100 ml-4">
                     <h5 class="mt-1 mb-2">Thống kê</h5>
 
-                    <table class="table table-bordered">
+                    <table class="table table-bordered statistical-table">
                         <tr>
-                            <th>Số lượng đối tượng</th>
-                            <td class="process__ungrouped-count" width="40%">{{ $process->ungrouped_count }}</td>
+                            <th>Số lượt người xuất hiện</th>
+                            <td class="process__ungrouped-count" width="30%">{{ $process->ungrouped_count }}</td>
                         </tr>
                         <tr>
-                            <th>Số lượng sau khi nhất thể hoá</th>
-                            <td class="process__grouped-count" width="40%">{{ $process->grouped_count }}</td>
+                            <th>Số người</th>
+                            <td class="process__grouped-count" width="30%">{{ $process->grouped_count }}</td>
                         </tr>
                         <tr>
-                            <th>Số lượng được xác định</th>
-                            <td class="process__identified-count" width="40%">{{ $process->identified_count }}</td>
+                            <th>Số người phát hiện được danh tính</th>
+                            <td class="process__identified-count" width="30%">{{ $process->identified_count }}</td>
                         </tr>
                         <tr>
-                            <th>Số lượng không thể xác định</th>
-                            <td class="process__unidentified-count" width="40%">{{ $process->unidentified_count }}</td>
+                            <th>Số người không phát hiện được danh tính</th>
+                            <td class="process__unidentified-count" width="30%">{{ $process->unidentified_count }}</td>
                         </tr>
                         <tr>
                             <th>Thời gian nhận diện</th>
-                            <td class="process__detecting-duration" width="40%">
+                            <td class="process__detecting-duration" width="30%">
                                 {{ $process->detecting_duration }}
                             </td>
                         </tr>
                         <tr>
                             <th>Thời gian kiểm tra định danh</th>
-                            <td class="process__matching-duration" width="40%">
+                            <td class="process__matching-duration" width="30%">
                                 {{ $process->matching_duration }}
                             </td>
                         </tr>
                         <tr>
                             <th>Thời gian tổng hợp video</th>
-                            <td class="process__rendering-duration" width="40%">
+                            <td class="process__rendering-duration" width="30%">
                                 {{ $process->rendering_duration }}
                             </td>
                         </tr>
                         <tr>
                             <th>Tổng thời gian</th>
-                            <td class="process__total-duration" width="40%">
+                            <td class="process__total-duration" width="30%">
                                 {{ $process->total_duration }}
                             </td>
                         </tr>
