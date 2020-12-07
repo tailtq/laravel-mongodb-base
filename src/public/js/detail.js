@@ -414,7 +414,6 @@ $('[name="hide-unknown"]').on('change', function () {
 
 function initSearchFace() {
     if (!$.fn.dropzone || typeof Dropzone == 'undefined') return;
-    console.log('console.log');
 
     const dropzone = new Dropzone('.search-face__dropzone', {
         url: '/processes/search-faces',
@@ -436,8 +435,7 @@ function initSearchFace() {
             this.on('success', function (res) {
                 const { data } = JSON.parse(res.xhr.response);
 
-                $('.dropzone-submit').attr('disabled', false);
-                $('.dropzone-submit').text('Tìm kiếm');
+                $('.dropzone-submit').attr('disabled', false).text('Tìm kiếm');
                 $('.search-face__result').removeAttr('style');
                 $('.search-face__result .list-unstyled').html('');
 
