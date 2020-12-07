@@ -123,7 +123,16 @@ function initDropzone() {
                     const startIndex = $('.image-links > div').length;
 
                     body.data.forEach((url, index) => {
-
+                        $('.image-links').append(`
+                            <div>
+                                <input type="hidden" name="images[${startIndex + index}][url]" value="${url}">
+                            </div>
+                        `);
+                        $('.images-visualization').append(`
+                            <div class="col-md-4 mb-2">
+                                <img src="${url}" alt="" class="img-fluid">
+                            </div>
+                        `);
                     });
                 } else {
                     $('.dropzone-field').val(body.data[0]);
