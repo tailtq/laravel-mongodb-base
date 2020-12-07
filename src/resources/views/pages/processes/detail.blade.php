@@ -121,6 +121,12 @@
                                 {{ $process->rendering_duration }}
                             </td>
                         </tr>
+                        <tr>
+                            <th>Tổng thời gian</th>
+                            <td class="process__total-duration" width="40%">
+                                {{ $process->total_duration }}
+                            </td>
+                        </tr>
                     </table>
 
                     <div class="d-flex justify-content-between mt-3">
