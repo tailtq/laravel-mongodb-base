@@ -263,8 +263,9 @@ class ProcessController extends Controller
                 'objects.identity_id',
                 'objects.mongo_id',
                 'objects.image',
+                'objects.video_result',
                 'identities.name',
-                'identities.images'
+                'identities.images',
             ])
             ->orderBy('objects.track_id')
             ->with('appearances')
