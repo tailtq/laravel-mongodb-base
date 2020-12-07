@@ -9,6 +9,10 @@
         .popover .popover-body {
             padding: 2px 5px;
         }
+
+        #videoModal {
+            z-index: 2000;
+        }
     </style>
 @endpush
 
@@ -249,9 +253,7 @@
 
                     <div class="search-face__result" style="display: none">
                         <hr>
-
                         <h5 class="mb-4">Kết quả tìm kiếm:</h5>
-
                         <ul class="list-unstyled"></ul>
                     </div>
                 </div>

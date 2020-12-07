@@ -370,7 +370,7 @@ function listenObjectRenderingEvent() {
             $('#videoModal video').attr('src', videoResult);
             return;
         }
-        const id = $(this).parent().closest('tr').data('id');
+        const id = $(this).parent().closest('tr').data('id') || $(this).parent().closest('li').data('id');
 
         $(this).addClass('disabled');
         $(this).html(`<i class="icon__normal-size" data-feather="rotate-cw"></i>`);
@@ -390,6 +390,12 @@ Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectVideoRe
     const { data } = res;
 
     $(`.socket-render tbody tr[data-id="${data.id}"] td:last-child a`)
+        .html('<i class="mdi mdi-play"></i>')
+        .addClass('text-success')
+        .removeClass('disabled')
+        .blur()
+        .data('video-result', data.video_result);
+    $(`.search-face__result li[data-id="${data.id}"] a.render-single-object`)
         .html('<i class="mdi mdi-play"></i>')
         .addClass('text-success')
         .removeClass('disabled')
@@ -450,7 +456,7 @@ function initSearchFace() {
                     });
 
                     $('.search-face__result .list-unstyled').append(`
-                        <li class="media d-block d-sm-flex mb-3">
+                        <li class="media d-block d-sm-flex mb-3 align-items-center" data-id="${element.id}">
                             <img src="${element.image}" class="mb-3 mb-sm-0 mr-3 img-fluid" style="height: 80px;">
 
                             <div class="media-body">
@@ -459,6 +465,14 @@ function initSearchFace() {
                                     <p>Thời gian xuất hiện:</p>
                                     ${appearance}
                                 </div>
+                            </div>
+                            
+                            <div>
+                                <a href="#"
+                                   data-video-result="${element.video_result || ''}"
+                                   class="render-single-object icon__normal-font-size ${element.video_result ? 'text-success' : 'text-secondary'}">
+                                    ${element.video_result ? `<i class="mdi mdi-play"></i>` : '<i class="mdi mdi-video-switch"></i>'}
+                                </a>
                             </div>
                         </li>      
                     `);
