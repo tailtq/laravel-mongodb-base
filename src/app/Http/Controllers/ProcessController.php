@@ -57,8 +57,10 @@ class ProcessController extends Controller
             abort(404);
         }
         if ($process->ungrouped_count != 0) {
-            $totalMatched = $process->identified_count + $process->unidentified_count;
-            $totalObjects = $process->grouped_count > 0 ? $process->grouped_count : $process->ungrouped_count;
+            $totalMatched = in_array($process->status, ['detecting', 'detected'])
+                ? $process->identified_count + $process->unidentified_count
+                : $process->ungrouped_count;
+            $totalObjects = $process->ungrouped_count;
 
             $matchingText = "($totalMatched/$totalObjects)";
             $matchingPercentage = (int) (100 * $totalMatched / ($totalObjects));
