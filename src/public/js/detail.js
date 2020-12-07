@@ -468,11 +468,13 @@ function initSearchFace() {
                             </div>
                             
                             <div>
-                                <a href="#"
-                                   data-video-result="${element.video_result || ''}"
-                                   class="render-single-object icon__normal-font-size ${element.video_result ? 'text-success' : 'text-secondary'}">
-                                    ${element.video_result ? `<i class="mdi mdi-play"></i>` : '<i class="mdi mdi-video-switch"></i>'}
-                                </a>
+                                ${element.identity_id ? `
+                                    <a href="#"
+                                       data-video-result="${element.video_result || ''}"
+                                       class="render-single-object icon__normal-font-size ${element.video_result ? 'text-success' : 'text-secondary'}">
+                                        ${element.video_result ? `<i class="mdi mdi-play"></i>` : '<i class="mdi mdi-video-switch"></i>'}
+                                    </a>
+                                ` : ''}
                             </div>
                         </li>      
                     `);
