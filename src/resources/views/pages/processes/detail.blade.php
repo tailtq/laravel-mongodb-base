@@ -144,7 +144,10 @@
 
                         <div class="video-rendering__btn text-right">
                             @if ($process->video_result)
-                                <a class="btn btn-primary" target="_blank" href="{{ $process->video_result }}">Video tái hiện</a>
+                                <a class="btn btn-primary"
+                                   target="_blank"
+                                   data-detecting-href="{{ $process->video_detecting_result }}"
+                                   href="{{ $process->video_result }}">Video tái hiện</a>
                             @endif
                         </div>
                     </div>

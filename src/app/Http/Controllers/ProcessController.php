@@ -202,6 +202,7 @@ class ProcessController extends Controller
             ->select([
                 'objects.id',
                 'objects.process_id',
+                'objects.mongo_id',
                 'objects.track_id',
                 'objects.identity_id',
                 'objects.image',
