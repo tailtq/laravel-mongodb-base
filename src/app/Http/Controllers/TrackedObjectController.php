@@ -21,10 +21,10 @@ class TrackedObjectController  extends Controller
         if (!$object) {
             return $this->error('Đối tượng không hợp lệ', 404);
         }
-        $processId = $object->process->mongo_id;
-        $objectId = $object->mongo_id;
-        $url = config('app.ai_server') . "/processes/$processId/$objectId/rendering";
-        $response = $this->sendGETRequest($url, [], $this->getDefaultHeaders());
+        $url = config('app.ai_server') . "/processes/faces/rendering";
+        $response = $this->sendPOSTRequest($url, [
+            'object_id' => $object->mongo_id
+        ], $this->getDefaultHeaders());
 
         if ($response->status) {
             return $this->success();

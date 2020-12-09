@@ -145,13 +145,12 @@ function renderBlock(object, appearances, fps, renderHour, shouldIncreasing) {
                 </div>
             </td>
             <td width="50px" class="text-center">
-                ${object.identity_id ? `
-                    <a href="#"
-                       data-video-result="${object.video_result || ''}"
-                       style="display: ${globalStatus === 'done' ? 'inline' : 'none'}"
-                       class="render-single-object icon__normal-font-size ${object.video_result ? 'text-success' : 'text-secondary'}">
-                        ${object.video_result ? `<i class="mdi mdi-play"></i>` : '<i class="mdi mdi-video-switch"></i>'}
-                    </a>` : ''}
+                <a href="#"
+                   data-video-result="${object.video_result || ''}"
+                   style="display: ${globalStatus === 'done' ? 'inline' : 'none'}"
+                   class="render-single-object icon__normal-font-size ${object.video_result ? 'text-success' : 'text-secondary'}">
+                    ${object.video_result ? `<i class="mdi mdi-play"></i>` : '<i class="mdi mdi-video-switch"></i>'}
+                </a>
             </td>
         </tr>
     `);
@@ -435,57 +434,55 @@ function initSearchFace() {
             'X-CSRF-TOKEN': $('meta[name="_token"]').attr('content'),
         },
         sending: function (file, xhr, formData) {
+            addSpinningIcon($('.dropzone-submit'), true);
             formData.append('process_ids', JSON.stringify([$('.process').data('id')]));
         },
-        init: function () {
-            this.on('success', function (res) {
-                const { data } = JSON.parse(res.xhr.response);
+        success: function (res) {
+            const { data } = JSON.parse(res.xhr.response);
 
-                $('.dropzone-submit').attr('disabled', false).text('Tìm kiếm');
-                $('.search-face__result').removeAttr('style');
-                $('.search-face__result .list-unstyled').html('');
+            $('.search-face__result').removeAttr('style');
+            $('.search-face__result .list-unstyled').html('');
 
-                if (data.length === 0) {
-                    $('.search-face__result .list-unstyled').html(`<li>Không có đối tượng nào được tìm thấy</li>`);
-                    return;
-                }
-                data.forEach((element, index) => {
-                    let appearance = '';
-                    element.appearances.forEach((element) => {
-                        appearance += `<span class="badge badge-primary mr-1">${getTimeString(element.frame_from, element.frame_to, fps, renderHour)}</span>`;
-                    });
-
-                    $('.search-face__result .list-unstyled').append(`
-                        <li class="media d-block d-sm-flex mb-3 align-items-center" data-id="${element.id}">
-                            <img src="${element.image}" class="mb-3 mb-sm-0 mr-3 img-fluid" style="height: 80px;">
-
-                            <div class="media-body">
-                                <p class="mt-0 mb-1"><b>${element.name || 'Không xác định'}</b></p>
-                                <div>
-                                    <p>Thời gian xuất hiện:</p>
-                                    ${appearance}
-                                </div>
-                            </div>
-                            
-                            <div>
-                                ${element.identity_id ? `
-                                    <a href="#"
-                                       data-video-result="${element.video_result || ''}"
-                                       class="render-single-object icon__normal-font-size ${element.video_result ? 'text-success' : 'text-secondary'}">
-                                        ${element.video_result ? `<i class="mdi mdi-play"></i>` : '<i class="mdi mdi-video-switch"></i>'}
-                                    </a>
-                                ` : ''}
-                            </div>
-                        </li>      
-                    `);
+            if (data.length === 0) {
+                $('.search-face__result .list-unstyled').html(`<li>Không có đối tượng nào được tìm thấy</li>`);
+                return;
+            }
+            data.forEach((element) => {
+                let appearance = '';
+                element.appearances.forEach((element) => {
+                    appearance += `<span class="badge badge-primary mr-1">${getTimeString(element.frame_from, element.frame_to, fps, renderHour)}</span>`;
                 });
+
+                $('.search-face__result .list-unstyled').append(`
+                    <li class="media d-block d-sm-flex mb-3 align-items-center" data-id="${element.id}">
+                        <img src="${element.image}" class="mb-3 mb-sm-0 mr-3 img-fluid" style="height: 80px;">
+
+                        <div class="media-body">
+                            <p class="mt-0 mb-1"><b>${element.name || 'Không xác định'}</b></p>
+                            <div>
+                                <p>Thời gian xuất hiện:</p>
+                                ${appearance}
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <a href="#"
+                               data-video-result="${element.video_result || ''}"
+                               class="render-single-object icon__normal-font-size ${element.video_result ? 'text-success' : 'text-secondary'}">
+                                ${element.video_result ? `<i class="mdi mdi-play"></i>` : '<i class="mdi mdi-video-switch"></i>'}
+                            </a>
+                        </div>
+                    </li>      
+                `);
             });
+        },
+        complete: function () {
+            $('.dropzone-submit').attr('disabled', false).text('Tìm kiếm');
         },
     });
 
     $('.dropzone-submit').click(function (e) {
         e.preventDefault();
-        addSpinningIcon(this, true);
         dropzone.processQueue();
     });
 }
