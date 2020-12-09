@@ -16,7 +16,7 @@ trait RequestAPI
 
     public function sendPOSTRequest($url, $body, $headers = [])
     {
-        $response = Http::withHeaders($headers)->post($url, $body);
+        $response = Http::withHeaders($headers)->timeout(120)->post($url, $body);
 
         return $this->getResponse($response, $url);
     }
