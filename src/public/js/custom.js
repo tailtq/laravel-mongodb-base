@@ -22,7 +22,6 @@ function initWizardForProcess() {
                         <label class="error ml-0 mt-2 text-danger">Vui lòng nhập thông tin này`
                     );
                 }
-
             } else {
                 $(input).next('label').remove();
             }
@@ -43,7 +42,7 @@ function initWizardForProcess() {
 
     const $processForm = $('#process-form');
 
-    $processForm.steps({
+    const steps = $processForm.steps({
         labels: {
             finish: 'Hoàn tất',
             next: 'Tiếp theo',
@@ -59,16 +58,22 @@ function initWizardForProcess() {
             return validRequiredInputs($($processForm.find('section')[currentIndex]));
         },
         onFinished: function (event, currentIndex) {
-            $('#process-form a[href="#finish"]').attr('disabled', true).css({'padding': '.5rem 1rem .3rem'});
-            $('#process-form a[href="#finish"]').html(`
-                <span class="spinner-border text-light" style="width: 1rem; height: 1rem;"></span>
-            `);
             const serializableData = $processForm.serializeArray();
 
             if (serializableData.length === 0 || !$processForm.hasClass('editable')) {
+                $(this).parent().closest('.modal').modal('hide');
+                setTimeout(() => {
+                    steps.steps('previous');
+                }, 500);
+
                 return true;
             }
 
+            $('#process-form a[href="#finish"]')
+                .attr('disabled', true).css({'padding': '.5rem 1rem .3rem'})
+                .html(`
+                    <span class="spinner-border text-light" style="width: 1rem; height: 1rem;"></span>
+                `);
             $.ajax({
                 url: '/processes/create',
                 type: 'POST',

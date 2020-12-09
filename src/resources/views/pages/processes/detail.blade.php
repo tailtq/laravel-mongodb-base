@@ -274,7 +274,7 @@
 @endpush
 
 @push('custom-scripts')
-    <script src="{{ my_asset('assets/js/custom.js') }}"></script>
+    <script src="{{ my_asset('js/custom.js') }}"></script>
     <script>
         // define global variables
         const processId = '{{ $process->id }}';
