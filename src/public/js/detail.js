@@ -239,9 +239,9 @@ Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectsAppear
     res.data.forEach((value) => {
         if (trackIds.indexOf(value.track_id) >= 0) {
             $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(5)`).html(`
-                        ${buildProgressBar([value], totalFrames, fps, renderHour, false)}
-                        <div class="position-absolute status-overlay"></div>
-                    `);
+                ${buildProgressBar([value], totalFrames, fps, renderHour, false)}
+                <div class="position-absolute status-overlay"></div>
+            `);
             if (value.name) {
                 $(`.socket-render tbody tr[data-track-id="${value.track_id}"]`).attr('data-identity-id', value.identity_id).removeAttr('style');
                 $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(2)`).html(`
@@ -354,6 +354,7 @@ Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChan
                 $('.process__grouped-count').html(res.data.length);
                 $('.process__identified-count').html(res.data.filter(e => !!e.identity_id).length);
                 $('.process__unidentified-count').html(res.data.filter(e => !e.identity_id).length);
+                $('[data-toggle="popover"]').popover();
             },
         });
     }
