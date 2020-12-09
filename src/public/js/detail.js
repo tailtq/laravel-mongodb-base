@@ -145,13 +145,12 @@ function renderBlock(object, appearances, fps, renderHour, shouldIncreasing) {
                 </div>
             </td>
             <td width="50px" class="text-center">
-                ${object.identity_id ? `
-                    <a href="#"
-                       data-video-result="${object.video_result || ''}"
-                       style="display: ${globalStatus === 'done' ? 'inline' : 'none'}"
-                       class="render-single-object icon__normal-font-size ${object.video_result ? 'text-success' : 'text-secondary'}">
-                        ${object.video_result ? `<i class="mdi mdi-play"></i>` : '<i class="mdi mdi-video-switch"></i>'}
-                    </a>` : ''}
+                <a href="#"
+                   data-video-result="${object.video_result || ''}"
+                   style="display: ${globalStatus === 'done' ? 'inline' : 'none'}"
+                   class="render-single-object icon__normal-font-size ${object.video_result ? 'text-success' : 'text-secondary'}">
+                    ${object.video_result ? `<i class="mdi mdi-play"></i>` : '<i class="mdi mdi-video-switch"></i>'}
+                </a>
             </td>
         </tr>
     `);
@@ -467,13 +466,11 @@ function initSearchFace() {
                         </div>
                         
                         <div>
-                            ${element.identity_id ? `
-                                <a href="#"
-                                   data-video-result="${element.video_result || ''}"
-                                   class="render-single-object icon__normal-font-size ${element.video_result ? 'text-success' : 'text-secondary'}">
-                                    ${element.video_result ? `<i class="mdi mdi-play"></i>` : '<i class="mdi mdi-video-switch"></i>'}
-                                </a>
-                            ` : ''}
+                            <a href="#"
+                               data-video-result="${element.video_result || ''}"
+                               class="render-single-object icon__normal-font-size ${element.video_result ? 'text-success' : 'text-secondary'}">
+                                ${element.video_result ? `<i class="mdi mdi-play"></i>` : '<i class="mdi mdi-video-switch"></i>'}
+                            </a>
                         </div>
                     </li>      
                 `);
