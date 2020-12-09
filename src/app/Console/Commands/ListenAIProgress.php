@@ -69,18 +69,19 @@ class ListenAIProgress extends Command
                     'progress' => $event->progress ?? 0,
                     'frame_index' => $event->frame_index ?? null,
                 ];
-                if (!empty($event->video_url)) {
-                    $process->video_result = $event->video_url;
-                    $data['video_result'] = $process->video_result;
-                }
                 if ($event->status === Process::STATUS['detected']) {
                     $process->detecting_end_time = Carbon::now();
+                    $process->video_detecting_result = $event->video_url;
                 }
                 if ($event->status === Process::STATUS['grouped']) {
                     $process->rendering_start_time = Carbon::now();
                 }
                 if ($event->status === Process::STATUS['done']) {
                     $process->done_time = Carbon::now();
+                    $process->video_result = $event->video_url;
+
+                    $data['video_result'] = $process->video_result;
+                    $data['video_detecting_result'] = $process->video_detecting_result;
                 }
                 if ($process->status != $event->status) {
                     $process->status = $event->status;
