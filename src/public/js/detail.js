@@ -129,7 +129,10 @@ function getLightboxBlock(images, id) {
 
 function renderBlock(object, appearances, fps, renderHour, shouldIncreasing) {
     return (`
-        <tr data-track-id="${object.track_id}" data-id="${object.id}" data-identity-id="${object.identity_id}"
+        <tr data-track-id="${object.track_id}"
+            data-id="${object.id}"
+            data-identity-id="${object.identity_id}"
+            data-mongo-id="${object.mongo_id}"
             ${!object.identity_id && $('[name="hide-unknown"]').is(':checked') ? 'style="display: none"' : ''}>
             <td class="text-center">${object.track_id}</td>
             <td class="text-center">
@@ -238,12 +241,13 @@ Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectsAppear
 
     res.data.forEach((value) => {
         if (trackIds.indexOf(value.track_id) >= 0) {
+            const $element = $(`.socket-render tbody tr[data-track-id="${value.track_id}"]`);
             $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(5)`).html(`
                 ${buildProgressBar([value], totalFrames, fps, renderHour, false)}
                 <div class="position-absolute status-overlay"></div>
             `);
             if (value.name) {
-                $(`.socket-render tbody tr[data-track-id="${value.track_id}"]`).attr('data-identity-id', value.identity_id).removeAttr('style');
+                $element.attr('data-identity-id', value.identity_id).removeAttr('style');
                 $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(2)`).html(`
                     <img src="${value.image}" alt="image" style="width: inherit; height: 60px;">
                 `);
@@ -257,6 +261,9 @@ Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectsAppear
                         <i class="mdi mdi-video-switch"></i>
                     </a>
                 `);
+            }
+            if (value.mongo_id) {
+                $element.attr('data-mongo-id', value.mongo_id);
             }
         } else {
             [trackIds, trackIndex] = insertInOrder(value.track_id, trackIds);
@@ -282,6 +289,7 @@ Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChan
         progress,
         total,
         video_result: videoResult,
+        video_detecting_result: videoDetectingResult,
         frame_index: frameIndex,
     } = res.data;
 
@@ -305,7 +313,12 @@ Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChan
         });
 
         $('.video-rendering__btn').html(`
-            <a class="btn btn-primary" target="_blank" href="${videoResult}">Video tái hiện</a>
+            <a class="btn btn-primary"
+               target="_blank"
+               href="${videoResult}"
+               data-detecting-href="${videoDetectingResult}">
+                Video tái hiện
+            </a>
         `);
         $('.search-face__btn').removeAttr('disabled');
         $('.render-single-object').removeAttr('style');
