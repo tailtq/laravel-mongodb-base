@@ -305,6 +305,32 @@ class ProcessController extends Controller
         return $this->success($process);
     }
 
+    public function exportBeforeGrouping($id)
+    {
+        $process = Process::findOrFail($id);
+        $url = config('app.ai_server') . "/processes/$process->mongo_id/report/before-grouping";
+        $response = $this->sendPOSTRequest($url, [], $this->getDefaultHeaders());
+
+        if (!$response->status) {
+            abort(400);
+        }
+
+        return redirect($response->body->url);
+    }
+
+    public function exportAfterGrouping($id)
+    {
+        $process = Process::findOrFail($id);
+        $url = config('app.ai_server') . "/processes/$process->mongo_id/report/after-grouping";
+        $response = $this->sendPOSTRequest($url, [], $this->getDefaultHeaders());
+
+        if (!$response->status) {
+            abort(400);
+        }
+
+        return redirect($response->body->url);
+    }
+
     /**
      * @param $status
      * @param $matchingPercentage
