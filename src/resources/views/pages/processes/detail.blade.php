@@ -79,6 +79,33 @@
                         <i class="link-icon icon__normal-size" data-feather="search"></i>
                         Tìm kiếm
                     </button>
+
+                    <div class="dropdown" style="display: inline-block">
+                        <button class="btn btn-primary dropdown-toggle export-statistic__btn"
+                                @if($process->status != 'done')
+                                disabled
+                                @endif
+                                type="button"
+                                id="dropdownMenuButton"
+                                data-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false">
+                            <i class="link-icon icon__normal-size" data-feather="download"></i>
+                            Xuất dữ liệu
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <a class="dropdown-item"
+                               target="_blank"
+                               href="{{ route('processes.export.before-grouping', ['id' => $process->id]) }}">
+                                Trước nhất thể hoá
+                            </a>
+                            <a class="dropdown-item"
+                               target="_blank"
+                               href="{{ route('processes.export.after-grouping', ['id' => $process->id]) }}">
+                                Sau nhất thể hoá
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
 

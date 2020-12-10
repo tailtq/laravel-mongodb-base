@@ -321,6 +321,7 @@ Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChan
             </a>
         `);
         $('.search-face__btn').removeAttr('disabled');
+        $('.export-statistic__btn').removeAttr('disabled');
         $('.render-single-object').removeAttr('style');
         renderTime();
     } else if (status === 'detecting' || status === 'rendering') {
