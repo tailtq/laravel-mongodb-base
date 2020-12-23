@@ -72,6 +72,8 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('/{id}/export/after-grouping', 'ProcessController@exportAfterGrouping')->name('processes.export.after-grouping');
 
         Route::post('/search-faces', 'ProcessController@searchFace')->name('processes.search-face');
+
+        Route::post('/thumbnails', 'ProcessController@getThumbnail')->name('processes.thumbnail.create');
     });
 
     Route::group(['prefix' => 'objects'], function () {

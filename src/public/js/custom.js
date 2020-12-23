@@ -2,6 +2,35 @@ if (typeof Dropzone !== 'undefined') {
     Dropzone.autoDiscover = false;
 }
 
+function addSpinning($element) {
+    $element
+        .attr('disabled', true)
+        .css({'padding': '.5rem 1rem .3rem'})
+        .html(`<span class="spinner-border text-light" style="width: 1rem; height: 1rem;"></span>`);
+}
+
+function removeSpinning($element, text = 'Tiếp theo') {
+    $element.attr('disabled', false).attr('style', null);
+    $element.html(text);
+}
+
+function validateRegions(shapes) {
+    let isValid = true;
+
+    shapes.forEach((shape) => {
+        Object.keys(shape).forEach((key) => {
+            const { length } = shape[key].coordinates[0];
+
+            if (length !== 0 && length < 3) {
+                isValid = false;
+                $('.canvas__error-message').text('Số lượng toạ độ của vùng không đủ (>= 3)');
+            }
+        });
+    });
+
+    return isValid;
+}
+
 function initWizardForProcess() {
     if (!$.fn.steps) return;
 
@@ -15,11 +44,11 @@ function initWizardForProcess() {
                 valid = false;
                 if ($(input).parent().hasClass('input-group')) {
                     $(input).parent().parent().append(`
-                        <label class="error ml-0 mt-2 text-danger">Vui lòng nhập thông tin này`
+                        <label class="error ml-0 mt-2 text-danger">Vui lòng nhập thông tin này</label>`
                     );
                 } else {
                     $(input).parent().append(`
-                        <label class="error ml-0 mt-2 text-danger">Vui lòng nhập thông tin này`
+                        <label class="error ml-0 mt-2 text-danger">Vui lòng nhập thông tin này</label>`
                     );
                 }
             } else {
@@ -41,6 +70,8 @@ function initWizardForProcess() {
     };
 
     const $processForm = $('#process-form');
+    let isAsyncStep = false;
+    let loadedCanvas = false;
 
     const steps = $processForm.steps({
         labels: {
@@ -51,11 +82,57 @@ function initWizardForProcess() {
         headerTag: 'h2',
         bodyTag: 'section',
         transitionEffect: 'slideLeft',
+        onStepChanged: function (event, currentIndex) {
+            if (currentIndex === 2 && !loadedCanvas) {
+                loadCanvas();
+                loadedCanvas = true;
+            }
+        },
         onStepChanging: function (event, currentIndex) {
-            return validRequiredInputs($($processForm.find('section')[currentIndex]));
+            if (isAsyncStep) {
+                isAsyncStep = false;
+                return true;
+            }
+            if (!validRequiredInputs($($processForm.find('section')[currentIndex]))) {
+                return false;
+            }
+            if (currentIndex === 0 && $processForm.hasClass('editable')) {
+                const $nextBtn = $('#process-form a[href="#next"]');
+                addSpinning($nextBtn);
+
+                // Get thumbnail for drawing recognition boundary
+                $.ajax({
+                    url: '/processes/thumbnails',
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json; charset=UTF-8',
+                    data: JSON.stringify({
+                        _token: $('meta[name="_token"]').attr('content'),
+                        video_url: $processForm.find('[name="video_url"]').val(),
+                    }),
+                    success: function (res) {
+                        const { thumbnail } = res.data;
+                        removeSpinning($nextBtn);
+                        $processForm.find('input[name="thumbnail"]').val(thumbnail);
+                        $('#canvas-img').attr('src', thumbnail);
+
+                        isAsyncStep = true;
+                        $processForm.steps('next');
+                    },
+                    error: function (res) {
+                        removeSpinning($nextBtn);
+
+                        $processForm.find('input[name="thumbnail"]').parent().parent().append(
+                            `<label class="error ml-0 mt-2 text-danger">Không lấy được ảnh, vui lòng thử lại</label>`
+                        );
+                    }
+                });
+            } else {
+                return true;
+            }
         },
         onFinishing: function (event, currentIndex) {
-            return validRequiredInputs($($processForm.find('section')[currentIndex]));
+            return validRequiredInputs($($processForm.find('section')[currentIndex])) && validateRegions(regions);
         },
         onFinished: function (event, currentIndex) {
             const serializableData = $processForm.serializeArray();
@@ -68,12 +145,10 @@ function initWizardForProcess() {
 
                 return true;
             }
+            const $finishBtn = $('#process-form a[href="#finish"]');
+            addSpinning($finishBtn);
 
-            $('#process-form a[href="#finish"]')
-                .attr('disabled', true).css({'padding': '.5rem 1rem .3rem'})
-                .html(`
-                    <span class="spinner-border text-light" style="width: 1rem; height: 1rem;"></span>
-                `);
+            const data = serializeObject(serializableData);
             $.ajax({
                 url: '/processes/create',
                 type: 'POST',
@@ -81,14 +156,14 @@ function initWizardForProcess() {
                 contentType: 'application/json; charset=UTF-8',
                 data: JSON.stringify({
                     _token: $('meta[name="_token"]').attr('content'),
-                    ...serializeObject(serializableData)
+                    ...data,
+                    regions: data.regions ? JSON.parse(data.regions) : [],
                 }),
                 success: function (res) {
                     window.location.href = `/processes/${res.data.id}`;
                 },
                 error: function (res) {
-                    $('#process-form a[href="#finish"]').attr('disabled', false).attr('style', null);
-                    $('#process-form a[href="#finish"]').html('Hoàn tất');
+                    removeSpinning($finishBtn, 'Hoàn tất');
 
                     Swal.fire({
                         icon: 'error',

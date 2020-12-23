@@ -319,4 +319,11 @@
         let globalStatus = '{{ $process->status }}';
     </script>
     <script src="{{ my_asset('js/detail.js') }}"></script>
+    <script src="{{ my_asset('js/shapes/circle.js') }}"></script>
+    <script src="{{ my_asset('js/geometry.js') }}"></script>
+    <script>
+        isDrawing = false;
+        loadCanvas();
+        loadOldRegions();
+    </script>
 @endpush
