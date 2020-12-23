@@ -144,9 +144,6 @@
                                               rows="10"
                                               class="form-control mb-0">{{ old('description') }}</textarea>
                                 </div>
-
-                                <input type="hidden" name="thumbnail">
-                                <input type="hidden" name="regions">
                             </section>
 
                             <h2>Cấu hình</h2>
@@ -344,6 +341,9 @@
                                 </div>
 
                                 <p class="error text-danger mt-2 text-center canvas__error-message"></p>
+
+                                <input type="hidden" name="thumbnail">
+                                <input type="hidden" name="regions">
                             </section>
                         </form>
                     </div>

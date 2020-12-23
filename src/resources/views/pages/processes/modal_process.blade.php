@@ -42,8 +42,6 @@
                                           disabled
                                           class="form-control mb-0">{{ old('description', $process->description) }}</textarea>
                             </div>
-
-                            <input type="hidden" name="regions" value="{{ json_encode($process->mongoData->regions) }}">
                         </section>
 
                         <h2>Cấu hình</h2>
@@ -249,6 +247,8 @@
                             </div>
 
                             <p class="error text-danger mt-2 text-center canvas__error-message"></p>
+
+                            <input type="hidden" name="regions" value="{{ json_encode($process->mongoData->regions) }}">
                         </section>
                     </form>
                 </div>
