@@ -300,6 +300,51 @@
                                     </div>
                                 </div>
                             </section>
+
+                            <h2>Vùng nhận diện</h2>
+                            <section>
+                                <div class="d-flex h-100 justify-content-center align-items-center">
+                                    <div class="position-relative h-100 mr-3">
+                                        <img style="width: 451px;"
+                                             id="canvas-img"
+                                             class="h-100">
+
+                                        <canvas id="canvas" class="position-absolute" style="top: 0; left: 0"></canvas>
+                                    </div>
+
+                                    <div class="canvas-toolbox d-flex flex-column">
+                                        <button class="btn btn-info mb-3"
+                                                type="button"
+                                                id="canvas__detecting">
+                                            Vẽ vùng nhận diện
+                                        </button>
+
+                                        <button class="btn btn-info mb-3 text-white"
+                                                type="button"
+                                                style="background-color: rgb(151, 35, 44); border-color: rgb(151, 35, 44)"
+                                                id="canvas__tracking">
+                                            Vẽ vùng theo dõi
+                                        </button>
+
+                                        <button class="btn btn-success mb-3"
+                                                type="button"
+                                                id="canvas__finish">
+                                            Hoàn thành
+                                        </button>
+
+                                        <button class="btn btn-danger"
+                                                type="button"
+                                                id="canvas__delete">
+                                            Xoá
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <p class="error text-danger mt-2 text-center canvas__error-message"></p>
+
+                                <input type="hidden" name="thumbnail">
+                                <input type="hidden" name="regions">
+                            </section>
                         </form>
                     </div>
                 </div>
@@ -316,4 +361,6 @@
 
 @push('custom-scripts')
     <script src="{{ my_asset('js/custom.js') }}"></script>
+    <script src="{{ my_asset('js/shapes/circle.js') }}"></script>
+    <script src="{{ my_asset('js/geometry.js') }}"></script>
 @endpush
