@@ -95,17 +95,6 @@ class ProcessController extends Controller
     public function store(ProcessCreateRequest $request)
     {
         $data = $request->validationData();
-
-        $thumbnailData = $this->sendPOSTRequest(config('app.ai_server') . '/medias/thumbnails', [
-            'url' => $data['video_url'],
-            'size' => [640, 480]
-        ]);
-        if (!$thumbnailData->status) {
-            return $this->error($thumbnailData->message, $thumbnailData->statusCode);
-        } else if (!$thumbnailData->body->url) {
-            return $this->error('Đường dẫn không hợp lệ', 400);
-        }
-
         $processData = $this->sendPOSTRequest(config('app.ai_server') . '/processes', [
             'name' => $data['name'],
             'url' => $data['video_url'],
@@ -122,6 +111,7 @@ class ProcessController extends Controller
             'min_head_confidence' => $data['min_head_confidence'],
             'min_face_confidence' => $data['min_face_confidence'],
             'min_body_confidence' => $data['min_body_confidence'],
+            'regions' => $data['regions'],
         ], $this->getDefaultHeaders());
 
         if (!$processData->status) {
@@ -131,7 +121,7 @@ class ProcessController extends Controller
         $process = Process::create([
             'user_id' => Auth::id(),
             'name' => $data['name'],
-            'thumbnail' => $thumbnailData->body->url,
+            'thumbnail' => $data['thumbnail'],
             'video_url' => $data['video_url'],
             'description' => $data['description'],
             'status' => Process::STATUS['ready'],
@@ -239,6 +229,10 @@ class ProcessController extends Controller
         return redirect()->route('processes');
     }
 
+    /**
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function searchFace(Request $request)
     {
         $ids = json_decode($request->get('process_ids'));
@@ -305,6 +299,10 @@ class ProcessController extends Controller
         return $this->success($process);
     }
 
+    /**
+     * @param $id
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
     public function exportBeforeGrouping($id)
     {
         $process = Process::findOrFail($id);
@@ -318,6 +316,10 @@ class ProcessController extends Controller
         return redirect($response->body->url);
     }
 
+    /**
+     * @param $id
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
     public function exportAfterGrouping($id)
     {
         $process = Process::findOrFail($id);
@@ -329,6 +331,24 @@ class ProcessController extends Controller
         }
 
         return redirect($response->body->url);
+    }
+
+    public function getThumbnail(Request $request)
+    {
+        $thumbnailData = $this->sendPOSTRequest(config('app.ai_server') . '/medias/thumbnails', [
+            'url' => $request->get('video_url'),
+            'size' => [640, 480]
+        ]);
+
+        if (!$thumbnailData->status) {
+            return $this->error($thumbnailData->message, $thumbnailData->statusCode);
+        } else if (!$thumbnailData->body->url) {
+            return $this->error('Đường dẫn không hợp lệ', 400);
+        }
+
+        return $this->success([
+            'thumbnail' => $thumbnailData->body->url,
+        ]);
     }
 
     /**
