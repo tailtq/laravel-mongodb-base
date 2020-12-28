@@ -109,6 +109,20 @@
                                 </div>
 
                                 <div class="form-group">
+                                    <label>Camera</label>
+                                    <select name="camera_id" class="form-control">
+                                        <option>Chọn camera</option>
+
+                                        @foreach($cameras as $camera)
+                                            <option value="{{ $camera->id }}"
+                                                    data-url="{{ $camera->url }}">
+                                                {{ $camera->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
                                     <label>Đường dẫn *</label>
 
                                     <div class="input-group mb-3">
@@ -144,6 +158,8 @@
                                               rows="10"
                                               class="form-control mb-0">{{ old('description') }}</textarea>
                                 </div>
+
+                                <div class="thumbnail-error"></div>
                             </section>
 
                             <h2>Cấu hình</h2>
@@ -363,4 +379,12 @@
     <script src="{{ my_asset('js/custom.js') }}"></script>
     <script src="{{ my_asset('js/shapes/circle.js') }}"></script>
     <script src="{{ my_asset('js/geometry.js') }}"></script>
+    <script>
+        $(document).ready(function () {
+            $('select[name="camera_id"]').on('change', function () {
+                const url = $(this).find('option:selected').data('url');
+                $('input[name="video_url"]').val(url || '').attr('readonly', !!url);
+            });
+        });
+    </script>
 @endpush

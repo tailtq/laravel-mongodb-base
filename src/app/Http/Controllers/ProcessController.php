@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProcessCreateRequest;
+use App\Models\Camera;
 use App\Models\ObjectAppearance;
 use App\Models\Process;
 use App\Models\TrackedObject;
@@ -22,10 +23,12 @@ class ProcessController extends Controller
      */
     public function index()
     {
+        $cameras = Camera::select(['id', 'name', 'url'])->orderBy('created_at', 'desc')->get();
         $processes = Process::orderBy('created_at', 'desc')->paginate(10);
 
         return view('pages.processes.index', [
             'processes' => $processes,
+            'cameras' => $cameras,
         ]);
     }
 
@@ -35,7 +38,7 @@ class ProcessController extends Controller
      */
     public function show($id)
     {
-        $process = Process::select('*',
+        $process = Process::with('camera')->select('*',
             DB::raw("
                 (SELECT COUNT(*) FROM objects
                  WHERE objects.process_id = $id) as grouped_count"),
@@ -80,7 +83,7 @@ class ProcessController extends Controller
             config('app.ai_server') . "/processes/$process->mongo_id", [], $this->getDefaultHeaders()
         );
 
-        $process->mongoData = $processData->status ? $processData->body : null;
+        $process->config = $processData->status ? $processData->body->config : null;
 
         return view('pages.processes.detail', array_merge([
             'process' => $process,
@@ -95,9 +98,13 @@ class ProcessController extends Controller
     public function store(ProcessCreateRequest $request)
     {
         $data = $request->validationData();
+        $cameraId = Arr::get($data, 'camera_id');
+        $camera = $cameraId ? Camera::find($cameraId) : null;
+
         $processData = $this->sendPOSTRequest(config('app.ai_server') . '/processes', [
+            'camera' => $camera ? $camera->mongo_id : null,
             'name' => $data['name'],
-            'url' => $data['video_url'],
+            'url' => $camera ? null : $data['video_url'],
             'status' => Process::STATUS['ready'],
             'detection_scale' => $data['detection_scale'],
             'frame_drop' => $data['frame_drop'],
@@ -120,9 +127,10 @@ class ProcessController extends Controller
 
         $process = Process::create([
             'user_id' => Auth::id(),
+            'camera_id' => $camera ? $camera->id : null,
             'name' => $data['name'],
             'thumbnail' => $data['thumbnail'],
-            'video_url' => $data['video_url'],
+            'video_url' => $camera ? null : $data['video_url'],
             'description' => $data['description'],
             'status' => Process::STATUS['ready'],
             'mongo_id' => $processData->body->_id,
