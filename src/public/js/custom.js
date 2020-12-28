@@ -113,6 +113,8 @@ function initWizardForProcess() {
                     success: function (res) {
                         const { thumbnail } = res.data;
                         removeSpinning($nextBtn);
+                        $processForm.find('input[name="thumbnail"]').html('');
+
                         $processForm.find('input[name="thumbnail"]').val(thumbnail);
                         $('#canvas-img').attr('src', thumbnail);
 
@@ -121,8 +123,7 @@ function initWizardForProcess() {
                     },
                     error: function (res) {
                         removeSpinning($nextBtn);
-
-                        $processForm.find('input[name="thumbnail"]').parent().parent().append(
+                        $processForm.find('.thumbnail-error').html(
                             `<label class="error ml-0 mt-2 text-danger">Không lấy được ảnh, vui lòng thử lại</label>`
                         );
                     }

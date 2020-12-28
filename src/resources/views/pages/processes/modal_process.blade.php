@@ -31,7 +31,7 @@
                                        placeholder="Nhập video"
                                        name="video_url"
                                        disabled
-                                       value="{{ old('video_url', $process->video_url) }}">
+                                       value="{{ old('video_url', $process->camera ? $process->camera->url : $process->video_url) }}">
                             </div>
 
                             <div class="form-group">
@@ -55,7 +55,7 @@
                                                placeholder="Nhập thông số"
                                                name="detection_scale"
                                                disabled
-                                               value="{{ old('detection_scale', object_get($process->mongoData, 'detection_scale')) }}">
+                                               value="{{ old('detection_scale', object_get($process->config, 'detection_scale')) }}">
                                     </div>
                                 </div>
 
@@ -67,7 +67,7 @@
                                                placeholder="Nhập thông số"
                                                name="frame_drop"
                                                disabled
-                                               value="{{ old('frame_drop', object_get($process->mongoData, 'frame_drop')) }}">
+                                               value="{{ old('frame_drop', object_get($process->config, 'frame_drop')) }}">
                                     </div>
                                 </div>
 
@@ -79,7 +79,7 @@
                                                placeholder="Nhập thông số"
                                                name="frame_step"
                                                disabled
-                                               value="{{ old('frame_step', object_get($process->mongoData, 'frame_step')) }}">
+                                               value="{{ old('frame_step', object_get($process->config, 'frame_step')) }}">
                                     </div>
                                 </div>
                             </div>
@@ -93,7 +93,7 @@
                                                placeholder="Nhập thông số"
                                                name="max_pitch"
                                                disabled
-                                               value="{{ old('max_pitch', object_get($process->mongoData, 'max_pitch')) }}">
+                                               value="{{ old('max_pitch', object_get($process->config, 'max_pitch')) }}">
                                     </div>
                                 </div>
 
@@ -105,7 +105,7 @@
                                                placeholder="Nhập thông số"
                                                name="max_roll"
                                                disabled
-                                               value="{{ old('max_roll', object_get($process->mongoData, 'max_roll')) }}">
+                                               value="{{ old('max_roll', object_get($process->config, 'max_roll')) }}">
                                     </div>
                                 </div>
 
@@ -117,7 +117,7 @@
                                                placeholder="Nhập thông số"
                                                name="max_yaw"
                                                disabled
-                                               value="{{ old('max_yaw', object_get($process->mongoData, 'max_yaw')) }}">
+                                               value="{{ old('max_yaw', object_get($process->config, 'max_yaw')) }}">
                                     </div>
                                 </div>
                             </div>
@@ -131,7 +131,7 @@
                                                placeholder="Nhập thông số"
                                                name="min_face_size"
                                                disabled
-                                               value="{{ old('min_face_size', object_get($process->mongoData, 'min_face_size')) }}">
+                                               value="{{ old('min_face_size', object_get($process->config, 'min_face_size')) }}">
                                     </div>
                                 </div>
 
@@ -143,7 +143,7 @@
                                                placeholder="Nhập thông số"
                                                name="tracking_scale"
                                                disabled
-                                               value="{{ old('tracking_scale', object_get($process->mongoData, 'tracking_scale')) }}">
+                                               value="{{ old('tracking_scale', object_get($process->config, 'tracking_scale')) }}">
                                     </div>
                                 </div>
 
@@ -155,7 +155,7 @@
                                                placeholder="Nhập thông số"
                                                name="biometric_threshold"
                                                disabled
-                                               value="{{ old('biometric_threshold', object_get($process->mongoData, 'biometric_threshold')) }}">
+                                               value="{{ old('biometric_threshold', object_get($process->config, 'biometric_threshold')) }}">
                                     </div>
                                 </div>
                             </div>
@@ -170,7 +170,7 @@
                                                placeholder="Nhập thông số"
                                                name="min_head_confidence"
                                                disabled
-                                               value="{{ old('min_head_confidence', object_get($process->mongoData, 'min_head_confidence')) }}">
+                                               value="{{ old('min_head_confidence', object_get($process->config, 'min_head_confidence')) }}">
                                     </div>
                                 </div>
 
@@ -183,7 +183,7 @@
                                                placeholder="Nhập thông số"
                                                name="min_face_confidence"
                                                disabled
-                                               value="{{ old('min_face_confidence', object_get($process->mongoData, 'min_face_confidence')) }}">
+                                               value="{{ old('min_face_confidence', object_get($process->config, 'min_face_confidence')) }}">
                                     </div>
                                 </div>
 
@@ -196,7 +196,7 @@
                                                placeholder="Nhập thông số"
                                                name="min_body_confidence"
                                                disabled
-                                               value="{{ old('min_body_confidence', object_get($process->mongoData, 'min_body_confidence')) }}">
+                                               value="{{ old('min_body_confidence', object_get($process->config, 'min_body_confidence')) }}">
                                     </div>
                                 </div>
                             </div>
@@ -248,7 +248,7 @@
 
                             <p class="error text-danger mt-2 text-center canvas__error-message"></p>
 
-                            <input type="hidden" name="regions" value="{{ json_encode($process->mongoData->regions) }}">
+                            <input type="hidden" name="regions" value="{{ json_encode($process->config->regions) }}">
                         </section>
                     </form>
                 </div>

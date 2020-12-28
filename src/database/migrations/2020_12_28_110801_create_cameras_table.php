@@ -14,7 +14,7 @@ class CreateCamerasTable extends Migration
     public function up()
     {
         Schema::create('cameras', function (Blueprint $table) {
-            $table->id();
+            $table->integerIncrements('id');
             $table->string('mongo_id');
             $table->string('name');
             $table->string('url');
