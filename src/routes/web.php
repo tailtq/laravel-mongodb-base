@@ -20,12 +20,6 @@ Route::group(['middleware' => ['auth']], function () {
 
     Route::get('/', 'DashboardController@index')->name('dashboard.index');
 
-    // test update object appear
-    Route::get('/test', function () {
-
-    });
-
-
     Route::group(['prefix' => 'users'], function () {
         Route::get('/', 'UserController@list')->name('users');
 
@@ -48,6 +42,20 @@ Route::group(['middleware' => ['auth']], function () {
         Route::put('/{id}', 'IdentityController@update')->name('identities.edit');
 
         Route::delete('/{id}', 'IdentityController@delete')->name('identities.delete');
+    });
+
+    Route::group(['prefix' => 'cameras'], function () {
+        Route::get('/', 'CameraController@index')->name('cameras');
+
+        Route::get('/create', 'CameraController@create')->name('cameras.create');
+
+        Route::post('/create', 'CameraController@store')->name('cameras.store');
+
+        Route::get('/{id}', 'CameraController@edit')->name('cameras.edit');
+
+        Route::put('/{id}', 'CameraController@update')->name('cameras.edit');
+
+        Route::delete('/{id}', 'CameraController@delete')->name('cameras.delete');
     });
 
     Route::group(['prefix' => 'processes'], function () {

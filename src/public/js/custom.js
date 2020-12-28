@@ -14,6 +14,16 @@ function removeSpinning($element, text = 'Tiếp theo') {
     $element.html(text);
 }
 
+function serializeObject(serializeArray) {
+    const result = {};
+
+    serializeArray.forEach((element) => {
+        result[element.name] = element.value
+    });
+
+    return result;
+}
+
 function validateRegions(shapes) {
     let isValid = true;
 
@@ -57,16 +67,6 @@ function initWizardForProcess() {
         });
 
         return valid;
-    };
-
-    const serializeObject = (serializeArray) => {
-        const result = {};
-
-        serializeArray.forEach((element) => {
-            result[element.name] = element.value
-        });
-
-        return result;
     };
 
     const $processForm = $('#process-form');

@@ -253,27 +253,23 @@ function initCanvasEvents(canvasElement) {
 
     $('#canvas__detecting').on('click', function () {
         removeActive();
-        
         drawingType = 'detecting_region';
         $(this).addClass('active');
     });
     
     $('#canvas__tracking').on('click', function () {
         removeActive();
-        
         drawingType = 'tracking_region';
         $(this).addClass('active');
     });
     
     $('#canvas__finish').on('click', function () {
         removeActive();
-        
         drawingType = null;
     });
 
     $('#canvas__delete').on('click', function () {
         removeActive();
-        
         drawingType = 'delete';
         $(this).addClass('active');
     });
