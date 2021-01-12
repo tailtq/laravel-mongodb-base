@@ -91,6 +91,10 @@ Route::group(['middleware' => ['auth']], function () {
     Route::group(['prefix' => '/medias'], function () {
         Route::post('/', 'MediaController@create')->name('medias.create');
     });
+
+    Route::group(['prefix' => '/monitors'], function () {
+        Route::get('/', 'MonitorController@index')->name('monitors');
+    });
 });
 
 // 404 for undefined routes

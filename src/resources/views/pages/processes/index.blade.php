@@ -109,9 +109,17 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label>Camera</label>
-                                    <select name="camera_id" class="form-control">
-                                        <option>Chọn camera</option>
+                                    <label>Loại tiến trình *</label>
+                                    <select name="process_type" class="form-control" required>
+                                        <option value="camera">Camera</option>
+                                        <option value="video">Video</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Camera *</label>
+                                    <select name="camera_id" class="form-control" data-type="number" required>
+                                        <option value="0">Chọn camera</option>
 
                                         @foreach($cameras as $camera)
                                             <option value="{{ $camera->id }}"
@@ -122,11 +130,12 @@
                                     </select>
                                 </div>
 
-                                <div class="form-group">
+                                <div class="form-group d-none">
                                     <label>Đường dẫn *</label>
 
                                     <div class="input-group mb-3">
-                                        <input type="text" class="form-control dropzone-field required" placeholder="Nhập video" name="video_url" required>
+                                        <input type="text" class="form-control dropzone-field required"
+                                               placeholder="Nhập video" name="video_url">
 
                                         <div class="input-group-append">
                                             <a class="btn btn-primary"
@@ -315,6 +324,32 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Write data step</label>
+                                            <input type="number"
+                                                   class="form-control"
+                                                   required
+                                                   placeholder="Nhập thông số"
+                                                   name="write_data_step"
+                                                   value="{{ old('write_data_step', 300) }}">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Write video step</label>
+                                            <input type="number"
+                                                   class="form-control"
+                                                   required
+                                                   placeholder="Nhập thông số"
+                                                   name="write_video_step"
+                                                   value="{{ old('write_video_step', 3000) }}">
+                                        </div>
+                                    </div>
+                                </div>
                             </section>
 
                             <h2>Vùng nhận diện</h2>
@@ -381,9 +416,18 @@
     <script src="{{ my_asset('js/geometry.js') }}"></script>
     <script>
         $(document).ready(function () {
-            $('select[name="camera_id"]').on('change', function () {
-                const url = $(this).find('option:selected').data('url');
-                $('input[name="video_url"]').val(url || '').attr('readonly', !!url);
+            $('select[name="process_type"]').on('change', function () {
+                const type = $(this).find('option:selected').val();
+                const $cameraElement = $('select[name="camera_id"]');
+                const $videoUrl = $('input[name="video_url"]');
+
+                if (type === 'camera') {
+                    $cameraElement.attr('required', true).parent().closest('.form-group').removeClass('d-none');
+                    $videoUrl.attr('required', false).parent().closest('.form-group').addClass('d-none');
+                } else {
+                    $cameraElement.attr('required', false).parent().closest('.form-group').addClass('d-none');
+                    $videoUrl.attr('required', true).parent().parent().closest('.form-group').removeClass('d-none');
+                }
             });
         });
     </script>

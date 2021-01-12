@@ -47,7 +47,7 @@ class IdentitySeeder extends Seeder
             $data['images'] = array_map(function ($index, $element) use ($response) {
                 return [
                     'url' => $element,
-                    'mongo_id' => $response->body->facial_data[$index]
+                    'mongo_id' => $response->body->facial_data[$index]->face_id
                 ];
             }, array_keys($data['images']), $data['images']);
 
