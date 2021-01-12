@@ -14,6 +14,16 @@ function removeSpinning($element, text = 'Tiếp theo') {
     $element.html(text);
 }
 
+function serializeObject(serializeArray) {
+    const result = {};
+
+    serializeArray.forEach((element) => {
+        result[element.name] = element.value
+    });
+
+    return result;
+}
+
 function validateRegions(shapes) {
     let isValid = true;
 
@@ -37,16 +47,21 @@ function initWizardForProcess() {
     const validRequiredInputs = ($section) => {
         let valid = true;
 
-        const $inputs = $section.find('input[required]');
+        const $inputs = $section.find('[required]');
 
         $inputs.each((_, input) => {
-            if (!$(input).val().trim()) {
+            const value = $(input).val().trim();
+            const dtype = $(input).data('type') || 'string';
+
+            if (!value || (dtype === 'number' && !parseInt(value, 10))) {
                 valid = false;
                 if ($(input).parent().hasClass('input-group')) {
+                    $(input).parent().parent().find('.error.text-danger').remove();
                     $(input).parent().parent().append(`
                         <label class="error ml-0 mt-2 text-danger">Vui lòng nhập thông tin này</label>`
                     );
                 } else {
+                    $(input).parent().find('.error.text-danger').remove();
                     $(input).parent().append(`
                         <label class="error ml-0 mt-2 text-danger">Vui lòng nhập thông tin này</label>`
                     );
@@ -57,16 +72,6 @@ function initWizardForProcess() {
         });
 
         return valid;
-    };
-
-    const serializeObject = (serializeArray) => {
-        const result = {};
-
-        serializeArray.forEach((element) => {
-            result[element.name] = element.value
-        });
-
-        return result;
     };
 
     const $processForm = $('#process-form');
@@ -113,6 +118,8 @@ function initWizardForProcess() {
                     success: function (res) {
                         const { thumbnail } = res.data;
                         removeSpinning($nextBtn);
+                        $processForm.find('input[name="thumbnail"]').html('');
+
                         $processForm.find('input[name="thumbnail"]').val(thumbnail);
                         $('#canvas-img').attr('src', thumbnail);
 
@@ -121,8 +128,7 @@ function initWizardForProcess() {
                     },
                     error: function (res) {
                         removeSpinning($nextBtn);
-
-                        $processForm.find('input[name="thumbnail"]').parent().parent().append(
+                        $processForm.find('.thumbnail-error').html(
                             `<label class="error ml-0 mt-2 text-danger">Không lấy được ảnh, vui lòng thử lại</label>`
                         );
                     }
@@ -147,8 +153,13 @@ function initWizardForProcess() {
             }
             const $finishBtn = $('#process-form a[href="#finish"]');
             addSpinning($finishBtn);
-
             const data = serializeObject(serializableData);
+
+            if (data['process_type'] === 'camera') {
+                delete data['video_url'];
+            } else {
+                delete data['camera_id'];
+            }
             $.ajax({
                 url: '/processes/create',
                 type: 'POST',

@@ -24,6 +24,7 @@ class Process extends Model
      * @var array
      */
     protected $fillable = [
+        'camera_id',
         'name',
         'video_url',
         'description',
@@ -41,4 +42,9 @@ class Process extends Model
         'rendering_start_time',
         'done_time',
     ];
+
+    public function camera()
+    {
+        return $this->belongsTo(Camera::class);
+    }
 }

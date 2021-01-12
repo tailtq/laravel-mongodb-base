@@ -95,7 +95,9 @@ function clearCanvas(canvasWidth, canvasHeight, ctx) {
 function drawPolygons(regions, drawingType, ctx) {
     regions.forEach((region) => {
         // sort to choose which key will be draw over which key
-        const allKeys = Object.keys(region).sort((a, b) => a === drawingType);
+        const allKeys = Object.keys(region).sort((a, b) => (
+            (a === drawingType) - (b === drawingType)
+        ));
 
         // draw by all keys
         allKeys.forEach((key) => {
@@ -253,27 +255,23 @@ function initCanvasEvents(canvasElement) {
 
     $('#canvas__detecting').on('click', function () {
         removeActive();
-        
         drawingType = 'detecting_region';
         $(this).addClass('active');
     });
     
     $('#canvas__tracking').on('click', function () {
         removeActive();
-        
         drawingType = 'tracking_region';
         $(this).addClass('active');
     });
     
     $('#canvas__finish').on('click', function () {
         removeActive();
-        
         drawingType = null;
     });
 
     $('#canvas__delete').on('click', function () {
         removeActive();
-        
         drawingType = 'delete';
         $(this).addClass('active');
     });

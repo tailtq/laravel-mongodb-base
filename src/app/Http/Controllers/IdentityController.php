@@ -61,7 +61,7 @@ class IdentityController extends Controller
             'images' => array_map(function ($index, $element) use ($response) {
                 return [
                     'url' => $element['url'],
-                    'mongo_id' => $response->body->facial_data[$index]
+                    'mongo_id' => $response->body->facial_data[$index]["face_id"]
                 ];
             }, array_keys($data['images']), $data['images']),
         ]);
@@ -117,7 +117,7 @@ class IdentityController extends Controller
         }
         foreach ($newImages as $index => $image) {
             array_push($oldImages, [
-                'mongo_id' => $response->body->facial_data[$index],
+                'mongo_id' => $response->body->facial_data[$index]["face_id"],
                 'url' => $image['url']
             ]);
         }

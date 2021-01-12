@@ -3,7 +3,6 @@
 @push('plugin-styles')
     <link href="{{ my_asset('assets/plugins/jquery-steps/jquery.steps.css') }}" rel="stylesheet"/>
     <link href="{{ asset('assets/plugins/lightbox/css/lightbox.min.css') }}" rel="stylesheet"/>
-    <link rel="stylesheet" href="{{ my_asset('assets/plugins/@mdi/css/materialdesignicons.min.css') }}">
     <link href="{{ my_asset('assets/plugins/dropzone/dropzone.min.css') }}" rel="stylesheet"/>
     <style>
         .popover .popover-body {
@@ -310,7 +309,7 @@
         const processId = '{{ $process->id }}';
         const allStatus = <?= json_encode(__('status', [], 'vi'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
         // render objects
-        const frameDrop = {{ object_get($process->mongoData, 'frame_drop', 1) }};
+        const frameDrop = {{ object_get($process->config, 'frame_drop', 1) }};
         const totalFrames = Math.round(parseInt({{ $process->total_frames }}, 10) / frameDrop);
         const fps = Math.round(parseInt('{{ $process->fps }}', 10) / frameDrop);
         // const renderHour = totalFrames / fps / 3600 >= 1;
