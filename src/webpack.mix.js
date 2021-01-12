@@ -57,12 +57,8 @@ mix.copyDirectory('node_modules/feather-icons/dist', 'public/assets/plugins/feat
 
   .copyDirectory('node_modules/bootstrap-datepicker/dist', 'public/assets/plugins/bootstrap-datepicker')
   .copyDirectory('node_modules/progressbar.js/dist/progressbar.min.js', 'public/assets/plugins/progressbar-js/progressbar.min.js')
-  // .copyDirectory('node_modules/select2/dist', 'public/assets/plugins/select2')
-  .copyDirectory(['node_modules/select2/dist/js/select2.min.js', 'node_modules/select2/dist/css/select2.min.css'] , 
+  .copyDirectory(['node_modules/select2/dist/js/select2.min.js', 'node_modules/select2/dist/css/select2.min.css'] ,
     'public/assets/plugins/select2')
-  // .copyDirectory(['node_modules/simplemde/dist/simplemde.min.js', 'node_modules/simplemde/dist/simplemde.min.css'] ,
-  //   'public/assets/plugins/simplemde')
-  // .copyDirectory('node_modules/jquery-tags-input/dist', 'public/assets/plugins/jquery-tags-input')
   .copyDirectory(['node_modules/dropzone/dist/min/dropzone.min.js', 'node_modules/dropzone/dist/min/dropzone.min.css'] , 
     'public/assets/plugins/dropzone')
   .copyDirectory('node_modules/dropify/dist', 'public/assets/plugins/dropify')

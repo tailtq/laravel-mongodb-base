@@ -95,7 +95,9 @@ function clearCanvas(canvasWidth, canvasHeight, ctx) {
 function drawPolygons(regions, drawingType, ctx) {
     regions.forEach((region) => {
         // sort to choose which key will be draw over which key
-        const allKeys = Object.keys(region).sort((a, b) => a === drawingType);
+        const allKeys = Object.keys(region).sort((a, b) => (
+            (a === drawingType) - (b === drawingType)
+        ));
 
         // draw by all keys
         allKeys.forEach((key) => {
