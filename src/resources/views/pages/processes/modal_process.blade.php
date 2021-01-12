@@ -25,6 +25,29 @@
                             </div>
 
                             <div class="form-group">
+                                <label>Loại tiến trình *</label>
+                                <select name="process_type" class="form-control" disabled>
+                                    <option value="camera" {{ $process->camera_id ? 'selected' : '' }}>Camera</option>
+                                    <option value="video" {{ $process->video_url ? 'selected' : '' }}>Video</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group {{ !$process->camera_id ? 'd-none' : '' }}">
+                                <label>Camera *</label>
+                                <select name="camera_id" class="form-control" data-type="number" disabled>
+                                    <option value="0">Chọn camera</option>
+
+                                    @foreach($cameras as $camera)
+                                        <option value="{{ $camera->id }}"
+                                                {{ $camera->id == $process->camera_id ? 'selected' : '' }}
+                                                data-url="{{ $camera->url }}">
+                                            {{ $camera->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="form-group {{ !$process->video_url ? 'd-none' : '' }}">
                                 <label>Đường dẫn *</label>
                                 <input type="text"
                                        class="form-control"
@@ -32,6 +55,13 @@
                                        name="video_url"
                                        disabled
                                        value="{{ old('video_url', $process->camera ? $process->camera->url : $process->video_url) }}">
+                            </div>
+
+                            <div class="form-group {{ !$process->video_url ? 'd-none' : '' }}">
+                                <label>Ngày bắt đầu</label>
+                                <input class="form-control mb-4 mb-md-0" disabled
+                                       name="started_at"
+                                       value="{{ $process->started_at ? $process->started_at->format('H:i d-m-Y') : '' }}" />
                             </div>
 
                             <div class="form-group">
