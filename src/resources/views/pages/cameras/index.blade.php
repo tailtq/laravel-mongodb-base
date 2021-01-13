@@ -35,7 +35,7 @@
 
                     @foreach ($items as $item)
                         <tr data-value="{{ json_encode($item) }}">
-                            <th class="text-center">{{ ++$index }}</th>
+                            <td class="text-center">{{ ++$index }}</td>
                             <td>{{ $item->name }}</td>
                             <td>{{ $item->created_at->format('H:i d-m-Y') }}</td>
                             <td>

@@ -79,6 +79,7 @@ class ProcessController extends Controller
             $process->rendering_duration = $this->parseTime($process->rendering_start_time, $process->done_time);
             $process->total_duration = $this->parseTime($process->detecting_start_time, $process->done_time);
         }
+        $cameras = Camera::select(['id', 'name', 'url'])->orderBy('created_at', 'desc')->get();
         $processData = $this->sendGETRequest(
             config('app.ai_server') . "/processes/$process->mongo_id", [], $this->getDefaultHeaders()
         );
@@ -88,6 +89,7 @@ class ProcessController extends Controller
         return view('pages.processes.detail', array_merge([
             'process' => $process,
             'matchingText' => $matchingText,
+            'cameras' => $cameras,
         ], $this->getProgressing($process->status, $matchingPercentage)));
     }
 
@@ -100,12 +102,16 @@ class ProcessController extends Controller
         $data = $request->validationData();
         $cameraId = Arr::get($data, 'camera_id');
         $camera = $cameraId ? Camera::find($cameraId) : null;
+        $startedAt = Arr::get($data, 'started_at')
+            ? Carbon::createFromFormat('H:i d-m-Y', $data['started_at'])->format('Y/m/d H:i:s')
+            : null;
 
         $processData = $this->sendPOSTRequest(config('app.ai_server') . '/processes', [
             'camera' => $camera ? $camera->mongo_id : null,
             'name' => $data['name'],
             'url' => $camera ? null : $data['video_url'],
             'status' => Process::STATUS['ready'],
+            'started_at' => $startedAt,
             'detection_scale' => (float) $data['detection_scale'],
             'frame_drop' => (int) $data['frame_drop'],
             'frame_step' => (int) $data['frame_step'],

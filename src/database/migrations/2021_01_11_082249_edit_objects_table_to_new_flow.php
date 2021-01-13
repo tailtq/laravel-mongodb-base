@@ -17,15 +17,14 @@ class EditObjectsTableToNewFlow extends Migration
             $table->unsignedBigInteger('cluster_id')->nullable();
             $table->foreign('cluster_id')->references('id')->on('clusters');
 
-            $table->json('avatars')->nullable();
+            $table->json('images')->nullable();
             $table->unsignedInteger('frame_from')->nullable();
             $table->unsignedInteger('frame_to')->nullable();
             $table->dateTime('time_from')->nullable();
             $table->dateTime('time_to')->nullable();
-            $table->unsignedInteger('accuracy_rate')->nullable();
-            $table->unsignedFloat('confidence_score')->nullable();
+            $table->unsignedInteger('confidence_rate')->nullable();
 
-            $table->dropColumn(['avatar']);
+            $table->dropColumn(['image']);
         });
     }
 
@@ -40,15 +39,14 @@ class EditObjectsTableToNewFlow extends Migration
             $table->dropForeign(['cluster_id']);
             $table->dropColumn([
                 'cluster_id',
-                'avatars',
+                'images',
                 'frame_from',
                 'frame_to',
                 'time_from',
                 'time_to',
-                'accuracy_rate',
-                'confidence_score',
+                'confidence_rate',
             ]);
-            $table->string('avatar')->nullable();
+            $table->string('image')->nullable();
         });
     }
 }

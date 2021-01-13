@@ -105,6 +105,10 @@ function initWizardForProcess() {
                 const $nextBtn = $('#process-form a[href="#next"]');
                 addSpinning($nextBtn);
 
+                const videoUrl = $processForm.find('[name="process_type"]').val() === 'video'
+                    ? $processForm.find('[name="video_url"]').val()
+                    : $processForm.find('[name="camera_id"] option:selected').data('url');
+
                 // Get thumbnail for drawing recognition boundary
                 $.ajax({
                     url: '/processes/thumbnails',
@@ -113,7 +117,7 @@ function initWizardForProcess() {
                     contentType: 'application/json; charset=UTF-8',
                     data: JSON.stringify({
                         _token: $('meta[name="_token"]').attr('content'),
-                        video_url: $processForm.find('[name="video_url"]').val(),
+                        video_url: videoUrl,
                     }),
                     success: function (res) {
                         const { thumbnail } = res.data;
@@ -157,6 +161,7 @@ function initWizardForProcess() {
 
             if (data['process_type'] === 'camera') {
                 delete data['video_url'];
+                delete data['started_at'];
             } else {
                 delete data['camera_id'];
             }
