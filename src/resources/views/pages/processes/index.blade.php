@@ -150,6 +150,14 @@
                                     </div>
                                 </div>
 
+                                <div class="form-group d-none">
+                                    <label>Ngày bắt đầu</label>
+                                    <input class="form-control mb-4 mb-md-0"
+                                           name="started_at"
+                                           data-inputmask="'alias': 'datetime'"
+                                           data-inputmask-inputformat="HH:MM dd-mm-yyyy" />
+                                </div>
+
                                 <div class="collapse form-group" id="collapseDropzone">
                                     <div class="card card-body">
                                         <div class="dropzone"></div>
@@ -408,6 +416,8 @@
     <script src="{{ my_asset('assets/plugins/jquery-steps/jquery.steps.min.js') }}"></script>
     <script src="{{ my_asset('assets/plugins/sweetalert2/sweetalert2.min.js') }}"></script>
     <script src="{{ my_asset('assets/plugins/dropzone/dropzone.min.js') }}"></script>
+    <script src="{{ my_asset('assets/plugins/inputmask/jquery.inputmask.bundle.min.js') }}"></script>
+    <script src="{{ my_asset('assets/js/inputmask.js') }}"></script>
 @endpush
 
 @push('custom-scripts')
@@ -416,17 +426,22 @@
     <script src="{{ my_asset('js/geometry.js') }}"></script>
     <script>
         $(document).ready(function () {
+            $('[name="started_at"]').inputmask();
+
             $('select[name="process_type"]').on('change', function () {
                 const type = $(this).find('option:selected').val();
                 const $cameraElement = $('select[name="camera_id"]');
                 const $videoUrl = $('input[name="video_url"]');
+                const $startedAt = $('input[name="started_at"]');
 
                 if (type === 'camera') {
                     $cameraElement.attr('required', true).parent().closest('.form-group').removeClass('d-none');
-                    $videoUrl.attr('required', false).parent().closest('.form-group').addClass('d-none');
+                    $videoUrl.attr('required', false).parent().parent().closest('.form-group').addClass('d-none');
+                    $startedAt.parent().closest('.form-group').addClass('d-none');
                 } else {
                     $cameraElement.attr('required', false).parent().closest('.form-group').addClass('d-none');
                     $videoUrl.attr('required', true).parent().parent().closest('.form-group').removeClass('d-none');
+                    $startedAt.parent().closest('.form-group').removeClass('d-none');
                 }
             });
         });

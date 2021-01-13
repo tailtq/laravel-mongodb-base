@@ -25,6 +25,29 @@
                             </div>
 
                             <div class="form-group">
+                                <label>Loại tiến trình *</label>
+                                <select name="process_type" class="form-control" disabled>
+                                    <option value="camera" {{ $process->camera_id ? 'selected' : '' }}>Camera</option>
+                                    <option value="video" {{ $process->video_url ? 'selected' : '' }}>Video</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group {{ !$process->camera_id ? 'd-none' : '' }}">
+                                <label>Camera *</label>
+                                <select name="camera_id" class="form-control" data-type="number" disabled>
+                                    <option value="0">Chọn camera</option>
+
+                                    @foreach($cameras as $camera)
+                                        <option value="{{ $camera->id }}"
+                                                {{ $camera->id == $process->camera_id ? 'selected' : '' }}
+                                                data-url="{{ $camera->url }}">
+                                            {{ $camera->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="form-group {{ !$process->video_url ? 'd-none' : '' }}">
                                 <label>Đường dẫn *</label>
                                 <input type="text"
                                        class="form-control"
@@ -32,6 +55,13 @@
                                        name="video_url"
                                        disabled
                                        value="{{ old('video_url', $process->camera ? $process->camera->url : $process->video_url) }}">
+                            </div>
+
+                            <div class="form-group {{ !$process->video_url ? 'd-none' : '' }}">
+                                <label>Ngày bắt đầu</label>
+                                <input class="form-control mb-4 mb-md-0" disabled
+                                       name="started_at"
+                                       value="{{ $process->started_at ? $process->started_at->format('H:i d-m-Y') : '' }}" />
                             </div>
 
                             <div class="form-group">
@@ -166,7 +196,6 @@
                                         <label>Tỉ lệ chính xác đầu tối thiểu</label>
                                         <input type="number"
                                                class="form-control"
-                                               required
                                                placeholder="Nhập thông số"
                                                name="min_head_confidence"
                                                disabled
@@ -179,7 +208,6 @@
                                         <label>Tỉ lệ chính xác khuôn mặt tối thiểu</label>
                                         <input type="number"
                                                class="form-control"
-                                               required
                                                placeholder="Nhập thông số"
                                                name="min_face_confidence"
                                                disabled
@@ -192,11 +220,36 @@
                                         <label>Tỉ lệ chính xác thân hình tối thiểu</label>
                                         <input type="number"
                                                class="form-control"
-                                               required
                                                placeholder="Nhập thông số"
                                                name="min_body_confidence"
                                                disabled
                                                value="{{ old('min_body_confidence', object_get($process->config, 'min_body_confidence')) }}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Write data step</label>
+                                        <input type="number"
+                                               class="form-control"
+                                               placeholder="Nhập thông số"
+                                               name="write_data_step"
+                                               disabled
+                                               value="{{ old('write_data_step', object_get($process->config, 'write_data_step')) }}">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Write video step</label>
+                                        <input type="number"
+                                               class="form-control"
+                                               placeholder="Nhập thông số"
+                                               name="write_video_step"
+                                               disabled
+                                               value="{{ old('write_video_step', object_get($process->config, 'write_video_step')) }}">
                                     </div>
                                 </div>
                             </div>
@@ -248,7 +301,8 @@
 
                             <p class="error text-danger mt-2 text-center canvas__error-message"></p>
 
-                            <input type="hidden" name="regions" value="{{ json_encode($process->config->regions) }}">
+                            <input type="hidden" name="regions"
+                                   value="{{ json_encode(object_get($process->config, 'regions', [])) }}">
                         </section>
                     </form>
                 </div>
