@@ -196,7 +196,6 @@
                                         <label>Tỉ lệ chính xác đầu tối thiểu</label>
                                         <input type="number"
                                                class="form-control"
-                                               required
                                                placeholder="Nhập thông số"
                                                name="min_head_confidence"
                                                disabled
@@ -209,7 +208,6 @@
                                         <label>Tỉ lệ chính xác khuôn mặt tối thiểu</label>
                                         <input type="number"
                                                class="form-control"
-                                               required
                                                placeholder="Nhập thông số"
                                                name="min_face_confidence"
                                                disabled
@@ -222,11 +220,36 @@
                                         <label>Tỉ lệ chính xác thân hình tối thiểu</label>
                                         <input type="number"
                                                class="form-control"
-                                               required
                                                placeholder="Nhập thông số"
                                                name="min_body_confidence"
                                                disabled
                                                value="{{ old('min_body_confidence', object_get($process->config, 'min_body_confidence')) }}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Write data step</label>
+                                        <input type="number"
+                                               class="form-control"
+                                               placeholder="Nhập thông số"
+                                               name="write_data_step"
+                                               disabled
+                                               value="{{ old('write_data_step', object_get($process->config, 'write_data_step')) }}">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Write video step</label>
+                                        <input type="number"
+                                               class="form-control"
+                                               placeholder="Nhập thông số"
+                                               name="write_video_step"
+                                               disabled
+                                               value="{{ old('write_video_step', object_get($process->config, 'write_video_step')) }}">
                                     </div>
                                 </div>
                             </div>
@@ -278,7 +301,8 @@
 
                             <p class="error text-danger mt-2 text-center canvas__error-message"></p>
 
-                            <input type="hidden" name="regions" value="{{ json_encode($process->config->regions) }}">
+                            <input type="hidden" name="regions"
+                                   value="{{ json_encode(object_get($process->config, 'regions', [])) }}">
                         </section>
                     </form>
                 </div>

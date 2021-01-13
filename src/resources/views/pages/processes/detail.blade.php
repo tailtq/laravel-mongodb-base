@@ -139,18 +139,18 @@
                                 {{ $process->detecting_duration }}
                             </td>
                         </tr>
-                        <tr>
-                            <th>Thời gian kiểm tra định danh</th>
-                            <td class="process__matching-duration" width="30%">
-                                {{ $process->matching_duration }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Thời gian tổng hợp video</th>
-                            <td class="process__rendering-duration" width="30%">
-                                {{ $process->rendering_duration }}
-                            </td>
-                        </tr>
+{{--                        <tr>--}}
+{{--                            <th>Thời gian kiểm tra định danh</th>--}}
+{{--                            <td class="process__matching-duration" width="30%">--}}
+{{--                                {{ $process->matching_duration }}--}}
+{{--                            </td>--}}
+{{--                        </tr>--}}
+{{--                        <tr>--}}
+{{--                            <th>Thời gian tổng hợp video</th>--}}
+{{--                            <td class="process__rendering-duration" width="30%">--}}
+{{--                                {{ $process->rendering_duration }}--}}
+{{--                            </td>--}}
+{{--                        </tr>--}}
                         <tr>
                             <th>Tổng thời gian</th>
                             <td class="process__total-duration" width="30%">
