@@ -38,12 +38,13 @@
                         @else
                             badge-success
                         @endif
-                        text-uppercase
-                        process__status
+                            text-uppercase
+                            process__status
                     ">
                         {{ __('status.' . $process->status, [], 'vi') }}
                     </span>
                 </h5>
+
                 <div style="display: inline-block">
                     <button type="button"
                             @if($process->status != 'ready')
@@ -109,9 +110,7 @@
             </div>
 
             <div class="table-responsive d-flex">
-                <video controls class="w-50 h-100" preload="auto">
-                    <source src="{{ $process->video_url }}" type="video/mp4">
-                </video>
+                <video class="videoElement w-100" controls></video>
 
                 <div class="w-100 ml-4">
                     <h5 class="mt-1 mb-2">Thống kê</h5>
@@ -119,19 +118,19 @@
                     <table class="table table-bordered statistical-table">
                         <tr>
                             <th>Số lượt người xuất hiện</th>
-                            <td class="process__ungrouped-count" width="30%">{{ $process->ungrouped_count }}</td>
+                            <td class="process__ungrouped-count" width="30%">{{ $process->total_appearances }}</td>
                         </tr>
                         <tr>
                             <th>Số người</th>
-                            <td class="process__grouped-count" width="30%">{{ $process->grouped_count }}</td>
+                            <td class="process__grouped-count" width="30%">{{ $process->total_objects }}</td>
                         </tr>
                         <tr>
                             <th>Số người phát hiện được danh tính</th>
-                            <td class="process__identified-count" width="30%">{{ $process->identified_count }}</td>
+                            <td class="process__identified-count" width="30%">{{ $process->total_identified }}</td>
                         </tr>
                         <tr>
                             <th>Số người không phát hiện được danh tính</th>
-                            <td class="process__unidentified-count" width="30%">{{ $process->unidentified_count }}</td>
+                            <td class="process__unidentified-count" width="30%">{{ $process->total_unidentified }}</td>
                         </tr>
                         <tr>
                             <th>Thời gian nhận diện</th>
@@ -139,18 +138,18 @@
                                 {{ $process->detecting_duration }}
                             </td>
                         </tr>
-{{--                        <tr>--}}
-{{--                            <th>Thời gian kiểm tra định danh</th>--}}
-{{--                            <td class="process__matching-duration" width="30%">--}}
-{{--                                {{ $process->matching_duration }}--}}
-{{--                            </td>--}}
-{{--                        </tr>--}}
-{{--                        <tr>--}}
-{{--                            <th>Thời gian tổng hợp video</th>--}}
-{{--                            <td class="process__rendering-duration" width="30%">--}}
-{{--                                {{ $process->rendering_duration }}--}}
-{{--                            </td>--}}
-{{--                        </tr>--}}
+                        {{--                        <tr>--}}
+                        {{--                            <th>Thời gian kiểm tra định danh</th>--}}
+                        {{--                            <td class="process__matching-duration" width="30%">--}}
+                        {{--                                {{ $process->matching_duration }}--}}
+                        {{--                            </td>--}}
+                        {{--                        </tr>--}}
+                        {{--                        <tr>--}}
+                        {{--                            <th>Thời gian tổng hợp video</th>--}}
+                        {{--                            <td class="process__rendering-duration" width="30%">--}}
+                        {{--                                {{ $process->rendering_duration }}--}}
+                        {{--                            </td>--}}
+                        {{--                        </tr>--}}
                         <tr>
                             <th>Tổng thời gian</th>
                             <td class="process__total-duration" width="30%">
@@ -194,49 +193,27 @@
                         {{ $detectingPercentage }}%
                     </div>
                 </div>
-
-                <p class="mt-4">Kiểm tra định danh</p>
-                <div class="progress">
-                    <div class="progress-bar progress-bar-striped bg-success progress-bar__matching"
-                         role="progressbar"
-                         style="width: {{ $matchingPercentage }}%"
-                         aria-valuenow="{{ $matchingPercentage }}"
-                         aria-valuemin="0"
-                         aria-valuemax="100">
-                        {{ $matchingText }} {{ $matchingPercentage }}%
-                    </div>
-                </div>
-            </div>
-
-            <p class="mt-4">Tổng hợp video</p>
-            <div class="progress">
-                <div class="progress-bar progress-bar-striped bg-warning progress-bar__rendering"
-                     role="progressbar"
-                     style="width: {{ $renderingPercentage }}%"
-                     aria-valuenow="{{ $renderingPercentage }}"
-                     aria-valuemin="0"
-                     aria-valuemax="100">
-                    {{ $renderingPercentage }}%
-                </div>
             </div>
 
             <div class="mt-5">
                 <h5 class="mb-2">Danh sách đối tượng</h5>
 
                 <div class="mb-4 socket-render">
-                    <div class="table-responsive pt-3">
-                        <table class="table table-bordered">
+                    <div class="pt-3">
+                        <table class="table table-responsive table-bordered">
                             <thead>
-                                <tr>
-                                    <th width="5%" class="text-center">Id</th>
-                                    <th width="7%" class="text-center">Ảnh</th>
-                                    <th width="15%" class="text-center">Ảnh CMND đối chiếu</th>
-                                    <th width="20%">Tên đối tượng</th>
-                                    <th>Thời gian xuất hiện</th>
-                                    <th></th>
-                                </tr>
+                            <tr>
+                                <th width="5%" class="text-center">Id</th>
+                                <th width="7%" class="text-center">Ảnh</th>
+                                <th width="15%" class="text-center">Ảnh CMND đối chiếu</th>
+                                <th width="20%">Tên đối tượng</th>
+                                <th>Thời gian xuất hiện</th>
+                                <th></th>
+                            </tr>
                             </thead>
-                            <tbody></tbody>
+                            <tbody>
+                                {{-- Insert objects here --}}
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -262,7 +239,8 @@
         </div>
     </div>
 
-    <div class="modal fade" id="searchFaceModal" tabindex="-1" role="dialog" aria-labelledby="searchFaceModal" aria-hidden="true">
+    <div class="modal fade" id="searchFaceModal" tabindex="-1" role="dialog" aria-labelledby="searchFaceModal"
+         aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -298,7 +276,6 @@
     <script src="{{ my_asset('assets/plugins/dropzone/dropzone.min.js') }}"></script>
     <script src="{{ my_asset('assets/plugins/jquery-steps/jquery.steps.min.js') }}"></script>
     <script src="{{ my_asset('assets/plugins/lightbox/js/lightbox.min.js') }}"></script>
-    {{--<script src="https://cdnjs.cloudflare.com/ajax/libs/dashjs/3.1.3/dash.all.min.js"></script>--}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@8.15.3/dist/sweetalert2.all.min.js"></script>
 @endpush
 
@@ -309,20 +286,31 @@
         const processId = '{{ $process->id }}';
         const allStatus = <?= json_encode(__('status', [], 'vi'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
         // render objects
+        {{--const totalFrames = Math.round(parseInt({{ $process->total_frames }}, 10) / frameDrop);--}}
         const frameDrop = {{ object_get($process->config, 'frame_drop', 1) }};
-        const totalFrames = Math.round(parseInt({{ $process->total_frames }}, 10) / frameDrop);
         const fps = Math.round(parseInt('{{ $process->fps }}', 10) / frameDrop);
         // const renderHour = totalFrames / fps / 3600 >= 1;
-        const renderHour = false;
+        const renderHour = parseInt('{{ $process->camera_id ? 1 : 0 }}');
 
         let globalStatus = '{{ $process->status }}';
     </script>
     <script src="{{ my_asset('js/detail.js') }}"></script>
     <script src="{{ my_asset('js/shapes/circle.js') }}"></script>
     <script src="{{ my_asset('js/geometry.js') }}"></script>
+    <script src="{{ my_asset('assets/plugins/flv/flv.min.js') }}"></script>
     <script>
         isDrawing = false;
         loadCanvas();
         loadOldRegions();
+
+        const videoElement = document.getElementsByClassName('videoElement')[0];
+        const flvPlayer = flvjs.createPlayer({
+            type: 'flv',
+            isLive: true,
+            url: '{{ env('STREAMING_SERVER') }}/{{ $process->mongo_id }}.flv'
+        });
+        flvPlayer.attachMediaElement(videoElement);
+        flvPlayer.load();
+        flvPlayer.play();
     </script>
 @endpush

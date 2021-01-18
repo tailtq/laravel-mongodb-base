@@ -2,27 +2,20 @@
 
 namespace App\Console\Commands;
 
-use App\Events\ObjectVideoRendered;
 use App\Events\ProgressChange;
 use App\Models\Process;
-use App\Models\TrackedObject;
-use App\Traits\GroupDataTrait;
-use App\Traits\RequestAPI;
-use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 
-class ListenAIProgress extends Command
+class ListenProgress extends Command
 {
-    use GroupDataTrait;
-
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'redis:listen-ai-progress';
+    protected $signature = 'redis:listen-progress';
 
     /**
      * The console command description.
@@ -47,7 +40,7 @@ class ListenAIProgress extends Command
     public function handle()
     {
         Redis::subscribe('progress', function ($event) {
-            Log::info($event);
+//            Log::info($event);
             $event = json_decode($event);
 
             if (!$event) {
@@ -68,14 +61,10 @@ class ListenAIProgress extends Command
 
                     $data['status'] = $process->status;
                 }
-                // Call rendering API if status is grouped
-//                if ($event->status === Process::STATUS['grouped']) {
-//                    $url = config('app.ai_server') .  "/processes/$process->mongo_id/rendering";
-//                    $response = $this->sendGETRequest($url, [], $this->getDefaultHeaders());
-//
-//                    Log::info("Rendering result $process->id: " . json_encode($response));
-//                }
-//                broadcast(new ProgressChange($process->id, $data));
+//                $url = config('app.ai_server') .  "/processes/$process->mongo_id/rendering";
+//                $response = $this->sendGETRequest($url, [], $this->getDefaultHeaders());
+
+                broadcast(new ProgressChange($process->id, $data));
             }
         });
     }

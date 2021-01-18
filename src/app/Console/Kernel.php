@@ -2,10 +2,11 @@
 
 namespace App\Console;
 
-use App\Console\Commands\GetDataFromAI;
 use Illuminate\Console\Scheduling\Schedule;
+use App\Console\Commands\ListenProgress;
+use App\Console\Commands\ListenTrackingProcess;
+use App\Console\Commands\ListenClusteringProcess;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
-use Illuminate\Support\Facades\Log;
 
 class Kernel extends ConsoleKernel
 {
@@ -15,7 +16,9 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        GetDataFromAI::class
+        ListenClusteringProcess::class,
+        ListenProgress::class,
+        ListenTrackingProcess::class,
     ];
 
     /**
