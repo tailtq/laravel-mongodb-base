@@ -142,6 +142,7 @@ class ListenTrackingProcess extends Command
             ])
             ->get();
         broadcast(new ObjectsAppear($processId, $objs));
+        broadcast(new ObjectsAppear($processId, $objs, 'monitor.tracking'));
 
         return $objs;
     }
