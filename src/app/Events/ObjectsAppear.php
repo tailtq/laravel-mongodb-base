@@ -15,17 +15,20 @@ class ObjectsAppear implements ShouldBroadcast
 
     private $processId;
     private $data;
+    private $channel;
 
     /**
      * Create a new event instance.
      *
      * @param $processId
      * @param $data
+     * @param string $channel
      */
-    public function __construct($processId, $data)
+    public function __construct($processId, $data, $channel = 'default')
     {
         $this->processId = $processId;
         $this->data = $data;
+        $this->channel = $channel;
     }
 
     /**
@@ -35,12 +38,16 @@ class ObjectsAppear implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new Channel("process.$this->processId.objects");
+        if ($this->channel === 'default') {
+            return new Channel("process.$this->processId.objects");
+        }
+        return new Channel($this->channel);
     }
 
     public function broadcastWith()
     {
         return [
+            'processId' => $this->processId,
             'data' => $this->data,
         ];
     }

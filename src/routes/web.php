@@ -94,6 +94,7 @@ Route::group(['middleware' => ['auth']], function () {
 
     Route::group(['prefix' => '/monitors'], function () {
         Route::get('/', 'MonitorController@index')->name('monitors');
+        Route::post('/new-processes', 'MonitorController@getNewProcesses')->name('monitors.new-processes');
     });
 });
 

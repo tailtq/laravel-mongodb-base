@@ -212,43 +212,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr data-track-id="${object.track_id}"
-                                data-id="${object.id}"
-                                data-identity-id="${object.identity_id}"
-                                data-mongo-id="${object.mongo_id}">
-                                <td class="text-center">1</td>
-                                <td class="text-center">
-                                    <img src="https://img-prod-cms-rt-microsoft-com.akamaized.net/cms/api/am/imageFileData/RE4wB5f?ver=0b5c" alt="image"
-                                         style="width: inherit; height: 60px;">
-                                </td>
-                                <td class="text-center">LightBox</td>
-                                <td>Không xác định</td>
-                                <td>
-                                    <span class="badge badge-info">
-                                        19:10 - 20:10 10T3
-                                    </span>
-
-                                    <span class="badge badge-info">
-                                        19:10 - 20:10 10T3
-                                    </span>
-
-                                    <span class="badge badge-info">
-                                        19:10 - 20:10 10T3
-                                    </span>
-
-                                    <span class="badge badge-info">
-                                        19:10 - 20:10 10T3
-                                    </span>
-                                </td>
-                                <td width="50px" class="text-center">
-                                    <a href="#"
-                                       data-video-result="${object.video_result || ''}"
-                                       style="display: block"
-                                       class="render-single-object icon__normal-font-size text-secondary">
-                                        <i class="mdi mdi-video-switch"></i>
-                                    </a>
-                                </td>
-                            </tr>
+                                {{-- Insert objects here --}}
                             </tbody>
                         </table>
                     </div>
@@ -343,7 +307,7 @@
         const flvPlayer = flvjs.createPlayer({
             type: 'flv',
             isLive: true,
-            url: '{{ env('STREAMING_SERVER') }}/live/{{ $process->mongo_id }}.flv'
+            url: '{{ env('STREAMING_SERVER') }}/{{ $process->mongo_id }}.flv'
         });
         flvPlayer.attachMediaElement(videoElement);
         flvPlayer.load();
