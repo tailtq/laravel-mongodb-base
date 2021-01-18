@@ -12,7 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class ProcessController extends Controller
 {
@@ -39,58 +39,48 @@ class ProcessController extends Controller
     public function show($id)
     {
         $process = Process::with('camera')->select('*',
+            DB::raw("(SELECT COUNT(*) FROM objects WHERE objects.process_id = $id) as total_appearances"),
             DB::raw("
-                (SELECT COUNT(*) FROM objects
-                 WHERE objects.process_id = $id) as grouped_count"),
+                (SELECT COUNT(*) FROM objects as OO WHERE OO.id in (
+                    SELECT min(objects.id) as unq_identity_id
+                        FROM objects
+                        WHERE objects.process_id = $id
+                        GROUP BY IFNULL(objects.cluster_id, UUID())
+                )) as total_objects
+            "),
             DB::raw("
-                (SELECT COUNT(objects.process_id) FROM objects
-                 WHERE objects.process_id = $id 
-                 AND objects.identity_id is not NULL
-                 AND objects.matching_status = '" . TrackedObject::MATCHING_STATUS['identified'] . "') as identified_count"),
+                (SELECT COUNT(*) FROM objects as OO WHERE id in (
+                    SELECT min(objects.id) FROM objects INNER JOIN clusters ON clusters.id = objects.cluster_id
+                        WHERE objects.process_id = $id AND clusters.identity_id != NULL
+                        GROUP BY IFNULL(objects.cluster_id, UUID())
+                )) as total_identified
+            "),
             DB::raw("
-                (SELECT COUNT(objects.process_id) FROM objects
-                 WHERE objects.process_id = $id 
-                 AND objects.identity_id is NULL
-                 AND objects.matching_status = '" . TrackedObject::MATCHING_STATUS['identified'] . "') as unidentified_count")
+                (SELECT COUNT(*) FROM objects as OO WHERE id in (
+                    SELECT min(objects.id) FROM objects INNER JOIN clusters ON clusters.id = objects.cluster_id
+                        WHERE objects.process_id = $id AND clusters.identity_id = NULL
+                        GROUP BY IFNULL(objects.cluster_id, UUID())
+                )) as total_unidentified
+            ")
         )->where('id', $id)->first();
-        $matchingPercentage = 0;
-        $matchingText = '(0/0)';
 
         if (!$process) {
             abort(404);
         }
-        if ($process->ungrouped_count != 0) {
-            $totalMatched = in_array($process->status, ['detecting', 'detected'])
-                ? $process->identified_count + $process->unidentified_count
-                : $process->ungrouped_count;
-            $totalObjects = $process->ungrouped_count;
-
-            $matchingText = "($totalMatched/$totalObjects)";
-            $matchingPercentage = (int) (100 * $totalMatched / ($totalObjects));
-        }
-        if (!in_array($process->status, ['done', 'grouped', 'rendering'])) {
-            $process->grouped_count = 0;
-            $process->identified_count = 0;
-            $process->unidentified_count = 0;
-        }
         if ($process->status === Process::STATUS['done']) {
             $process->detecting_duration = $this->parseTime($process->detecting_start_time, $process->detecting_end_time);
-            $process->matching_duration = $this->parseTime($process->matching_start_time, $process->grouping_start_time);
-            $process->rendering_duration = $this->parseTime($process->rendering_start_time, $process->done_time);
-            $process->total_duration = $this->parseTime($process->detecting_start_time, $process->done_time);
         }
-        $cameras = Camera::select(['id', 'name', 'url'])->orderBy('created_at', 'desc')->get();
         $processData = $this->sendGETRequest(
             config('app.ai_server') . "/processes/$process->mongo_id", [], $this->getDefaultHeaders()
         );
-
         $process->config = $processData->status ? $processData->body->config : null;
+        $cameras = Camera::select(['id', 'name', 'url'])->orderBy('created_at', 'desc')->get();
 
-        return view('pages.processes.detail', array_merge([
+        return view('pages.processes.detail', [
             'process' => $process,
-            'matchingText' => $matchingText,
             'cameras' => $cameras,
-        ], $this->getProgressing($process->status, $matchingPercentage)));
+            'detectingPercentage' => $this->getProgressing($process->status),
+        ]);
     }
 
     /**
@@ -112,20 +102,20 @@ class ProcessController extends Controller
             'url' => $camera ? null : $data['video_url'],
             'status' => Process::STATUS['ready'],
             'started_at' => $startedAt,
-            'detection_scale' => (float) $data['detection_scale'],
-            'frame_drop' => (int) $data['frame_drop'],
-            'frame_step' => (int) $data['frame_step'],
-            'max_pitch' => (int) $data['max_pitch'],
-            'max_roll' => (int) $data['max_roll'],
-            'max_yaw' => (int) $data['max_yaw'],
-            'min_face_size' => (int) $data['min_face_size'],
-            'tracking_scale' => (float) $data['tracking_scale'],
-            'biometric_threshold' => (float) $data['biometric_threshold'],
-            'min_head_confidence' => (int) $data['min_head_confidence'],
-            'min_face_confidence' => (int) $data['min_face_confidence'],
-            'min_body_confidence' => (int) $data['min_body_confidence'],
-            'write_video_step' => (int) $data['write_video_step'],
-            'write_data_step' => (int) $data['write_data_step'],
+            'detection_scale' => (float)$data['detection_scale'],
+            'frame_drop' => (int)$data['frame_drop'],
+            'frame_step' => (int)$data['frame_step'],
+            'max_pitch' => (int)$data['max_pitch'],
+            'max_roll' => (int)$data['max_roll'],
+            'max_yaw' => (int)$data['max_yaw'],
+            'min_face_size' => (int)$data['min_face_size'],
+            'tracking_scale' => (float)$data['tracking_scale'],
+            'biometric_threshold' => (float)$data['biometric_threshold'],
+            'min_head_confidence' => (int)$data['min_head_confidence'],
+            'min_face_confidence' => (int)$data['min_face_confidence'],
+            'min_body_confidence' => (int)$data['min_body_confidence'],
+            'write_video_step' => (int)$data['write_video_step'],
+            'write_data_step' => (int)$data['write_data_step'],
             'regions' => $data['regions'],
         ], $this->getDefaultHeaders());
 
@@ -203,21 +193,14 @@ class ProcessController extends Controller
      */
     public function getObjects($processId)
     {
-        $objects = TrackedObject::leftJoin('identities', 'objects.identity_id', 'identities.id')
-            ->where('process_id', $processId)
+        $objects = DB::table('objects')
+            ->leftJoin('identities', 'objects.identity_id', 'identities.id')
+            ->where('objects.process_id', $processId)
             ->select([
-                'objects.id',
-                'objects.process_id',
-                'objects.mongo_id',
-                'objects.track_id',
-                'objects.identity_id',
-                'objects.image',
-                'objects.video_result',
-                'identities.name',
-                'identities.images'
+                'objects.*',
+                'identities.name as identity_name',
+                'identities.images as identity_images',
             ])
-            ->orderBy('objects.track_id')
-            ->with('appearances')
             ->get();
 
         return $this->success($objects);
@@ -369,30 +352,13 @@ class ProcessController extends Controller
 
     /**
      * @param $status
-     * @param $matchingPercentage
-     * @return array
+     * @return int
      */
-    private function getProgressing($status, $matchingPercentage)
+    private function getProgressing($status)
     {
-        $detectingPercentage = 0;
-        $renderingPercentage = 0;
+        $detectingPercentage = ($status === 'done') ? 100 : 0;
 
-        if ($status === 'done') {
-            $detectingPercentage = 100;
-            $matchingPercentage = 100;
-            $renderingPercentage = 100;
-        } else if ($status === 'grouping' || $status === 'grouped' || $status === 'rendering') {
-            $detectingPercentage = 100;
-            $matchingPercentage = 100;
-        } else if ($status === 'detected') {
-            $detectingPercentage = 100;
-        }
-
-        return [
-            'detectingPercentage' => $detectingPercentage,
-            'matchingPercentage' => $matchingPercentage,
-            'renderingPercentage' => $renderingPercentage,
-        ];
+        return $detectingPercentage;
     }
 
     private function parseTime($timeFrom, $timeTo)

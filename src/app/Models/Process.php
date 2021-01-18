@@ -10,9 +10,6 @@ class Process extends Model
         'ready' => 'ready',
         'stopped' => 'stopped',
         'detecting' => 'detecting',
-        'detected' => 'detected',
-        'grouping' => 'grouping',
-        'grouped' => 'grouped',
         'rendering' => 'rendering',
         'done' => 'done',
         'error' => 'error',
@@ -35,12 +32,6 @@ class Process extends Model
         'total_time',
         'total_frames',
         'fps',
-        'detecting_start_time',
-        'detecting_end_time',
-        'matching_start_time',
-        'grouping_start_time',
-        'rendering_start_time',
-        'done_time',
     ];
 
     public function camera()

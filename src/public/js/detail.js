@@ -69,34 +69,6 @@ $('.btn-stop').click(function () {
     sendStartStopRequest(processId, 'stop');
 });
 
-function buildProgressBar(times, totalFrames, fps, renderHour, shouldIncreasing = false) {
-    let bars = ``;
-    let currentTime = 0;
-
-    times.forEach(({frame_from: frameFrom, frame_to: frameTo}) => {
-        const length = frameTo - frameFrom;
-        const transparentLength = frameFrom - currentTime;
-
-        // for shouldIncreasing case, we just render a red slice of the bar
-        bars += `
-            <div class="progress-bar bg-transparent" role="progressbar"
-                 data-toggle="tooltip"
-                 style="width: ${transparentLength / totalFrames * 100}%"></div>
-    
-            <div class="progress-bar progress-bar-striped ${shouldIncreasing ? 'bg-danger' : 'bg-success'}" role="progressbar"
-                 data-frame-from="${frameFrom}"
-                 style="width: ${shouldIncreasing ? 1 : (length / totalFrames * 100)}%"
-                 data-toggle="popover"
-                 data-placement="bottom"
-                 data-trigger="hover"
-                 data-content="${getTimeString(frameFrom, frameTo, fps, renderHour)}"></div>`;
-
-        currentTime += frameTo;
-    });
-
-    return `<div class="progress ht-15">${bars}</div>`;
-}
-
 function getTimeString(frameFrom, frameTo, fps, renderHour) {
     let secondFrom = Math.floor(frameFrom / fps);
     let minFrom = Math.floor(secondFrom / 60);
@@ -127,25 +99,29 @@ function getLightboxBlock(images, id) {
             ` : ``;
 }
 
-function renderBlock(object, appearances, fps, renderHour, shouldIncreasing) {
+function renderBlock(object, appearances = []) {
+    appearances = appearances.map((appearance) => (
+        `<span type="button" class="badge badge-info">
+            ${appearance.frame_from} - ${appearance.frame_to}
+        </span>`
+    ));
+    object.images = JSON.parse(object.images);
+
     return (`
-        <tr data-track-id="${object.track_id}"
-            data-id="${object.id}"
+        <tr data-id="${object.id}"
+            data-track-id="${object.track_id}"
             data-identity-id="${object.identity_id}"
+            data-cluster-id="${object.cluster_id}"
             data-mongo-id="${object.mongo_id}"
             ${!object.identity_id && $('[name="hide-unknown"]').is(':checked') ? 'style="display: none"' : ''}>
             <td class="text-center">${object.track_id}</td>
             <td class="text-center">
-                <img src="${object.image}" alt="image"
-                     style="width: inherit; height: 60px;">
+                ${object.images ? `<img src="${object.images[0]}" alt="image" style="width: inherit; height: 60px;">` : ''}
             </td>
-            <td class="text-center">${getLightboxBlock(object.images, object.id)}</td>
-            <td>${object.name || 'Không xác định'}</td>
-            <td class="position-relative">
-                ${buildProgressBar(appearances, totalFrames, fps, renderHour, shouldIncreasing)}
-                <div class="position-absolute status-overlay ${shouldIncreasing ? 'increasing' : ''}">
-                    ${shouldIncreasing ? 'Đang nhận diện' : ''}
-                </div>
+            <td class="text-center">${getLightboxBlock(object.identity_images, object.id)}</td>
+            <td>${object.identity_name || 'Không xác định'}</td>
+            <td>
+                ${appearances}
             </td>
             <td width="50px" class="text-center">
                 <a href="#"
@@ -204,7 +180,7 @@ function renderData() {
                 [trackIds, trackIndex] = insertInOrder(value.track_id, trackIds);
 
                 renderBlockInOrder(
-                    renderBlock(value, value.appearances, fps, renderHour, !Number.isInteger(value.appearances[0].frame_to)),
+                    renderBlock(value, value.cluster_elements || [value]),
                     trackIndex,
                     trackIds
                 );
@@ -242,18 +218,23 @@ Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectsAppear
     res.data.forEach((value) => {
         if (trackIds.indexOf(value.track_id) >= 0) {
             const $element = $(`.socket-render tbody tr[data-track-id="${value.track_id}"]`);
-            $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(5)`).html(`
-                ${buildProgressBar([value], totalFrames, fps, renderHour, false)}
-                <div class="position-absolute status-overlay"></div>
-            `);
-            if (value.name) {
-                $element.attr('data-identity-id', value.identity_id).removeAttr('style');
-                $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(2)`).html(`
-                    <img src="${value.image}" alt="image" style="width: inherit; height: 60px;">
+            // re-render progress bar
+            // $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(5)`).html(`
+            //     ${buildProgressBar([value], totalFrames, fps, renderHour, false)}
+            //     <div class="position-absolute status-overlay"></div>
+            // `);
+            if (value.frame_to) {
+                $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(5)`).html(`
+                    <span class="badge badge-info">${value.frame_from} - ${value.frame_to}</span>
                 `);
-                $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(3)`).html(getLightboxBlock(value.images, value.id));
-                $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(4)`).text(value.name);
-                $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(6)`).html(`
+            }
+            if (value.identity_name) {
+                $element.attr('data-identity-id', value.identity_id).removeAttr('style');
+                $(`.socket-render tbody tr[data-track-id="${value.id}"] td:nth-child(3)`).html(
+                    getLightboxBlock(value.identity_images, value.id)
+                );
+                $(`.socket-render tbody tr[data-track-id="${value.id}"] td:nth-child(4)`).text(value.identity_name);
+                $(`.socket-render tbody tr[data-track-id="${value.id}"] td:nth-child(6)`).html(`
                     <a href="#"
                        data-video-result=""
                        style="display: ${globalStatus === 'done' ? 'inline' : 'none'}"
@@ -262,14 +243,11 @@ Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectsAppear
                     </a>
                 `);
             }
-            if (value.mongo_id) {
-                $element.attr('data-mongo-id', value.mongo_id);
-            }
         } else {
             [trackIds, trackIndex] = insertInOrder(value.track_id, trackIds);
 
             renderBlockInOrder(
-                renderBlock(value, [value], fps, renderHour, true),
+                renderBlock(value, [value]),
                 trackIndex,
                 trackIds
             );
@@ -330,20 +308,8 @@ Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChan
         $element.css({width: `${progress}%`});
         $element.attr('aria-valuenow', progress);
         $element.text(`${progress}%`);
-    } else if (status === 'matching') {
-        const $element = $(`.progress-bar__${status}`);
-        const trackLength = trackIds.length;
-        const percentage = trackLength > 0 ? total / trackLength * 100 : 0;
-
-        $element.css({width: `${percentage}%`});
-        $element.attr('aria-valuenow', progress);
-        $element.text(`(${total}/${trackLength}) ${parseInt(percentage, 10)}%`);
-    } else if (status === 'grouping') {
-        Toast.fire({
-            type: 'success',
-            title: 'Đang nhất thể hoá',
-        });
     } else if (status === 'grouped') {
+        // grouping
         Toast.fire({
             type: 'success',
             title: 'Nhất thể hoá thành công',
@@ -465,7 +431,9 @@ function initSearchFace() {
             data.forEach((element) => {
                 let appearance = '';
                 element.appearances.forEach((element) => {
-                    appearance += `<span class="badge badge-primary mr-1">${getTimeString(element.frame_from, element.frame_to, fps, renderHour)}</span>`;
+                    appearance += `<span class="badge badge-primary mr-1">
+                                       ${getTimeString(element.frame_from, element.frame_to, fps, renderHour)}
+                                   </span>`;
                 });
 
                 $('.search-face__result .list-unstyled').append(`
@@ -473,7 +441,7 @@ function initSearchFace() {
                         <img src="${element.image}" class="mb-3 mb-sm-0 mr-3 img-fluid" style="height: 80px;">
 
                         <div class="media-body">
-                            <p class="mt-0 mb-1"><b>${element.name || 'Không xác định'}</b></p>
+                            <p class="mt-0 mb-1"><b>${element.identity_name || 'Không xác định'}</b></p>
                             <div>
                                 <p>Thời gian xuất hiện:</p>
                                 ${appearance}
