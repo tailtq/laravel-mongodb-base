@@ -1,7 +1,6 @@
 @extends('layout.master')
 
 @push('plugin-styles')
-    <script src="{{ my_asset('assets/plugins/flv/flv.min.js') }}"></script>
     <style>
         .monitor-sidebar {
             position: fixed;
@@ -163,7 +162,6 @@
 
 @push('custom-scripts')
     <script src="{{ my_asset('assets/plugins/flv/flv.min.js') }}"></script>
-    <script src="{{ my_asset('assets/plugins/video-js/video.min.js') }}"></script>
     <script>
         $(document).ready(function () {
             $('.sidebar__btn-open, .sidebar__close-btn').on('click', function (e) {
@@ -180,7 +178,6 @@
         });
 
         if (flvjs.isSupported()) {
-            var a;
             const videoElements = document.getElementsByClassName('videoElement');
 
             for (const videoElement of videoElements) {

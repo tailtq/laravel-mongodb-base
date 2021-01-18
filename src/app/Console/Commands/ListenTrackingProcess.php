@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Events\ObjectsAppear;
 use App\Helpers\DatabaseHelper;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -36,40 +37,44 @@ class ListenTrackingProcess extends Command
         parent::__construct();
     }
 
+    /**
+     * Map data from AI Server to Web Server
+     */
     public function handle()
     {
-        Redis::subscribe('tracking', function ($objs) {
-            Log::info('Tracking ============ ' . $objs);
-            $objs = json_decode($objs);
+        Redis::subscribe('process', function ($data) {
+            Log::info($data);
+            $data = json_decode(json_decode($data));
 
-            if (!$objs) {
+            if (!$data) {
                 return;
             }
-            $objMongoIds = Arr::pluck($objs, '_id');
-            $processMongoIds = Arr::pluck($objs, 'process');
-            $identityMongoIds = Arr::pluck($objs, 'identity');
-
             $process = DB::table('processes')
-                ->where('mongo_id', $processMongoIds)
+                ->where('mongo_id', $data->process_id)
                 ->select(['id', 'mongo_id'])
                 ->first();
 
             if (!$process) {
                 return;
             }
+            $objs = $data->objects_data;
+            $objMongoIds = Arr::pluck($objs, '_id');
+            $identityMongoIds = Arr::pluck($objs, 'identity');
+
             $identities = DB::table('identities')->whereIn('mongo_id', $identityMongoIds)->get();
             $existingObjs = DB::table('objects')
-                ->whereIn('track_id', $objMongoIds)
+                ->whereIn('mongo_id', $objMongoIds)
                 ->select(['id', 'mongo_id'])
                 ->get();
-            $reQueryObjIds = [];
-            $insertingObjs = [];
             $updatingObjs = [];
+            $reQueryObjIds = [];
 
             foreach ($objs as $obj) {
+                # decide whether insert or update objects
                 $existingObj = Arr::first($existingObjs, function ($existingObj) use ($obj) {
                     return $existingObj->mongo_id === $obj->_id;
                 });
+                # map identity from mongodb to mysql
                 $identityId = object_get($obj, 'identity');
 
                 if ($identityId) {
@@ -79,44 +84,65 @@ class ListenTrackingProcess extends Command
                     $identityId = $identity ? $identity->id : null;
                 }
                 if ($existingObj) {
+                    # update object
                     array_push($updatingObjs, [
                         'id' => $existingObj->id,
                         'identity_id' => $identityId,
                         'track_id' => $obj->track_id,
-                        'images' => json_encode($obj->images),
-                        'frame_from' => $obj->frame_from,
-                        'frame_to' => object_get($obj, 'frame_to'),
-                        'time_from' => object_get($obj, 'time_from'),
-                        'time_to' => object_get($obj, 'time_to'),
+                        'images' => json_encode($obj->avatars),
+                        'frame_from' => $obj->from_frame,
+                        'frame_to' => object_get($obj, 'to_frame'),
+                        'time_from' => object_get($obj, 'from_time'),
+                        'time_to' => object_get($obj, 'to_time'),
                         'confidence_rate' => object_get($obj, 'confidence_rate'),
                         'updated_at' => Carbon::now(),
                     ]);
                     $reQueryObjIds[] = $existingObj->id;
                 } else {
-                    array_push($insertingObjs, [
+                    # insert new object
+                    $reQueryObjIds[] = DB::table('objects')->insertGetId([
+                        'process_id' => $process->id,
                         'identity_id' => $identityId,
                         'track_id' => $obj->track_id,
-                        'images' => json_encode($obj->images),
-                        'frame_from' => $obj->frame_from,
-                        'frame_to' => object_get($obj, 'frame_to'),
-                        'time_from' => object_get($obj, 'time_from'),
-                        'time_to' => object_get($obj, 'time_to'),
+                        'mongo_id' => $obj->_id,
+                        'images' => json_encode($obj->avatars),
+                        'frame_from' => $obj->from_frame,
+                        'frame_to' => object_get($obj, 'to_frame'),
+                        'time_from' => object_get($obj, 'from_time'),
+                        'time_to' => object_get($obj, 'to_time'),
                         'confidence_rate' => object_get($obj, 'confidence_rate'),
                         'created_at' => Carbon::now(),
                         'updated_at' => Carbon::now(),
                     ]);
                 }
             }
-            if (count($insertingObjs) !== 0) {
-                foreach ($insertingObjs as $insertingObj) {
-                    $reQueryObjIds[] = DB::table('objects')->insertGetId($insertingObj);
-                }
-            }
             if (count($updatingObjs) !== 0) {
+                # update many objects
                 DatabaseHelper::updateMultiple($updatingObjs, 'id', 'objects');
             }
-            # publish output
-//            $result = $this->queryAndBroadcastResult('objects.id', $objectIds);
+            $this->queryAndBroadcastResult($reQueryObjIds, $process->id);
         });
+    }
+
+    /**
+     * Broadcast results after matching or tracking objects
+     * @param $ids array
+     * @param $processId int
+     * @return \Illuminate\Support\Collection
+     */
+    public function queryAndBroadcastResult($ids, $processId)
+    {
+        $objs = DB::table('objects')
+            ->leftJoin('identities', 'objects.identity_id', 'identities.id')
+            ->whereIn('objects.id', $ids)
+            ->select([
+                'objects.*',
+                'identities.name as identity_name',
+                'identities.images as identity_images',
+            ])
+            ->get();
+        broadcast(new ObjectsAppear($processId, $objs));
+
+        return $objs;
     }
 }
