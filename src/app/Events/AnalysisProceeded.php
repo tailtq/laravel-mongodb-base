@@ -9,7 +9,7 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class ObjectsAppear implements ShouldBroadcast
+class AnalysisProceeded implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -20,13 +20,11 @@ class ObjectsAppear implements ShouldBroadcast
     /**
      * Create a new event instance.
      *
-     * @param $processId
      * @param $data
      * @param string $channel
      */
-    public function __construct($processId, $data, $channel = 'monitor.tracking')
+    public function __construct($data, $channel = 'monitor.analysis')
     {
-        $this->processId = $processId;
         $this->data = $data;
         $this->channel = $channel;
     }
@@ -44,7 +42,6 @@ class ObjectsAppear implements ShouldBroadcast
     public function broadcastWith()
     {
         return [
-            'processId' => $this->processId,
             'data' => $this->data,
         ];
     }

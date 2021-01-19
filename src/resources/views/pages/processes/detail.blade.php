@@ -12,6 +12,14 @@
         #videoModal {
             z-index: 2000;
         }
+
+        .table td, .table th {
+            white-space: normal !important;
+        }
+
+        .table td .badge {
+            margin-bottom: 5px !important;
+        }
     </style>
 @endpush
 
@@ -24,7 +32,7 @@
     </nav>
 
     <div class="row">
-        <div class="card-body">
+        <div class="card-body w-100">
             <div class="d-flex justify-content-md-between align-items-center mb-3">
                 <h5 class="card-title process"
                     data-id="{{ $process->id }}"
@@ -109,8 +117,8 @@
                 </div>
             </div>
 
-            <div class="table-responsive d-flex">
-                <video class="videoElement w-100" controls></video>
+            <div class="d-flex">
+                <video class="videoElement w-100" style="max-width: 640px" controls></video>
 
                 <div class="w-100 ml-4">
                     <h5 class="mt-1 mb-2">Thống kê</h5>
@@ -118,19 +126,19 @@
                     <table class="table table-bordered statistical-table">
                         <tr>
                             <th>Số lượt người xuất hiện</th>
-                            <td class="process__ungrouped-count" width="30%">{{ $process->total_appearances }}</td>
+                            <td class="statistic__total-appearances" width="30%">{{ $process->total_appearances }}</td>
                         </tr>
                         <tr>
                             <th>Số người</th>
-                            <td class="process__grouped-count" width="30%">{{ $process->total_objects }}</td>
+                            <td class="statistic__total-objects" width="30%">{{ $process->total_objects }}</td>
                         </tr>
                         <tr>
                             <th>Số người phát hiện được danh tính</th>
-                            <td class="process__identified-count" width="30%">{{ $process->total_identified }}</td>
+                            <td class="statistic__total-identified" width="30%">{{ $process->total_identified }}</td>
                         </tr>
                         <tr>
                             <th>Số người không phát hiện được danh tính</th>
-                            <td class="process__unidentified-count" width="30%">{{ $process->total_unidentified }}</td>
+                            <td class="statistic__total-unidentified" width="30%">{{ $process->total_unidentified }}</td>
                         </tr>
                         <tr>
                             <th>Thời gian nhận diện</th>
@@ -311,6 +319,9 @@
         });
         flvPlayer.attachMediaElement(videoElement);
         flvPlayer.load();
-        flvPlayer.play();
+
+        if (globalStatus === 'detecting') {
+            flvPlayer.play();
+        }
     </script>
 @endpush
