@@ -33,8 +33,8 @@ class DatabaseHelper
         });
 
         $query = "UPDATE `$table` SET ";
-        $condition = implode(', ', Arr::pluck($data, $conditionColumn));
         $sets = [];
+        $totalConditionIsString = false;
 
         foreach ($keys as $key) {
             $set = "`$key` = CASE `$conditionColumn` ";
@@ -46,6 +46,7 @@ class DatabaseHelper
                 $value = $value === null ? 'NULL' : $value;
 
                 $condition = is_string($condition) ? "'$condition'" : $condition;
+                $totalConditionIsString = is_string($condition);
 
                 if ($value !== "'false'") {
                     $updatingString .= "WHEN $condition THEN $value ";
@@ -58,8 +59,15 @@ class DatabaseHelper
             }
         }
 
+        if ($totalConditionIsString) {
+            foreach ($data as &$element) {
+                $element[$conditionColumn] = '"' . $element[$conditionColumn] . '"';
+            }
+        }
+        $totalCondition = implode(', ', Arr::pluck($data, $conditionColumn));
         $query .= implode(', ', $sets);
-        $query .= " WHERE `$conditionColumn` IN ($condition)";
+        $query .= " WHERE `$conditionColumn` IN ($totalCondition)";
+        Log::info($query);
 
         DB::statement($query);
     }
