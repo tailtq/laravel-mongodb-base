@@ -101,6 +101,9 @@ function buildTimeRanges(appearances) {
     let timeRanges = '';
 
     appearances.forEach((value) => {
+        const clusteringType = value.clustering_type
+            ? `<p class="text-center">${value.clustering_type}</p>`
+            : '';
         let imageHTML = '';
         let bodyHTML = '';
 
@@ -120,7 +123,7 @@ function buildTimeRanges(appearances) {
                   data-html="true"
                   data-toggle="popover"
                   data-placement="top"
-                  data-content='<div><div class="text-center">${imageHTML}</div><div class="text-center">${bodyHTML}</div></div>'
+                  data-content='<div>${clusteringType}<div class="text-center">${imageHTML}</div><div class="text-center">${bodyHTML}</div></div>'
                   data-trigger="focus">${value.frame_from} - ${value.frame_to}</button> &nbsp;
         `;
     });
