@@ -20,6 +20,24 @@
         .table td .badge {
             margin-bottom: 5px !important;
         }
+
+        .original-avatar {
+            max-width: 50px;
+            max-height: 50px;
+        }
+
+        .original-body {
+            width: 32px;
+            height: 64px;
+        }
+
+        button.badge {
+            border: none;
+        }
+
+        .popover {
+            max-width: 1000px !important;
+        }
     </style>
 @endpush
 
@@ -112,6 +130,9 @@
                                href="{{ route('processes.export.after-grouping', ['id' => $process->id]) }}">
                                 Sau nhất thể hoá
                             </a>
+                            <a class="dropdown-item" href="#" target="_blank">
+                                Video tái hiện
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -173,15 +194,6 @@
                                 Ẩn đối tượng không xác định
                                 <i class="input-frame"></i>
                             </label>
-                        </div>
-
-                        <div class="video-rendering__btn text-right">
-                            @if ($process->video_result)
-                                <a class="btn btn-primary"
-                                   target="_blank"
-                                   data-detecting-href="{{ $process->video_detecting_result }}"
-                                   href="{{ $process->video_result }}">Video tái hiện</a>
-                            @endif
                         </div>
                     </div>
                 </div>
@@ -297,7 +309,6 @@
         const processId = '{{ $process->id }}';
         const allStatus = <?= json_encode(__('status', [], 'vi'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
         // render objects
-        {{--const totalFrames = Math.round(parseInt({{ $process->total_frames }}, 10) / frameDrop);--}}
         const frameDrop = {{ object_get($process->config, 'frame_drop', 1) }};
         const fps = Math.round(parseInt('{{ $process->fps }}', 10) / frameDrop);
         // const renderHour = totalFrames / fps / 3600 >= 1;
@@ -315,9 +326,9 @@
             url: '{{ env('STREAMING_SERVER') }}/{{ $process->mongo_id }}.flv'
         });
         flvPlayer.attachMediaElement(videoElement);
-        flvPlayer.load();
 
         if (globalStatus === 'detecting') {
+            flvPlayer.load();
             flvPlayer.play();
         }
     </script>

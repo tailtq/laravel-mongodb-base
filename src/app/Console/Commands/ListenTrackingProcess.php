@@ -93,7 +93,8 @@ class ListenTrackingProcess extends Command
                         'id' => $existingObj->id,
                         'identity_id' => $identityId,
                         'track_id' => $obj->track_id,
-                        'images' => json_encode($obj->avatars),
+                        'images' => json_encode($this->getFaceImages($obj)),
+                        'body_images' => json_encode($this->getBodyImages($obj)),
                         'frame_from' => $obj->from_frame,
                         'frame_to' => object_get($obj, 'to_frame'),
                         'time_from' => object_get($obj, 'from_time'),
@@ -109,7 +110,8 @@ class ListenTrackingProcess extends Command
                         'identity_id' => $identityId,
                         'track_id' => $obj->track_id,
                         'mongo_id' => $obj->_id,
-                        'images' => json_encode($obj->avatars),
+                        'images' => json_encode($this->getFaceImages($obj)),
+                        'body_images' => json_encode($this->getBodyImages($obj)),
                         'frame_from' => $obj->from_frame,
                         'frame_to' => object_get($obj, 'to_frame'),
                         'time_from' => object_get($obj, 'from_time'),
@@ -152,5 +154,39 @@ class ListenTrackingProcess extends Command
             array_merge(['id'], $this->getStatistic($processId))
         )->first();
         broadcast(new AnalysisProceeded([$process]));
+    }
+
+    /**
+     * @param $obj
+     * @return array
+     */
+    private function getFaceImages($obj)
+    {
+        $faces = [];
+
+        foreach ($obj->face_ids ?? [] as $faceRange) {
+            foreach ($faceRange as $face) {
+                array_push($faces, $face->url);
+            }
+        }
+        if (count($faces) == 0) {
+            return $obj->avatars;
+        }
+        return $faces;
+    }
+
+    /**
+     * @param $obj
+     * @return array
+     */
+    private function getBodyImages($obj)
+    {
+        if (empty($obj->body_ids)) {
+            return [];
+        }
+
+        return array_map(function ($body) {
+            return $body->url;
+        }, $obj->body_ids);
     }
 }
