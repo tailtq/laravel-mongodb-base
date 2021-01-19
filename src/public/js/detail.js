@@ -185,7 +185,7 @@ function renderData() {
                 [trackIds, trackIndex] = insertInOrder(value.track_id, trackIds);
 
                 renderBlockInOrder(
-                    renderBlock(value, value.cluster_elements || [value]),
+                    renderBlock(value, value.appearances),
                     trackIndex,
                     trackIds
                 );
@@ -255,25 +255,31 @@ Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectsAppear
         }
     });
 
-    $('.process__ungrouped-count').html(trackIds.length);
-    feather.replace();
-    $('[data-toggle="popover"]').popover();
+    $('.statistic__total-appearances').html(trackIds.length);
 });
 
 Echo.channel(`process.${processId}.cluster`).listen('.App\\Events\\ClusteringProceeded', (res) => {
-    console.log(res.data);
-    res.data.forEach((object) => {
+    res.data.grouped_objects.forEach((object) => {
         $(`.socket-render tbody tr[data-track-id="${object.track_id}"] td:nth-child(5)`).html(
-            buildTimeRanges([object, ...(object.appearances || [])])
+            buildTimeRanges(object.appearances)
         );
         object.appearances.forEach((appearance) => {
-            $(`.socket-render tbody tr[data-track-id="${appearance.track_id}"]`).addClass('d-none');
+            if (appearance.id !== object.id) {
+                $(`.socket-render tbody tr[data-track-id="${appearance.track_id}"]`).addClass('d-none');
+            }
         });
     });
+    const {
+        total_appearances: totalAppearances,
+        total_objects: totalObjects,
+        total_identified: totalIdentified,
+        total_unidentified: totalUnidentified,
+    } = res.data.statistic;
 
-    $('.process__ungrouped-count').html(trackIds.length);
-    feather.replace();
-    $('[data-toggle="popover"]').popover();
+    $('td.statistic__total-appearances').html(totalAppearances);
+    $('td.statistic__total-objects').html(totalObjects);
+    $('td.statistic__total-identified').html(totalIdentified);
+    $('td.statistic__total-unidentified').html(totalUnidentified);
 });
 
 Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChange', (res) => {

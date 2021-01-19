@@ -2,7 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Events\AnalysisProceeded;
 use App\Events\ClusteringProceeded;
+use App\Traits\AnalysisTrait;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -11,6 +13,8 @@ use Illuminate\Support\Facades\Redis;
 
 class ListenClusteringProcess extends Command
 {
+    use AnalysisTrait;
+
     /**
      * The name and signature of the console command.
      *
@@ -43,7 +47,6 @@ class ListenClusteringProcess extends Command
         Redis::subscribe('clustering', function ($clusters) {
             Log::info('Clustering ============ ' . $clusters);
             $clusters = json_decode($clusters);
-            # [{"identity", "_id", "objects"}]
 
             if (!$clusters) {
                 return;
@@ -87,8 +90,7 @@ class ListenClusteringProcess extends Command
             }
 
             $objects = $this->getClusteredObjects($totalMongoIds);
-            $objectsWithAppearances = $this->publishClusteringDataToMonitorPage($objects);
-            $this->publishClusteringDataToEachProcess($objectsWithAppearances);
+            $this->publishClusteringDataToEachProcess($objects);
         });
     }
 
@@ -117,36 +119,32 @@ class ListenClusteringProcess extends Command
     }
 
     /**
-     * @param $objectsWithAppearances \Illuminate\Support\Collection
+     * @param $objects \Illuminate\Support\Collection
      */
-    public function publishClusteringDataToEachProcess($objectsWithAppearances)
+    public function publishClusteringDataToEachProcess($objects)
     {
-        $processes = $objectsWithAppearances->groupBy('process_id');
+        $processesNewFormat = [];
+        $processes = $objects->groupBy('process_id');
 
-        foreach ($processes as $process => $objects) {
-            foreach ($objects as $object) {
-                $object->appearances = $object->appearances->filter(function ($appearance) use ($process) {
-                    return $appearance->process_id == $process;
-                });
+        foreach ($processes as $processId => $groupedObjects) {
+            $process = DB::table('processes')->where('id', $processId)->select(
+                array_merge(['id'], $this->getStatistic($processId))
+            )->first();
+
+            array_push($processesNewFormat, $process);
+
+            foreach ($groupedObjects as $object) {
+                $object->appearances = DB::table('objects')
+                    ->where('cluster_id', $object->cluster_id)
+                    ->where('process_id', $object->process_id)
+                    ->get();
             }
-            broadcast(new ClusteringProceeded($objects, "process.$process.cluster"));
+            broadcast(new ClusteringProceeded([
+                'statistic' => $process,
+                'grouped_objects' => $groupedObjects,
+            ], "process.$processId.cluster"));
         }
-    }
 
-    /**
-     * @param $objects
-     * @return \Illuminate\Support\Collection
-     */
-    public function publishClusteringDataToMonitorPage($objects)
-    {
-        foreach ($objects as $object) {
-            $object->appearances = DB::table('objects')
-                ->where('id', '!=', $object->id)
-                ->where('cluster_id', $object->cluster_id)
-                ->get();
-        }
-        broadcast(new ClusteringProceeded($objects));
-
-        return $objects;
+        broadcast(new AnalysisProceeded($processes));
     }
 }

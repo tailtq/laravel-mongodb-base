@@ -88,17 +88,17 @@
         </div>
 
         <ul class="nav flex-column list-unstyled monitor__objects">
-{{--            @for ($i = 0; $i < 10; $i++)--}}
-{{--                <li class="media mb-2">--}}
-{{--                    <img class="mr-2"--}}
-{{--                         src="data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2264%22%20height%3D%2264%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder_176ec726fa7%20text%20%7B%20fill%3Argba(255%2C255%2C255%2C.75)%3Bfont-weight%3Anormal%3Bfont-family%3AHelvetica%2C%20monospace%3Bfont-size%3A10pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder_176ec726fa7%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20fill%3D%22%23777%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%2213.8359375%22%20y%3D%2236.65%22%3E64x64%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E"--}}
-{{--                         alt="Generic placeholder image">--}}
-{{--                    <div class="media-body">--}}
-{{--                        <p class="mt-0 mb-1"><b>Nguyen Le Van A</b></p>--}}
-{{--                        11:00 - 55:00--}}
-{{--                    </div>--}}
-{{--                </li>--}}
-{{--            @endfor--}}
+            {{--            @for ($i = 0; $i < 10; $i++)--}}
+            {{--                <li class="media mb-2">--}}
+            {{--                    <img class="mr-2"--}}
+            {{--                         src="data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2264%22%20height%3D%2264%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder_176ec726fa7%20text%20%7B%20fill%3Argba(255%2C255%2C255%2C.75)%3Bfont-weight%3Anormal%3Bfont-family%3AHelvetica%2C%20monospace%3Bfont-size%3A10pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder_176ec726fa7%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20fill%3D%22%23777%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%2213.8359375%22%20y%3D%2236.65%22%3E64x64%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E"--}}
+            {{--                         alt="Generic placeholder image">--}}
+            {{--                    <div class="media-body">--}}
+            {{--                        <p class="mt-0 mb-1"><b>Nguyen Le Van A</b></p>--}}
+            {{--                        11:00 - 55:00--}}
+            {{--                    </div>--}}
+            {{--                </li>--}}
+            {{--            @endfor--}}
         </ul>
     </div>
 
@@ -112,15 +112,15 @@
                          data-total-objects="{{ $process->total_objects }}"
                          data-total-identified="{{ $process->total_identified }}"
                          data-total-unidentified="{{ $process->total_unidentified }}">
-                            @if ($process->camera_id)
-                                <div class="monitor-icon__group" title="Live">
-                                    <i class="monitor-icon mdi mdi-access-point"></i>
-                                </div>
-                            @else
-                                <div class="monitor-icon__group" title="Video">
-                                    <i class="monitor-icon mdi mdi-video"></i>
-                                </div>
-                            @endif
+                        @if ($process->camera_id)
+                            <div class="monitor-icon__group" title="Live">
+                                <i class="monitor-icon mdi mdi-access-point"></i>
+                            </div>
+                        @else
+                            <div class="monitor-icon__group" title="Video">
+                                <i class="monitor-icon mdi mdi-video"></i>
+                            </div>
+                        @endif
 
                         <video class="videoElement w-100" controls
                                resource="{{ env('STREAMING_SERVER') }}/{{ $process->mongo_id }}.flv">
@@ -189,63 +189,33 @@
             }
         }
 
-        function listenTracking() {
-            Echo.channel('monitor.tracking').listen('.App\\Events\\ObjectsAppear', function (res) {
-                // TODO: Update when using clustering
-                const {processId} = res;
-                const {length: newAppearances} = res.data;
-                const newIdentified = res.data.filter(e => !!e.identity_id).length;
-                const newUnidentified = res.data.filter(e => !e.identity_id).length;
-
-                if (!processes[processId]) {
-                    processes[processId] = {
-                        totalAppearances: newAppearances,
-                        totalObjects: newAppearances,
-                        totalIdentified: newIdentified,
-                        totalUnidentified: newUnidentified,
-                    };
-                    loadNewProcesses(Object.keys(processes).map(e => parseInt(e)));
-                } else {
-                    processes[processId].totalAppearances += newAppearances;
-                    processes[processId].totalObjects += newAppearances;
-                    processes[processId].totalIdentified += newIdentified;
-                    processes[processId].totalUnidentified += newUnidentified;
-                }
-                
-                const process = processes[processId];
-                const $block = $(`.monitor-block[data-id="${processId}"]`);
-                $block.find('td.statistic__total-appearances').text(process.totalAppearances);
-                $block.find('td.statistic__total-objects').text(process.totalObjects);
-                $block.find('td.statistic__total-identified').text(process.totalIdentified);
-                $block.find('td.statistic__total-unidentified').text(process.totalUnidentified);
-
-                // render objects
-                res.data.forEach((element) => {
-                    const images = JSON.parse(element.images);
-
-                    $('.monitor__objects').prepend(
-                        `<li class="media mb-2">
-                            <img class="mr-2" src="${images[0]}" alt="Generic placeholder image">
-                            <div class="media-body">
-                                <p class="mt-0 mb-1"><b>${element.identity_name || 'Không xác định'}</b></p>
-                                ${element.frame_from} - ${element.frame_to}
-                            </div>
-                        </li>`
-                    );
-                });
-                const $totalObjects = $('.monitor__objects li');
-
-                if ($totalObjects.length > 100) {
-                    // TODO: Not working
-                    const totalDeleted = $totalObjects.length - 100;
-                    $totalObjects.find(`tr td:nth-last-child(-n + ${totalDeleted})`).remove();
-                }
-            });
-        }
-
-        function listenClustering() {
-            Echo.channel('monitor.clustering').listen('.App\\Events\\ObjectsAppear', function (res) {
+        function listenAnalysisEvent() {
+            Echo.channel('monitor.analysis').listen('.App\\Events\\AnalysisProceeded', function (res) {
                 console.log(res);
+                res.data.forEach((process) => {
+                    const {
+                        id: processId,
+                        total_appearances: totalAppearances,
+                        total_objects: totalObjects,
+                        total_identified: totalIdentified,
+                        total_unidentified: totalUnidentified,
+                    } = process;
+
+                    if (!processes[processId]) {
+                        loadNewProcesses(Object.keys(processes).map(e => parseInt(e)));
+                    }
+                    const existingProcess = processes[processId];
+                    existingProcess.totalAppearances = totalAppearances;
+                    existingProcess.totalObjects = totalObjects;
+                    existingProcess.totalIdentified = totalIdentified;
+                    existingProcess.totalUnidentified = totalUnidentified;
+
+                    const $block = $(`.monitor-block[data-id="${processId}"]`);
+                    $block.find('td.statistic__total-appearances').text(existingProcess.totalAppearances);
+                    $block.find('td.statistic__total-objects').text(existingProcess.totalObjects);
+                    $block.find('td.statistic__total-identified').text(existingProcess.totalIdentified);
+                    $block.find('td.statistic__total-unidentified').text(existingProcess.totalUnidentified);
+                });
             });
         }
 
@@ -267,7 +237,7 @@
                                  data-total-appearances="${process.total_appearances}"
                                  data-total-objects="${process.total_objects}"
                                  data-total-identified="${process.total_identified}"
-                                 data-total-unidentified="${process.total_unidentified }">
+                                 data-total-unidentified="${process.total_unidentified}">
                                 ${process.camera_id ? `
                                     <div class="monitor-icon__group" title="Live">
                                         <i class="monitor-icon mdi mdi-access-point"></i>
@@ -328,8 +298,7 @@
 
         $(document).ready(function () {
             loadVideos();
-            listenTracking();
-            listenClustering();
+            listenAnalysisEvent();
 
             $('.sidebar__btn-open, .sidebar__close-btn').on('click', function (e) {
                 e.preventDefault();

@@ -2,8 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Events\AnalysisProceeded;
 use App\Events\ObjectsAppear;
 use App\Helpers\DatabaseHelper;
+use App\Traits\AnalysisTrait;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
@@ -13,6 +15,8 @@ use Illuminate\Support\Facades\Redis;
 
 class ListenTrackingProcess extends Command
 {
+    use AnalysisTrait;
+
     /**
      * The name and signature of the console command.
      *
@@ -43,12 +47,12 @@ class ListenTrackingProcess extends Command
     public function handle()
     {
         Redis::subscribe('process', function ($data) {
-            Log::info($data);
             $data = json_decode(json_decode($data));
 
             if (!$data) {
                 return;
             }
+            Log::info(json_encode($data));
             $process = DB::table('processes')
                 ->where('mongo_id', $data->process_id)
                 ->select(['id', 'mongo_id'])
@@ -128,10 +132,10 @@ class ListenTrackingProcess extends Command
      * Broadcast results after matching or tracking objects
      * @param $ids array
      * @param $processId int
-     * @return \Illuminate\Support\Collection
      */
     public function queryAndBroadcastResult($ids, $processId)
     {
+        # broadcast to detail page
         $objs = DB::table('objects')
             ->leftJoin('identities', 'objects.identity_id', 'identities.id')
             ->whereIn('objects.id', $ids)
@@ -142,8 +146,11 @@ class ListenTrackingProcess extends Command
             ])
             ->get();
         broadcast(new ObjectsAppear($processId, $objs, "process.$processId.objects"));
-        broadcast(new ObjectsAppear($processId, $objs, 'monitor.tracking'));
 
-        return $objs;
+        # broadcast to monitor page
+        $process = DB::table('processes')->where('id', $processId)->select(
+            array_merge(['id'], $this->getStatistic($processId))
+        )->first();
+        broadcast(new AnalysisProceeded([$process]));
     }
 }

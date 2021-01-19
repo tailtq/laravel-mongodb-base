@@ -9,7 +9,7 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class ClusteringProceeded implements ShouldBroadcast
+class AnalysisProceeded implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -23,7 +23,7 @@ class ClusteringProceeded implements ShouldBroadcast
      * @param $data
      * @param string $channel
      */
-    public function __construct($data, $channel = 'monitor.clustering')
+    public function __construct($data, $channel = 'monitor.analysis')
     {
         $this->data = $data;
         $this->channel = $channel;
