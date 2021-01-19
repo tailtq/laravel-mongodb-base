@@ -190,7 +190,7 @@
                                                    required
                                                    placeholder="Nhập thông số"
                                                    name="detection_scale"
-                                                   value="{{ old('detection_scale', 0.5) }}">
+                                                   value="{{ old('detection_scale', 0.35) }}">
                                         </div>
                                     </div>
 
