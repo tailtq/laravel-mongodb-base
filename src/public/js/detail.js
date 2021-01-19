@@ -63,6 +63,7 @@ function sendStartStopRequest(processId, type) {
 
 $('.btn-start').click(function () {
     sendStartStopRequest(processId, 'start');
+    flvPlayer.play();
 });
 
 $('.btn-stop').click(function () {

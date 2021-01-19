@@ -8,7 +8,6 @@ use App\Traits\AnalysisTrait;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 
 class ListenClusteringProcess extends Command
@@ -45,7 +44,6 @@ class ListenClusteringProcess extends Command
     public function handle()
     {
         Redis::subscribe('clustering', function ($clusters) {
-            Log::info('Clustering ============ ' . $clusters);
             $clusters = json_decode($clusters);
 
             if (!$clusters) {
@@ -106,7 +104,7 @@ class ListenClusteringProcess extends Command
                 $query->select([DB::raw('MIN(id)')])
                     ->from('objects')
                     ->whereIn('mongo_id', $objectMongoIds)
-                    ->groupBy('cluster_id');
+                    ->groupBy(['cluster_id', 'process_id']);
             })
             ->select([
                 'objects.*',
