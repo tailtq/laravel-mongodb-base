@@ -1,15 +1,7 @@
 let currentFrame = 0;
 let trackIds = [];
 
-// define global variables at detail.blade.php
-// const processId = '{{ $process->id }}';
-// const allStatus = <?= json_encode(__('status', [], 'vi'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
-// const frameDrop = {{ object_get($process->mongoData, 'frame_drop', 1) }};
-// const totalFrames = Math.round(parseInt({{ $process->total_frames }}, 10) / frameDrop);
-// const fps = Math.round(parseInt('{{ $process->fps }}', 10) / frameDrop);
-// const renderHour = totalFrames / fps / 3600 >= 1;
-// const renderHour = false;
-// let globalStatus = '{{ $process->status }}';
+// global variables are defined at detail.blade.php
 
 const Toast = Swal.mixin({
     toast: true,
@@ -31,6 +23,11 @@ function processMessage(type) {
             title: 'Kết thúc thực thi'
         });
     }
+}
+
+function reloadIcons() {
+    feather.replace();
+    $('[data-toggle="popover"]').popover();
 }
 
 function sendStartStopRequest(processId, type) {
@@ -104,7 +101,28 @@ function buildTimeRanges(appearances) {
     let timeRanges = '';
 
     appearances.forEach((value) => {
-        timeRanges += `<span class="badge badge-info">${value.frame_from} - ${value.frame_to}</span> &nbsp;`;
+        let imageHTML = '';
+        let bodyHTML = '';
+
+        value.images = JSON.parse(value.images);
+        value.body_images = value.body_images ? JSON.parse(value.body_images) : [];
+
+        value.images.forEach((image) => {
+            imageHTML += `<img class="original-avatar" src="${image}" alt="">`;
+        });
+        value.body_images.forEach((body) => {
+            bodyHTML += `<img class="original-body" src="${body}" alt="">`;
+        });
+        // TODO: Generate HTML and CSS content
+        timeRanges += `
+            <button class="badge badge-info"
+                  role="button"
+                  data-html="true"
+                  data-toggle="popover"
+                  data-placement="top"
+                  data-content='<div><div class="text-center">${imageHTML}</div><div class="text-center">${bodyHTML}</div></div>'
+                  data-trigger="focus">${value.frame_from} - ${value.frame_to}</button> &nbsp;
+        `;
     });
 
     return timeRanges;
@@ -122,7 +140,7 @@ function renderBlock(object, appearances = []) {
             ${!object.identity_id && $('[name="hide-unknown"]').is(':checked') ? 'style="display: none"' : ''}>
             <td class="text-center">${object.track_id}</td>
             <td class="text-center">
-                ${object.images ? `<img src="${object.images[0]}" alt="image" style="width: inherit; height: 60px;">` : ''}
+                ${object.images ? `<img src="${object.images[0] || '#'}" alt="image" style="width: inherit; height: 60px;">` : ''}
             </td>
             <td class="text-center">${getLightboxBlock(object.identity_images, object.id)}</td>
             <td>${object.identity_name || 'Không xác định'}</td>
@@ -191,8 +209,7 @@ function renderData() {
                     trackIds
                 );
             });
-            feather.replace();
-            $('[data-toggle="popover"]').popover();
+            reloadIcons();
         },
     });
 }
@@ -219,7 +236,6 @@ function renderTime() {
 
 Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectsAppear', (res) => {
     $('.socket__message').remove();
-    console.log(res);
 
     res.data.forEach((object) => {
         if (trackIds.indexOf(object.track_id) >= 0) {
@@ -255,8 +271,7 @@ Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectsAppear
             );
         }
     });
-
-    $('.statistic__total-appearances').html(trackIds.length);
+    reloadIcons();
 });
 
 Echo.channel(`process.${processId}.cluster`).listen('.App\\Events\\ClusteringProceeded', (res) => {
@@ -270,6 +285,8 @@ Echo.channel(`process.${processId}.cluster`).listen('.App\\Events\\ClusteringPro
             }
         });
     });
+    reloadIcons();
+
     const {
         total_appearances: totalAppearances,
         total_objects: totalObjects,
@@ -289,8 +306,6 @@ Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChan
     const {
         status,
         progress,
-        total,
-        video_result: videoResult,
         video_detecting_result: videoDetectingResult,
         frame_index: frameIndex,
     } = res.data;
@@ -308,20 +323,13 @@ Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChan
             $processStatus.removeClass('badge-success').addClass('badge-danger');
         }
     }
-    if (status === 'done' && videoResult) {
+    if (status === 'done') {
         Toast.fire({
             type: 'success',
             title: 'Tiến trình đã hoàn thành',
         });
+        flvPlayer.stop();
 
-        $('.video-rendering__btn').html(`
-            <a class="btn btn-primary"
-               target="_blank"
-               href="${videoResult}"
-               data-detecting-href="${videoDetectingResult}">
-                Video tái hiện
-            </a>
-        `);
         $('.search-face__btn').removeAttr('disabled');
         $('.export-statistic__btn').removeAttr('disabled');
         $('.render-single-object').removeAttr('style');
@@ -332,6 +340,8 @@ Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChan
         $element.css({width: `${progress}%`});
         $element.attr('aria-valuenow', progress);
         $element.text(`${progress}%`);
+    } else if (status === 'error' || status === 'stopped') {
+        flvPlayer.stop();
     }
 });
 
