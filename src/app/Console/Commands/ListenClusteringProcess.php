@@ -2,13 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Helpers\DatabaseHelper;
-use App\Models\Cluster;
-use App\Models\Identity;
-use App\Models\ObjectAppearance;
-use App\Models\Process;
-use App\Models\TrackedObject;
-use Carbon\Carbon;
+use App\Events\ClusteringProceeded;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -41,6 +35,9 @@ class ListenClusteringProcess extends Command
         parent::__construct();
     }
 
+    /**
+     * Listen events
+     */
     public function handle()
     {
         Redis::subscribe('clustering', function ($clusters) {
@@ -51,9 +48,11 @@ class ListenClusteringProcess extends Command
             if (!$clusters) {
                 return;
             }
+            $totalMongoIds = [];
             $clusterMongoIds = Arr::pluck($clusters, '_id');
-            $existingClusters = Cluster::where('mongo_id', $clusterMongoIds)
-                ->select(['id', 'identity_id'])
+            $existingClusters = DB::table('clusters')
+                ->whereIn('mongo_id', $clusterMongoIds)
+                ->select(['id', 'identity_id', 'mongo_id'])
                 ->get();
 
             foreach ($clusters as &$cluster) {
@@ -69,18 +68,85 @@ class ListenClusteringProcess extends Command
                             ->select(['id'])
                             ->first();
                     }
-                    $cluster->id = DB::table('clusters')->insert([
+                    $cluster->id = DB::table('clusters')->insertGetId([
                         'identity_id' => $identity ? $identity->id : null,
                         'mongo_id' => $cluster->_id,
                     ]);
                 } else {
                     $cluster->id = $existingCluster->id;
                 }
+                $objectMongoIds = array_map(function ($object) {
+                    return $object->object;
+                }, $cluster->objects);
+
                 DB::table('objects')
-                    ->whereIn('mongo_id', $cluster->objects)
+                    ->whereIn('mongo_id', $objectMongoIds)
                     ->update(['cluster_id' => $cluster->id]);
+
+                $totalMongoIds = array_merge($totalMongoIds, $objectMongoIds);
             }
-            # publish event
+
+            $objects = $this->getClusteredObjects($totalMongoIds);
+            $objectsWithAppearances = $this->publishClusteringDataToMonitorPage($objects);
+            $this->publishClusteringDataToEachProcess($objectsWithAppearances);
         });
+    }
+
+    /**
+     * @param $objectMongoIds array[string]
+     * @return \Illuminate\Support\Collection
+     */
+    public function getClusteredObjects($objectMongoIds)
+    {
+        $objects = DB::table('objects')
+            ->leftJoin('identities', 'objects.identity_id', 'identities.id')
+            ->whereIn('objects.id', function ($query) use ($objectMongoIds) {
+                $query->select([DB::raw('MIN(id)')])
+                    ->from('objects')
+                    ->whereIn('mongo_id', $objectMongoIds)
+                    ->groupBy('cluster_id');
+            })
+            ->select([
+                'objects.*',
+                'identities.name as identity_name',
+                'identities.images as identity_images',
+            ])
+            ->get();
+
+        return $objects;
+    }
+
+    /**
+     * @param $objectsWithAppearances \Illuminate\Support\Collection
+     */
+    public function publishClusteringDataToEachProcess($objectsWithAppearances)
+    {
+        $processes = $objectsWithAppearances->groupBy('process_id');
+
+        foreach ($processes as $process => $objects) {
+            foreach ($objects as $object) {
+                $object->appearances = $object->appearances->filter(function ($appearance) use ($process) {
+                    return $appearance->process_id == $process;
+                });
+            }
+            broadcast(new ClusteringProceeded($objects, "process.$process.cluster"));
+        }
+    }
+
+    /**
+     * @param $objects
+     * @return \Illuminate\Support\Collection
+     */
+    public function publishClusteringDataToMonitorPage($objects)
+    {
+        foreach ($objects as $object) {
+            $object->appearances = DB::table('objects')
+                ->where('id', '!=', $object->id)
+                ->where('cluster_id', $object->cluster_id)
+                ->get();
+        }
+        broadcast(new ClusteringProceeded($objects));
+
+        return $objects;
     }
 }

@@ -236,6 +236,7 @@
                 const $totalObjects = $('.monitor__objects li');
 
                 if ($totalObjects.length > 100) {
+                    // TODO: Not working
                     const totalDeleted = $totalObjects.length - 100;
                     $totalObjects.find(`tr td:nth-last-child(-n + ${totalDeleted})`).remove();
                 }

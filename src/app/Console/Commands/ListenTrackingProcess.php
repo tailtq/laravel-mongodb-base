@@ -141,7 +141,7 @@ class ListenTrackingProcess extends Command
                 'identities.images as identity_images',
             ])
             ->get();
-        broadcast(new ObjectsAppear($processId, $objs));
+        broadcast(new ObjectsAppear($processId, $objs, "process.$processId.objects"));
         broadcast(new ObjectsAppear($processId, $objs, 'monitor.tracking'));
 
         return $objs;

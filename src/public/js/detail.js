@@ -99,12 +99,17 @@ function getLightboxBlock(images, id) {
             ` : ``;
 }
 
+function buildTimeRanges(appearances) {
+    let timeRanges = '';
+
+    appearances.forEach((value) => {
+        timeRanges += `<span class="badge badge-info">${value.frame_from} - ${value.frame_to}</span> &nbsp;`;
+    });
+
+    return timeRanges;
+}
+
 function renderBlock(object, appearances = []) {
-    appearances = appearances.map((appearance) => (
-        `<span type="button" class="badge badge-info">
-            ${appearance.frame_from} - ${appearance.frame_to}
-        </span>`
-    ));
     object.images = JSON.parse(object.images);
 
     return (`
@@ -121,7 +126,7 @@ function renderBlock(object, appearances = []) {
             <td class="text-center">${getLightboxBlock(object.identity_images, object.id)}</td>
             <td>${object.identity_name || 'Không xác định'}</td>
             <td>
-                ${appearances}
+                ${buildTimeRanges(appearances)}
             </td>
             <td width="50px" class="text-center">
                 <a href="#"
@@ -215,26 +220,22 @@ Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectsAppear
     $('.socket__message').remove();
     console.log(res);
 
-    res.data.forEach((value) => {
-        if (trackIds.indexOf(value.track_id) >= 0) {
-            const $element = $(`.socket-render tbody tr[data-track-id="${value.track_id}"]`);
-            // re-render progress bar
-            // $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(5)`).html(`
-            //     ${buildProgressBar([value], totalFrames, fps, renderHour, false)}
-            //     <div class="position-absolute status-overlay"></div>
-            // `);
-            if (value.frame_to) {
-                $(`.socket-render tbody tr[data-track-id="${value.track_id}"] td:nth-child(5)`).html(`
-                    <span class="badge badge-info">${value.frame_from} - ${value.frame_to}</span>
-                `);
-            }
-            if (value.identity_name) {
-                $element.attr('data-identity-id', value.identity_id).removeAttr('style');
-                $(`.socket-render tbody tr[data-track-id="${value.id}"] td:nth-child(3)`).html(
-                    getLightboxBlock(value.identity_images, value.id)
+    res.data.forEach((object) => {
+        if (trackIds.indexOf(object.track_id) >= 0) {
+            const $element = $(`.socket-render tbody tr[data-track-id="${object.track_id}"]`);
+
+            if (object.frame_to) {
+                $(`.socket-render tbody tr[data-track-id="${object.track_id}"] td:nth-child(5)`).html(
+                    buildTimeRanges([object])
                 );
-                $(`.socket-render tbody tr[data-track-id="${value.id}"] td:nth-child(4)`).text(value.identity_name);
-                $(`.socket-render tbody tr[data-track-id="${value.id}"] td:nth-child(6)`).html(`
+            }
+            if (object.identity_name) {
+                $element.attr('data-identity-id', object.identity_id).removeAttr('style');
+                $(`.socket-render tbody tr[data-track-id="${object.id}"] td:nth-child(3)`).html(
+                    getLightboxBlock(object.identity_images, object.id)
+                );
+                $(`.socket-render tbody tr[data-track-id="${object.id}"] td:nth-child(4)`).text(object.identity_name);
+                $(`.socket-render tbody tr[data-track-id="${object.id}"] td:nth-child(6)`).html(`
                     <a href="#"
                        data-video-result=""
                        style="display: ${globalStatus === 'done' ? 'inline' : 'none'}"
@@ -244,14 +245,30 @@ Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectsAppear
                 `);
             }
         } else {
-            [trackIds, trackIndex] = insertInOrder(value.track_id, trackIds);
+            [trackIds, trackIndex] = insertInOrder(object.track_id, trackIds);
 
             renderBlockInOrder(
-                renderBlock(value, [value]),
+                renderBlock(object, [object]),
                 trackIndex,
                 trackIds
             );
         }
+    });
+
+    $('.process__ungrouped-count').html(trackIds.length);
+    feather.replace();
+    $('[data-toggle="popover"]').popover();
+});
+
+Echo.channel(`process.${processId}.cluster`).listen('.App\\Events\\ClusteringProceeded', (res) => {
+    console.log(res.data);
+    res.data.forEach((object) => {
+        $(`.socket-render tbody tr[data-track-id="${object.track_id}"] td:nth-child(5)`).html(
+            buildTimeRanges([object, ...(object.appearances || [])])
+        );
+        object.appearances.forEach((appearance) => {
+            $(`.socket-render tbody tr[data-track-id="${appearance.track_id}"]`).addClass('d-none');
+        });
     });
 
     $('.process__ungrouped-count').html(trackIds.length);
@@ -308,35 +325,6 @@ Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChan
         $element.css({width: `${progress}%`});
         $element.attr('aria-valuenow', progress);
         $element.text(`${progress}%`);
-    } else if (status === 'grouped') {
-        // grouping
-        Toast.fire({
-            type: 'success',
-            title: 'Nhất thể hoá thành công',
-        });
-
-        $.ajax({
-            url: `/processes/${processId}/objects`,
-            type: 'GET',
-            success: function (res) {
-                res.data.forEach((value) => {
-                    $(`.socket-render tbody tr[data-id="${value.id}"] td:nth-child(5)`).html(`
-                        ${buildProgressBar(value.appearances, totalFrames, fps, renderHour, false)}
-                        <div class="position-absolute status-overlay"></div>
-                    `);
-
-                    value.appearances.forEach((appearance) => {
-                        if (appearance.object_id !== appearance.old_object_id) {
-                            $(`.socket-render tbody tr[data-id="${appearance.old_object_id}"]`).fadeOut(3000);
-                        }
-                    });
-                });
-                $('.process__grouped-count').html(res.data.length);
-                $('.process__identified-count').html(res.data.filter(e => !!e.identity_id).length);
-                $('.process__unidentified-count').html(res.data.filter(e => !e.identity_id).length);
-                $('[data-toggle="popover"]').popover();
-            },
-        });
     }
 });
 
