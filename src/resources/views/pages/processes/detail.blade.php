@@ -289,6 +289,9 @@
 
 @push('custom-scripts')
     <script src="{{ my_asset('js/custom.js') }}"></script>
+    <script src="{{ my_asset('assets/plugins/flv/flv.min.js') }}"></script>
+    <script src="{{ my_asset('js/shapes/circle.js') }}"></script>
+    <script src="{{ my_asset('js/geometry.js') }}"></script>
     <script>
         // define global variables
         const processId = '{{ $process->id }}';
@@ -299,14 +302,8 @@
         const fps = Math.round(parseInt('{{ $process->fps }}', 10) / frameDrop);
         // const renderHour = totalFrames / fps / 3600 >= 1;
         const renderHour = parseInt('{{ $process->camera_id ? 1 : 0 }}');
-
         let globalStatus = '{{ $process->status }}';
-    </script>
-    <script src="{{ my_asset('js/detail.js') }}"></script>
-    <script src="{{ my_asset('js/shapes/circle.js') }}"></script>
-    <script src="{{ my_asset('js/geometry.js') }}"></script>
-    <script src="{{ my_asset('assets/plugins/flv/flv.min.js') }}"></script>
-    <script>
+
         isDrawing = false;
         loadCanvas();
         loadOldRegions();
@@ -324,4 +321,5 @@
             flvPlayer.play();
         }
     </script>
+    <script src="{{ my_asset('js/detail.js') }}"></script>
 @endpush

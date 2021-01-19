@@ -23,16 +23,16 @@ trait AnalysisTrait
             DB::raw("
                 (SELECT COUNT(*) FROM objects as OO WHERE id in (
                     SELECT min(objects.id) FROM objects INNER JOIN clusters ON clusters.id = objects.cluster_id
-                        WHERE objects.process_id = $processId AND clusters.identity_id != NULL
+                        WHERE objects.process_id = $processId AND clusters.identity_id IS NOT NULL
                         GROUP BY IFNULL(objects.cluster_id, UUID())
-                )) as total_identified
+                ) OR (OO.cluster_id IS NULL AND OO.identity_id IS NOT NULL AND OO.process_id = $processId)) as total_identified
             "),
             DB::raw("
                 (SELECT COUNT(*) FROM objects as OO WHERE id in (
                     SELECT min(objects.id) FROM objects INNER JOIN clusters ON clusters.id = objects.cluster_id
-                        WHERE objects.process_id = $processId AND clusters.identity_id = NULL
+                        WHERE objects.process_id = $processId AND clusters.identity_id IS NULL
                         GROUP BY IFNULL(objects.cluster_id, UUID())
-                )) as total_unidentified
+                ) OR (OO.cluster_id IS NULL AND OO.identity_id IS NOT NULL AND OO.process_id = $processId)) as total_unidentified
             ")
         ];
     }

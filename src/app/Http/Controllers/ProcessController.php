@@ -190,11 +190,15 @@ class ProcessController extends Controller
             ->get();
 
         foreach ($objects as $object) {
-            $object->appearances = DB::table('objects')
-                ->where('cluster_id', $object->cluster_id)
-                ->where('process_id', $processId)
-                ->orderBy('track_id')
-                ->get();
+            if ($object->cluster_id) {
+                $object->appearances = DB::table('objects')
+                    ->where('cluster_id', $object->cluster_id)
+                    ->where('process_id', $processId)
+                    ->orderBy('track_id')
+                    ->get();
+            } else {
+                $object->appearances = [clone $object];
+            }
         }
 
         return $this->success($objects);

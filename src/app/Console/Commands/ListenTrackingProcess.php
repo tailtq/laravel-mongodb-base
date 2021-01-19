@@ -52,7 +52,7 @@ class ListenTrackingProcess extends Command
             if (!$data) {
                 return;
             }
-            Log::info(json_encode($data));
+//            Log::info(json_encode($data));
             $process = DB::table('processes')
                 ->where('mongo_id', $data->process_id)
                 ->select(['id', 'mongo_id'])
