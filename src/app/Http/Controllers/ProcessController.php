@@ -7,6 +7,7 @@ use App\Models\Camera;
 use App\Models\ObjectAppearance;
 use App\Models\Process;
 use App\Models\TrackedObject;
+use App\Traits\AnalysisTrait;
 use App\Traits\RequestAPI;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -16,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 
 class ProcessController extends Controller
 {
-    use RequestAPI;
+    use RequestAPI, AnalysisTrait;
 
     /**
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
@@ -38,31 +39,10 @@ class ProcessController extends Controller
      */
     public function show($id)
     {
-        $process = Process::with('camera')->select('*',
-            DB::raw("(SELECT COUNT(*) FROM objects WHERE objects.process_id = $id) as total_appearances"),
-            DB::raw("
-                (SELECT COUNT(*) FROM objects as OO WHERE OO.id in (
-                    SELECT min(objects.id) as unq_identity_id
-                        FROM objects
-                        WHERE objects.process_id = $id
-                        GROUP BY IFNULL(objects.cluster_id, UUID())
-                )) as total_objects
-            "),
-            DB::raw("
-                (SELECT COUNT(*) FROM objects as OO WHERE id in (
-                    SELECT min(objects.id) FROM objects INNER JOIN clusters ON clusters.id = objects.cluster_id
-                        WHERE objects.process_id = $id AND clusters.identity_id != NULL
-                        GROUP BY IFNULL(objects.cluster_id, UUID())
-                )) as total_identified
-            "),
-            DB::raw("
-                (SELECT COUNT(*) FROM objects as OO WHERE id in (
-                    SELECT min(objects.id) FROM objects INNER JOIN clusters ON clusters.id = objects.cluster_id
-                        WHERE objects.process_id = $id AND clusters.identity_id = NULL
-                        GROUP BY IFNULL(objects.cluster_id, UUID())
-                )) as total_unidentified
-            ")
-        )->where('id', $id)->first();
+        $process = Process::with('camera')
+            ->select(array_merge(['*'], $this->getStatistic($id)))
+            ->where('id', $id)
+            ->first();
 
         if (!$process) {
             abort(404);
@@ -196,12 +176,26 @@ class ProcessController extends Controller
         $objects = DB::table('objects')
             ->leftJoin('identities', 'objects.identity_id', 'identities.id')
             ->where('objects.process_id', $processId)
+            ->whereIn('objects.id', function ($query) use ($processId) {
+                $query->select(DB::raw('MIN(O.id)'))
+                    ->from('objects AS O')
+                    ->where('O.process_id', $processId)
+                    ->groupBy(DB::raw('IFNULL(O.cluster_id, UUID())'));
+            })
             ->select([
                 'objects.*',
                 'identities.name as identity_name',
                 'identities.images as identity_images',
             ])
             ->get();
+
+        foreach ($objects as $object) {
+            $object->appearances = DB::table('objects')
+                ->where('cluster_id', $object->cluster_id)
+                ->where('process_id', $processId)
+                ->orderBy('track_id')
+                ->get();
+        }
 
         return $this->success($objects);
     }
