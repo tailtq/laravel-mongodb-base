@@ -96,7 +96,7 @@ class ProcessController extends Controller
             'min_body_confidence' => (int)$data['min_body_confidence'],
             'write_video_step' => (int)$data['write_video_step'],
             'write_data_step' => (int)$data['write_data_step'],
-            'regions' => $data['regions'],
+            'regions' => count($data['regions']) > 0 ? $data['regions'] : null,
         ], $this->getDefaultHeaders());
 
         if (!$processData->status) {

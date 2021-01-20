@@ -67,7 +67,6 @@ class DatabaseHelper
         $totalCondition = implode(', ', Arr::pluck($data, $conditionColumn));
         $query .= implode(', ', $sets);
         $query .= " WHERE `$conditionColumn` IN ($totalCondition)";
-        Log::info($query);
 
         DB::statement($query);
     }
