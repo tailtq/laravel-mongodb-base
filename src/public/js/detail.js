@@ -132,7 +132,7 @@ function buildTimeRanges(appearances) {
 }
 
 function renderBlock(object, appearances = []) {
-    object.images = JSON.parse(object.images);
+    const avatar = JSON.parse(object.images)[0];
 
     return (`
         <tr data-id="${object.id}"
@@ -143,7 +143,7 @@ function renderBlock(object, appearances = []) {
             ${!object.identity_id && $('[name="hide-unknown"]').is(':checked') ? 'style="display: none"' : ''}>
             <td class="text-center">${object.track_id}</td>
             <td class="text-center">
-                ${object.images ? `<img src="${object.images[0] || '#'}" alt="image" style="width: inherit; height: 60px;">` : ''}
+                ${avatar ? `<img src="${avatar}" alt="image" style="width: inherit; height: 60px;">` : ''}
             </td>
             <td class="text-center">${getLightboxBlock(object.identity_images, object.id)}</td>
             <td>${object.identity_name || 'Không xác định'}</td>
@@ -239,6 +239,7 @@ function renderTime() {
 
 Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectsAppear', (res) => {
     $('.socket__message').remove();
+    console.log(res);
 
     res.data.forEach((object) => {
         if (trackIds.indexOf(object.track_id) >= 0) {
@@ -304,8 +305,6 @@ Echo.channel(`process.${processId}.cluster`).listen('.App\\Events\\ClusteringPro
 });
 
 Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChange', (res) => {
-    console.log('Socket data', res.data);
-
     const {
         status,
         progress,
