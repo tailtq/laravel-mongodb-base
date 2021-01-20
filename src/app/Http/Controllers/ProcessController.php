@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProcessController extends Controller
 {
@@ -159,9 +160,9 @@ class ProcessController extends Controller
         $processData = $this->sendGETRequest(
             config('app.ai_server') . "/processes/$process->mongo_id/stop", [], $this->getDefaultHeaders()
         );
-//        if (!$processData->status) {
-//            return $this->error($processData->body->message, 400);
-//        }
+        if (!$processData->status) {
+            return $this->error($processData->body->message, 400);
+        }
         $process->update(['status' => Process::STATUS['stopped']]);
 
         return $this->success('Kết thúc thành công');
@@ -213,13 +214,11 @@ class ProcessController extends Controller
         $process = Process::findOrFail($id);
         $url = config('app.ai_server') . "/processes/$process->mongo_id";
         $response = $this->sendDELETERequest($url, [], $this->getDefaultHeaders());
+        Log::info('Delete process response: ' . json_encode($response));
 
-        if (!$response->status) {
-            abort(400, $response->message);
-        }
-        $objectIds = TrackedObject::where('process_id', $id)->pluck('id');
-
-        ObjectAppearance::whereIn('object_id', $objectIds)->delete();
+//        if (!$response->status) {
+//            abort(400, $response->message);
+//        }
         TrackedObject::where('process_id', $id)->delete();
         $process->delete();
 
