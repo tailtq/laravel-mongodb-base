@@ -23,7 +23,7 @@ class IdentitySeeder extends Seeder
         foreach ($urls as $index => $url) {
             $chunks = explode('/', $url);
             $name = str_replace(['%20', '_'], ' ', $chunks[count($chunks) - 1]);
-            $name = str_replace(['.JPG', 'passport', 'GPLX'], '', $name);
+            $name = str_replace(['.JPG', 'passport', 'GPLX', '.png', '.jpg'], '', $name);
 
             $data = [
                 'name' => $name,
@@ -40,6 +40,7 @@ class IdentitySeeder extends Seeder
             ], $this->getDefaultHeaders());
 
             if (!$response->status) {
+                var_dump($response->status);
                 continue;
             }
 
