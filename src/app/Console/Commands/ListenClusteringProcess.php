@@ -4,10 +4,12 @@ namespace App\Console\Commands;
 
 use App\Events\AnalysisProceeded;
 use App\Events\ClusteringProceeded;
+use App\Helpers\DatabaseHelper;
 use App\Traits\AnalysisTrait;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 
 class ListenClusteringProcess extends Command
@@ -55,11 +57,13 @@ class ListenClusteringProcess extends Command
                 ->whereIn('mongo_id', $clusterMongoIds)
                 ->select(['id', 'identity_id', 'mongo_id'])
                 ->get();
+            DatabaseHelper::updateMultiple($this->getClusteringTypes($clusters), 'mongo_id', 'objects');
 
             foreach ($clusters as &$cluster) {
                 $existingCluster = Arr::first($existingClusters, function ($existingCluster) use ($cluster) {
                     return $existingCluster->mongo_id == $cluster->_id;
                 });
+
                 if (!$existingCluster) {
                     $identity = null;
 
@@ -129,7 +133,7 @@ class ListenClusteringProcess extends Command
                 array_merge(['id'], $this->getStatistic($processId))
             )->first();
 
-            array_push($processesNewFormat, $process);
+            $processesNewFormat[] = $process;
 
             foreach ($groupedObjects as $object) {
                 $object->appearances = DB::table('objects')
@@ -144,5 +148,21 @@ class ListenClusteringProcess extends Command
         }
 
         broadcast(new AnalysisProceeded($processes));
+    }
+
+    public function getClusteringTypes($clusters)
+    {
+        $data = [];
+
+        foreach ($clusters as $cluster) {
+            foreach ($cluster->objects as $obj) {
+                $data[] = [
+                    'mongo_id' => $obj->object,
+                    'clustering_type' => $obj->type
+                ];
+            }
+        }
+
+        return $data;
     }
 }
