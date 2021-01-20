@@ -96,7 +96,7 @@ class ProcessController extends Controller
             'min_body_confidence' => (int)$data['min_body_confidence'],
             'write_video_step' => (int)$data['write_video_step'],
             'write_data_step' => (int)$data['write_data_step'],
-            'regions' => count($data['regions']) > 0 ? $data['regions'] : null,
+            'regions' => $data['regions'],
         ], $this->getDefaultHeaders());
 
         if (!$processData->status) {
@@ -159,9 +159,9 @@ class ProcessController extends Controller
         $processData = $this->sendGETRequest(
             config('app.ai_server') . "/processes/$process->mongo_id/stop", [], $this->getDefaultHeaders()
         );
-        if (!$processData->status) {
-            return $this->error($processData->body->message, 400);
-        }
+//        if (!$processData->status) {
+//            return $this->error($processData->body->message, 400);
+//        }
         $process->update(['status' => Process::STATUS['stopped']]);
 
         return $this->success('Kết thúc thành công');
