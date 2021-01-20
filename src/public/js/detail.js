@@ -60,6 +60,7 @@ function sendStartStopRequest(processId, type) {
 
 $('.btn-start').click(function () {
     sendStartStopRequest(processId, 'start');
+    flvPlayer.load();
     flvPlayer.play();
 });
 
@@ -330,7 +331,7 @@ Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChan
             type: 'success',
             title: 'Tiến trình đã hoàn thành',
         });
-        flvPlayer.stop();
+        flvPlayer.destroy();
 
         $('.search-face__btn').removeAttr('disabled');
         $('.export-statistic__btn').removeAttr('disabled');
@@ -343,7 +344,7 @@ Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChan
         $element.attr('aria-valuenow', progress);
         $element.text(`${progress}%`);
     } else if (status === 'error' || status === 'stopped') {
-        flvPlayer.stop();
+        flvPlayer.destroy();
     }
 });
 
