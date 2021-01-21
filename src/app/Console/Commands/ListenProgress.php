@@ -4,6 +4,8 @@ namespace App\Console\Commands;
 
 use App\Events\ProgressChange;
 use App\Models\Process;
+use App\Traits\RequestAPI;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -11,6 +13,8 @@ use Illuminate\Support\Facades\Redis;
 
 class ListenProgress extends Command
 {
+    use RequestAPI;
+
     /**
      * The name and signature of the console command.
      *
@@ -41,7 +45,6 @@ class ListenProgress extends Command
     public function handle()
     {
         Redis::subscribe('progress', function ($event) {
-            Log::info($event);
             $event = json_decode($event);
 
             if (!$event) {
@@ -50,15 +53,8 @@ class ListenProgress extends Command
             $process = Process::where('mongo_id', $event->process_id)->first();
 
             if ($process) {
-                $data = [
-                    'id' => $process->id,
-                    'status' => $event->status,
-                    'progress' => $event->progress ?? 0,
-                    'frame_index' => $event->frame_index ?? null,
-                ];
-//                if ($process->status === Process::STATUS['done'] && !$process->camera_id) {
-//                    broadcast(new ProgressChange($process->id, $data));
-//                }
+                Log::info(json_encode($event));
+
                 if ($event->status === 'rendered') {
                     $videoResult = object_get($event, 'video_url');
                     $process->video_result = $videoResult;
@@ -66,13 +62,44 @@ class ListenProgress extends Command
 
                     $data['video_result'] = $videoResult;
                 }
-                if ($process->status != $event->status && in_array($event->status, array_values(Process::STATUS))) {
+                if ($process->status !== Process::STATUS['done']
+                    && $process->status != $event->status
+                    && in_array($event->status, array_values(Process::STATUS))) {
                     $process->status = $event->status;
+
+                    if ($event->status === Process::STATUS['detected']) {
+                        $process->detecting_end_time = Carbon::now();
+                        $process->grouping_start_time = Carbon::now();
+                    }
+                    if ($event->status === Process::STATUS['done']) {
+                        $process->done_time = Carbon::now();
+                    }
                     $process->save();
                 }
 
+                $data = [
+                    'id' => $process->id,
+                    'status' => $process->status,
+                    'progress' => $event->progress ?? 0,
+                    'frame_index' => $event->frame_index ?? null,
+                ];
                 broadcast(new ProgressChange($process->id, $data));
+
+                if ($process->status === Process::STATUS['detected']) {
+                    Log::info("Called clustering");
+                    $this->runClustering($process->mongo_id);
+                }
             }
         });
+    }
+
+    public function runClustering($processMongoId)
+    {
+        $url = config('app.ai_server') . '/clusters';
+        $payload = [
+            'search_body' => true,
+            'process_ids' => [$processMongoId]
+        ];
+        $this->sendPOSTRequest($url, $payload, $this->getDefaultHeaders());
     }
 }

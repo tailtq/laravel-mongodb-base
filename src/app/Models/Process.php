@@ -10,6 +10,7 @@ class Process extends Model
         'ready' => 'ready',
         'stopped' => 'stopped',
         'detecting' => 'detecting',
+        'detected' => 'detected',
         'clustering' => 'clustering',
 //        'rendering' => 'rendering',
         'done' => 'done',
