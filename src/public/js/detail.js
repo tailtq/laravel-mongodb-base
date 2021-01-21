@@ -68,6 +68,39 @@ $('.btn-stop').click(function () {
     sendStartStopRequest(processId, 'stop');
 });
 
+$('.render-video__btn').click(function (e) {
+    const href = $(this).data('href');
+
+    if (href) {
+        window.open(href, '_blank');
+        return;
+    }
+    e.preventDefault();
+    $.ajax({
+        url: `/processes/render-video`,
+        type: 'POST',
+        dataType: 'json',
+        contentType: 'application/json; charset=UTF-8',
+        data: JSON.stringify({
+            _token: $('meta[name="_token"]').attr('content'),
+            processId: processId
+        }),
+        success: function (res) {
+            console.log(res);
+            Toast.fire({
+                type: 'success',
+                title: res.data
+            });
+        },
+        error: function ({responseJSON: res}) {
+            Toast.fire({
+                type: 'error',
+                title: res.message
+            });
+        }
+    });
+});
+
 function getTimeString(frameFrom, frameTo, fps, renderHour) {
     let secondFrom = Math.floor(frameFrom / fps);
     let minFrom = Math.floor(secondFrom / 60);
@@ -309,7 +342,7 @@ Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChan
     const {
         status,
         progress,
-        video_detecting_result: videoDetectingResult,
+        video_result: videoResult,
         frame_index: frameIndex,
     } = res.data;
 
@@ -335,6 +368,7 @@ Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChan
 
         $('.search-face__btn').removeAttr('disabled');
         $('.export-statistic__btn').removeAttr('disabled');
+        $('.render-video__btn').removeAttr('disabled');
         $('.render-single-object').removeAttr('style');
         renderTime();
     } else if (status === 'detecting' || status === 'rendering') {
@@ -345,6 +379,11 @@ Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChan
         $element.text(`${progress}%`);
     } else if (status === 'error' || status === 'stopped') {
         flvPlayer.destroy();
+    } else if (status === 'rendered') {
+        $('.render-video__btn')
+            .addClass('btn-success')
+            .removeClass('btn-secondary')
+            .data('href', videoResult);
     }
 });
 
