@@ -273,7 +273,6 @@ function renderTime() {
 
 Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectsAppear', (res) => {
     $('.socket__message').remove();
-    console.log(res);
 
     res.data.forEach((object) => {
         if (trackIds.indexOf(object.track_id) >= 0) {
@@ -339,6 +338,7 @@ Echo.channel(`process.${processId}.cluster`).listen('.App\\Events\\ClusteringPro
 });
 
 Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChange', (res) => {
+    console.log(res.data);
     const {
         status,
         progress,
