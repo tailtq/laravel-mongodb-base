@@ -130,9 +130,6 @@
                                href="{{ route('processes.export.after-grouping', ['id' => $process->id]) }}">
                                 Sau nhất thể hoá
                             </a>
-                            <a class="dropdown-item" href="#" target="_blank">
-                                Video tái hiện
-                            </a>
                         </div>
                     </div>
                 </div>
@@ -195,6 +192,16 @@
                                 <i class="input-frame"></i>
                             </label>
                         </div>
+
+                        <div>
+                            <button class="btn {{ $process->video_result ? 'btn-success' : 'btn-secondary' }} render-video__btn"
+                               @if($process->status != 'done')
+                               disabled
+                               @endif
+                               data-href="{{ $process->video_result }}">
+                                Tổng hợp video
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -211,6 +218,18 @@
                          aria-valuemin="0"
                          aria-valuemax="100">
                         {{ $detectingPercentage }}%
+                    </div>
+                </div>
+
+                <p class="mt-4">Tổng hợp video</p>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-striped bg-warning progress-bar__rendering"
+                         role="progressbar"
+                         style="width: {{ $renderingPercentage }}%"
+                         aria-valuenow="{{ $renderingPercentage }}"
+                         aria-valuemin="0"
+                         aria-valuemax="100">
+                        {{ $renderingPercentage }}%
                     </div>
                 </div>
             </div>

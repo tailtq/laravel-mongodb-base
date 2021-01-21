@@ -71,6 +71,8 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::post('/stop-process', 'ProcessController@stopProcess')->name('processes.stop');
 
+        Route::post('/render-video', 'ProcessController@renderVideo')->name('processes.render');
+
         Route::get('/{id}/objects', 'ProcessController@getObjects')->name('processes.objects');
 
         Route::get('/{id}/detail', 'ProcessController@getDetail')->name('processes.durations');
