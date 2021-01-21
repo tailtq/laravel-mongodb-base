@@ -70,4 +70,14 @@ class DatabaseHelper
 
         DB::statement($query);
     }
+
+    public static function blendObjectsIdentity($objects)
+    {
+        foreach ($objects as &$object) {
+            $object->identity_name = $object->identity_name ?: $object->cluster_identity_name;
+            $object->identity_images = $object->identity_images ?: $object->cluster_identity_images;
+        }
+
+        return $objects;
+    }
 }

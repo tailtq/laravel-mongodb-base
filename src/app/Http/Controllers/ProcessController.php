@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\DatabaseHelper;
 use App\Http\Requests\ProcessCreateRequest;
 use App\Models\Camera;
 use App\Models\ObjectAppearance;
@@ -197,7 +198,9 @@ class ProcessController extends Controller
     public function getObjects($processId)
     {
         $objects = DB::table('objects')
-            ->leftJoin('identities', 'objects.identity_id', 'identities.id')
+            ->leftJoin('clusters', 'objects.cluster_id', 'clusters.id')
+            ->leftJoin('identities as CI', 'clusters.identity_id', 'CI.id')
+            ->leftJoin('identities as OI', 'objects.identity_id', 'OI.id')
             ->where('objects.process_id', $processId)
             ->whereIn('objects.id', function ($query) use ($processId) {
                 $query->select(DB::raw('MIN(O.id)'))
@@ -207,10 +210,13 @@ class ProcessController extends Controller
             })
             ->select([
                 'objects.*',
-                'identities.name as identity_name',
-                'identities.images as identity_images',
+                'OI.name as identity_name',
+                'OI.images as identity_images',
+                'CI.name as cluster_identity_name',
+                'CI.images as cluster_identity_images',
             ])
             ->get();
+        $objects = DatabaseHelper::blendObjectsIdentity($objects);
 
         foreach ($objects as $object) {
             if ($object->cluster_id) {
