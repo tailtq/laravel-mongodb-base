@@ -138,16 +138,21 @@ class ListenTrackingProcess extends Command
     public function queryAndBroadcastResult($ids, $processId)
     {
         # broadcast to detail page
-        $objs = DB::table('objects')
-            ->leftJoin('identities', 'objects.identity_id', 'identities.id')
+        $objects = DB::table('objects')
+            ->leftJoin('clusters', 'objects.cluster_id', 'clusters.id')
+            ->leftJoin('identities as CI', 'clusters.identity_id', 'CI.id')
+            ->leftJoin('identities as OI', 'objects.identity_id', 'OI.id')
             ->whereIn('objects.id', $ids)
             ->select([
                 'objects.*',
-                'identities.name as identity_name',
-                'identities.images as identity_images',
+                'OI.name as identity_name',
+                'OI.images as identity_images',
+                'CI.name as cluster_identity_name',
+                'CI.images as cluster_identity_images',
             ])
             ->get();
-        broadcast(new ObjectsAppear($processId, $objs, "process.$processId.objects"));
+        $objects = DatabaseHelper::blendObjectsIdentity($objects);
+        broadcast(new ObjectsAppear($processId, $objects, "process.$processId.objects"));
 
         # broadcast to monitor page
         $process = DB::table('processes')->where('id', $processId)->select(
