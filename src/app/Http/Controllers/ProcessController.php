@@ -57,11 +57,10 @@ class ProcessController extends Controller
         $process->config = $processData->status ? $processData->body->config : null;
         $cameras = Camera::select(['id', 'name', 'url'])->orderBy('created_at', 'desc')->get();
 
-        return view('pages.processes.detail', [
+        return view('pages.processes.detail', array_merge([
             'process' => $process,
             'cameras' => $cameras,
-            'detectingPercentage' => $this->getProgressing($process->status),
-        ]);
+        ], $this->getProgressing($process)));
     }
 
     /**
@@ -127,7 +126,7 @@ class ProcessController extends Controller
      */
     public function startProcess(Request $request)
     {
-        $process = Process::find($request->processId);
+        $process = DB::table('processes')->where('id', $request->processId)->first();
 
         if (!$process) {
             return $this->error('Không tìm thấy luồng xử lý', 404);
@@ -138,7 +137,7 @@ class ProcessController extends Controller
         if (!$processData->status) {
             return $this->error($processData->body->message, 400);
         }
-        $process->update([
+        DB::table('processes')->where('id', $request->processId)->update([
             'detecting_start_time' => Carbon::now(),
             'status' => Process::STATUS['detecting'],
         ]);
@@ -152,7 +151,7 @@ class ProcessController extends Controller
      */
     public function stopProcess(Request $request)
     {
-        $process = Process::findOrFail($request->processId);
+        $process = DB::table('processes')->where('id', $request->processId)->first();
 
         if (!$process) {
             return $this->error('Không tìm thấy luồng xử lý', 404);
@@ -163,9 +162,32 @@ class ProcessController extends Controller
         if (!$processData->status) {
             return $this->error($processData->body->message, 400);
         }
-        $process->update(['status' => Process::STATUS['stopped']]);
+        DB::table('processes')->where('id', $request->processId)->update([
+            'status' => Process::STATUS['stopped']
+        ]);
 
         return $this->success('Kết thúc thành công');
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function renderVideo(Request $request)
+    {
+        $process = DB::table('processes')->where('id', $request->processId)->first();
+
+        if (!$process) {
+            return $this->error('Không tìm thấy luồng xử lý', 404);
+        }
+        $processData = $this->sendGETRequest(
+            config('app.ai_server') . "/processes/$process->mongo_id/rendering", [], $this->getDefaultHeaders()
+        );
+        if (!$processData->status) {
+            return $this->error($processData->body->message, 400);
+        }
+
+        return $this->success('Đang tổng hợp video');
     }
 
     /**
@@ -348,14 +370,18 @@ class ProcessController extends Controller
     }
 
     /**
-     * @param $status
-     * @return int
+     * @param $process
+     * @return array
      */
-    private function getProgressing($status)
+    private function getProgressing($process)
     {
-        $detectingPercentage = ($status === 'done') ? 100 : 0;
+        $detectingPercentage = ($process->status === 'done') ? 100 : 0;
+        $renderingPercentage = $process->video_result ? 100 : 0;
 
-        return $detectingPercentage;
+        return [
+            'detectingPercentage' => $detectingPercentage,
+            'renderingPercentage' => $renderingPercentage
+        ];
     }
 
     private function parseTime($timeFrom, $timeTo)

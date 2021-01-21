@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Events\ProgressChange;
 use App\Models\Process;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 
@@ -40,7 +41,7 @@ class ListenProgress extends Command
     public function handle()
     {
         Redis::subscribe('progress', function ($event) {
-//            Log::info($event);
+            Log::info($event);
             $event = json_decode($event);
 
             if (!$event) {
@@ -51,18 +52,24 @@ class ListenProgress extends Command
             if ($process) {
                 $data = [
                     'id' => $process->id,
-                    'status' => $process->status,
+                    'status' => $event->status,
                     'progress' => $event->progress ?? 0,
                     'frame_index' => $event->frame_index ?? null,
                 ];
-                if ($process->status != $event->status) {
-                    $process->status = $event->status;
+//                if ($process->status === Process::STATUS['done'] && !$process->camera_id) {
+//                    broadcast(new ProgressChange($process->id, $data));
+//                }
+                if ($event->status === 'rendered') {
+                    $videoResult = object_get($event, 'video_url');
+                    $process->video_result = $videoResult;
                     $process->save();
 
-                    $data['status'] = $process->status;
+                    $data['video_result'] = $videoResult;
                 }
-//                $url = config('app.ai_server') .  "/processes/$process->mongo_id/rendering";
-//                $response = $this->sendGETRequest($url, [], $this->getDefaultHeaders());
+                if ($process->status != $event->status && in_array($event->status, array_values(Process::STATUS))) {
+                    $process->status = $event->status;
+                    $process->save();
+                }
 
                 broadcast(new ProgressChange($process->id, $data));
             }
