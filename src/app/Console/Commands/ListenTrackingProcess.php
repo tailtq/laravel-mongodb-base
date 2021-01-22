@@ -159,6 +159,7 @@ class ListenTrackingProcess extends Command
             array_merge(['id'], $this->getStatistic($processId))
         )->first();
         broadcast(new AnalysisProceeded([$process]));
+        broadcast(new AnalysisProceeded($process, "process.$processId.analysis"));
     }
 
     /**

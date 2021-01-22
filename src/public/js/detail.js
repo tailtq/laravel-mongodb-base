@@ -216,6 +216,20 @@ function renderBlockInOrder(html, order, trackIds) {
     }
 }
 
+function renderObjectWithIdentity($element, object) {
+    $element.attr('data-identity-id', object.identity_id).removeAttr('style');
+    $element.find('td:nth-child(3)').html(getLightboxBlock(object.identity_images, object.id));
+    $element.find('td:nth-child(4)').text(object.identity_name);
+    $element.find('td:nth-child(6)').html(`
+        <a href="#"
+           data-video-result=""
+           style="display: ${globalStatus === 'done' ? 'inline' : 'none'}"
+           class="render-single-object icon__normal-font-size text-secondary">
+            <i class="mdi mdi-video-switch"></i>
+        </a>
+    `);
+}
+
 function insertInOrder(element, array) {
     array.push(element);
     array.sort(function (a, b) {
@@ -284,19 +298,7 @@ Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectsAppear
                 );
             }
             if (object.identity_name) {
-                $element.attr('data-identity-id', object.identity_id).removeAttr('style');
-                $(`.socket-render tbody tr[data-track-id="${object.id}"] td:nth-child(3)`).html(
-                    getLightboxBlock(object.identity_images, object.id)
-                );
-                $(`.socket-render tbody tr[data-track-id="${object.id}"] td:nth-child(4)`).text(object.identity_name);
-                $(`.socket-render tbody tr[data-track-id="${object.id}"] td:nth-child(6)`).html(`
-                    <a href="#"
-                       data-video-result=""
-                       style="display: ${globalStatus === 'done' ? 'inline' : 'none'}"
-                       class="render-single-object icon__normal-font-size text-secondary">
-                        <i class="mdi mdi-video-switch"></i>
-                    </a>
-                `);
+                renderObjectWithIdentity($element, object);
             }
         } else {
             [trackIds, trackIndex] = insertInOrder(object.track_id, trackIds);
@@ -313,9 +315,13 @@ Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectsAppear
 
 Echo.channel(`process.${processId}.cluster`).listen('.App\\Events\\ClusteringProceeded', (res) => {
     res.data.grouped_objects.forEach((object) => {
-        $(`.socket-render tbody tr[data-track-id="${object.track_id}"] td:nth-child(5)`).html(
-            buildTimeRanges(object.appearances)
-        );
+        const $element = $(`.socket-render tbody tr[data-track-id="${object.track_id}"]`);
+
+        if (!object.identity_id && object.identity_name) {
+            console.log('render identity');
+            renderObjectWithIdentity($element, object);
+        }
+        $element.find('td:nth-child(5)').html(buildTimeRanges(object.appearances));
         object.appearances.forEach((appearance) => {
             if (appearance.id !== object.id) {
                 $(`.socket-render tbody tr[data-track-id="${appearance.track_id}"]`).addClass('d-none');
@@ -330,6 +336,20 @@ Echo.channel(`process.${processId}.cluster`).listen('.App\\Events\\ClusteringPro
         total_identified: totalIdentified,
         total_unidentified: totalUnidentified,
     } = res.data.statistic;
+
+    $('td.statistic__total-appearances').html(totalAppearances);
+    $('td.statistic__total-objects').html(totalObjects);
+    $('td.statistic__total-identified').html(totalIdentified);
+    $('td.statistic__total-unidentified').html(totalUnidentified);
+});
+
+Echo.channel(`process.${processId}.analysis`).listen('.App\\Events\\AnalysisProceeded', (res) => {
+    const {
+        total_appearances: totalAppearances,
+        total_objects: totalObjects,
+        total_identified: totalIdentified,
+        total_unidentified: totalUnidentified,
+    } = res.data;
 
     $('td.statistic__total-appearances').html(totalAppearances);
     $('td.statistic__total-objects').html(totalObjects);
