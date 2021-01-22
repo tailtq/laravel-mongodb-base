@@ -28,8 +28,7 @@ class TrackedObjectController  extends Controller
 
         if ($response->status) {
             return $this->success();
-        } else {
-            return $this->error($response->message, 400);
         }
+        return $this->error($response->message, 400);
     }
 }
