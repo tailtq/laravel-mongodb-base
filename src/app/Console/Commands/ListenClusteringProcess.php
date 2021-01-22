@@ -152,7 +152,7 @@ class ListenClusteringProcess extends Command
             ], "process.$processId.cluster"));
         }
 
-        broadcast(new AnalysisProceeded($processes));
+        broadcast(new AnalysisProceeded($processesNewFormat));
     }
 
     public function getClusteringTypes($clusters)

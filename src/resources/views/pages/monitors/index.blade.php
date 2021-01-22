@@ -77,7 +77,7 @@
     <div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
         <h4 class="mb-3 mb-md-0">Màn hình giám sát</h4>
 
-        <button class="btn btn-primary sidebar__btn-open">Danh sách đối tượng</button>
+{{--        <button class="btn btn-primary sidebar__btn-open">Danh sách đối tượng</button>--}}
     </div>
 
     <div class="nav hidden monitor-sidebar bg-white d-block">
@@ -102,61 +102,74 @@
         </ul>
     </div>
 
-    <div class="row">
-        <div class="col-12 col-xl-12">
-            <div class="row d-flex monitor-manager">
-                @foreach ($processes as $process)
-                    <div class="monitor-block mb-3"
-                         data-id="{{ $process->id }}"
-                         data-total-appearances="{{ $process->total_appearances }}"
-                         data-total-objects="{{ $process->total_objects }}"
-                         data-total-identified="{{ $process->total_identified }}"
-                         data-total-unidentified="{{ $process->total_unidentified }}">
-                        @if ($process->camera_id)
-                            <div class="monitor-icon__group" title="Live">
-                                <i class="monitor-icon mdi mdi-access-point"></i>
-                            </div>
-                        @else
-                            <div class="monitor-icon__group" title="Video">
-                                <i class="monitor-icon mdi mdi-video"></i>
-                            </div>
-                        @endif
+    <div class="d-flex monitor-manager">
+        @if (count($processes) == 0)
+            <p>Không có tiến trình nào đang thực hiện</p>
+        @endif
 
-                        <video class="videoElement w-100" controls
-                               resource="{{ env('STREAMING_SERVER') }}/{{ $process->mongo_id }}.flv">
-                        </video>
-
-                        <table class="table table-bordered">
-                            <tbody>
-                            <tr>
-                                <td colspan="2">
-                                    <a href="{{ route('processes.detail', $process->id) }}" target="_blank">
-                                        <b>{{ $process->name }}</b>
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><b>Số lượt người xuất hiện</b></td>
-                                <td class="statistic__total-appearances">{{ $process->total_appearances }}</td>
-                            </tr>
-                            <tr>
-                                <td><b>Số người</b></td>
-                                <td class="statistic__total-objects">{{ $process->total_objects }}</td>
-                            </tr>
-                            <tr>
-                                <td><b>Số người phát hiện được danh tính</b></td>
-                                <td class="statistic__total-identified">{{ $process->total_identified }}</td>
-                            </tr>
-                            <tr>
-                                <td><b>Số người không phát hiện được danh tính</b></td>
-                                <td class="statistic__total-unidentified">{{ $process->total_unidentified }}</td>
-                            </tr>
-                            </tbody>
-                        </table>
+        @foreach ($processes as $process)
+            <div class="monitor-block mb-3"
+                 data-id="{{ $process->id }}"
+                 data-total-appearances="{{ $process->total_appearances }}"
+                 data-total-objects="{{ $process->total_objects }}"
+                 data-total-identified="{{ $process->total_identified }}"
+                 data-total-unidentified="{{ $process->total_unidentified }}">
+                @if ($process->camera_id)
+                    <div class="monitor-icon__group" title="Live">
+                        <i class="monitor-icon mdi mdi-access-point"></i>
                     </div>
-                @endforeach
+                @else
+                    <div class="monitor-icon__group" title="Video">
+                        <i class="monitor-icon mdi mdi-video"></i>
+                    </div>
+                @endif
+
+                <video class="videoElement w-100" controls
+                       resource="{{ env('STREAMING_SERVER') }}/{{ $process->mongo_id }}.flv">
+                </video>
+
+                <table class="table table-bordered">
+                    <tbody>
+                    <tr>
+                        <td colspan="8">
+                            <a href="{{ route('processes.detail', $process->id) }}" target="_blank">
+                                <b>{{ $process->name }}</b>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td title="Số lượt người xuất hiện">
+                            <b class="display-5">
+                                <i class="mdi mdi-walk"></i>
+                            </b>
+                        </td>
+                        <td class="statistic__total-appearances">{{ $process->total_appearances }}</td>
+
+                        <td title="Số người">
+                            <b class="display-5">
+                                <i class="mdi mdi-account-group"></i>
+                            </b>
+                        </td>
+                        <td class="statistic__total-objects">{{ $process->total_objects }}</td>
+
+                        <td title="Số người phát hiện được danh tính">
+                            <b class="display-5">
+                                <i class="mdi mdi-card-account-details"></i>
+                            </b>
+                        </td>
+                        <td class="statistic__total-identified">{{ $process->total_identified }}</td>
+
+                        <td title="Số người không phát hiện được danh tính">
+                            <b class="display-5">
+                                <i class="mdi mdi-account-question"></i>
+                            </b>
+                        </td>
+                        <td class="statistic__total-unidentified">{{ $process->total_unidentified }}</td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
-        </div>
+        @endforeach
     </div>
 @endsection
 

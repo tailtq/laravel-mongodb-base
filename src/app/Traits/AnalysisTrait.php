@@ -32,7 +32,7 @@ trait AnalysisTrait
                     SELECT min(objects.id) FROM objects INNER JOIN clusters ON clusters.id = objects.cluster_id
                         WHERE objects.process_id = $processId AND clusters.identity_id IS NULL
                         GROUP BY IFNULL(objects.cluster_id, UUID())
-                ) OR (OO.cluster_id IS NULL AND OO.identity_id IS NOT NULL AND OO.process_id = $processId)) as total_unidentified
+                ) OR (OO.cluster_id IS NULL AND OO.identity_id IS NULL AND OO.process_id = $processId)) as total_unidentified
             ")
         ];
     }
