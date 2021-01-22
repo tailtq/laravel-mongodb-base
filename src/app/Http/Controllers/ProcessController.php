@@ -113,8 +113,8 @@ class ProcessController extends Controller
             'description' => $data['description'],
             'status' => Process::STATUS['ready'],
             'mongo_id' => $processData->body->_id,
-            'total_time' => $processData->body->total_time,
-            'total_frames' => $processData->body->total_frames,
+            'total_time' => $camera ? -1 : $processData->body->total_time,
+            'total_frames' => $camera ? -1 : $processData->body->total_frames,
             'fps' => $processData->body->fps,
         ]);
 
