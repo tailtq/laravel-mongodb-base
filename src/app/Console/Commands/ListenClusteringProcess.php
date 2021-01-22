@@ -9,7 +9,6 @@ use App\Traits\AnalysisTrait;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 
 class ListenClusteringProcess extends Command
@@ -167,7 +166,6 @@ class ListenClusteringProcess extends Command
                 ];
             }
         }
-
         return $data;
     }
 }
