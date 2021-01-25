@@ -135,11 +135,19 @@ function buildTimeRanges(appearances) {
     let timeRanges = '';
 
     appearances.forEach((value) => {
-        const clusteringType = value.clustering_type
-            ? `<p class="text-center">${value.clustering_type}</p>`
-            : '';
+        const clusteringType = `<p class="text-center">Id: ${value.track_id} ${value.clustering_type ? ` - ${value.clustering_type}` : ''}</p>`;
         let imageHTML = '';
         let bodyHTML = '';
+        let time = '';
+
+        if (isRealtime) {
+            const timeFrom = new Date(value.time_from);
+            const timeTo = new Date(value.time_from);
+            time += `${timeFrom.getHours()}:${timeFrom.getMinutes()}:${timeFrom.getSeconds()}`;
+            time += ` - ${timeTo.getHours()}:${timeTo.getMinutes()}:${timeTo.getSeconds()}`;
+        } else {
+            time = getTimeString(value.frame_from, value.frame_to, fps, renderHour);
+        }
 
         value.images = JSON.parse(value.images);
         value.body_images = value.body_images ? JSON.parse(value.body_images) : [];
@@ -153,12 +161,17 @@ function buildTimeRanges(appearances) {
         // TODO: Generate HTML and CSS content
         timeRanges += `
             <button class="badge badge-info"
-                  role="button"
-                  data-html="true"
-                  data-toggle="popover"
-                  data-placement="top"
-                  data-content='<div>${clusteringType}<div class="text-center">${imageHTML}</div><div class="text-center">${bodyHTML}</div></div>'
-                  data-trigger="focus">${value.frame_from} - ${value.frame_to}</button> &nbsp;
+                    role="button"
+                    data-html="true"
+                    data-toggle="popover"
+                    data-placement="top"
+                    data-id="${value.id}"
+                    data-track-id="${value.track_id}"
+                    data-identity-id="${value.identity_id}"
+                    data-cluster-id="${value.cluster_id}"
+                    data-mongo-id="${value.mongo_id}"
+                    data-content='<div>${clusteringType}<div class="text-center">${imageHTML}</div><div class="text-center">${bodyHTML}</div></div>'
+                    data-trigger="focus">${time}</button> &nbsp;
         `;
     });
 
@@ -318,7 +331,6 @@ Echo.channel(`process.${processId}.cluster`).listen('.App\\Events\\ClusteringPro
         const $element = $(`.socket-render tbody tr[data-track-id="${object.track_id}"]`);
 
         if (!object.identity_id && object.identity_name) {
-            console.log('render identity');
             renderObjectWithIdentity($element, object);
         }
         $element.find('td:nth-child(5)').html(buildTimeRanges(object.appearances));
