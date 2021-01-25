@@ -332,6 +332,7 @@
         const fps = Math.round(parseInt('{{ $process->fps }}', 10) / frameDrop);
         // const renderHour = totalFrames / fps / 3600 >= 1;
         const renderHour = parseInt('{{ $process->camera_id ? 1 : 0 }}');
+        const isRealtime = parseInt('{{ $process->camera_id ? 1 : 0 }}');
         let globalStatus = '{{ $process->status }}';
 
         isDrawing = false;
