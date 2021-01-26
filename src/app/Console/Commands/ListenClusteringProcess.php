@@ -138,13 +138,8 @@ class ListenClusteringProcess extends Command
             )->first();
 
             $processesNewFormat[] = $process;
+            $groupedObjects = $this->getAppearances($groupedObjects);
 
-            foreach ($groupedObjects as $object) {
-                $object->appearances = DB::table('objects')
-                    ->where('cluster_id', $object->cluster_id)
-                    ->where('process_id', $object->process_id)
-                    ->get();
-            }
             broadcast(new ClusteringProceeded([
                 'statistic' => $process,
                 'grouped_objects' => $groupedObjects,

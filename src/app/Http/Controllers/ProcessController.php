@@ -216,18 +216,7 @@ class ProcessController extends Controller
             ])
             ->get();
         $objects = DatabaseHelper::blendObjectsIdentity($objects);
-
-        foreach ($objects as $object) {
-            if ($object->cluster_id) {
-                $object->appearances = DB::table('objects')
-                    ->where('cluster_id', $object->cluster_id)
-                    ->where('process_id', $processId)
-                    ->orderBy('track_id')
-                    ->get();
-            } else {
-                $object->appearances = [clone $object];
-            }
-        }
+        $objects = $this->getAppearances($objects);
 
         return $this->success($objects);
     }
@@ -258,45 +247,64 @@ class ProcessController extends Controller
      */
     public function searchFace(Request $request)
     {
-        $ids = json_decode($request->get('process_ids'));
+        $ids = json_decode($request->get('process_ids', '[]'));
+        $searchType = $request->get('search_type');
         $processes = Process::whereIn('id', $ids)->get();
 
-        $file = $request->file('file');
-        $imageUrl = $this->uploadFile($file);
-
         $url = config('app.ai_server') . "/processes/faces/searching";
-        $requestBody = [
-            'image_url' => $imageUrl,
+        $payload = [
             'process_ids' => $processes->pluck('mongo_id')->all(),
+            'type_search' => $searchType,
+            'threshold' => $searchType === 'face' ? 1.05 : 0.7
         ];
-        $response = $this->sendPOSTRequest($url, $requestBody, $this->getDefaultHeaders());
+
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $payload['image_url'] = $this->uploadFile($file);
+        } else {
+            $objectId = $request->get('object_id');
+            $payload['object_id'] = DB::table('objects')->where('id', $objectId)->first()->mongo_id;
+        }
+        $response = $this->sendPOSTRequest($url, $payload, $this->getDefaultHeaders());
         $searchedObjects = $response->body;
         $objectMongoIds = Arr::pluck($searchedObjects, 'object_id');
 
         // handle error cases
         // laravel receive image --> save to min_io + search
 
-        $objects = TrackedObject::leftJoin('identities', 'objects.identity_id', 'identities.id')
+        $objects = DB::table('objects')
+            ->join('processes', 'objects.process_id', 'processes.id')
+            ->leftJoin('clusters', 'objects.cluster_id', 'clusters.id')
+            ->leftJoin('identities as CI', 'clusters.identity_id', 'CI.id')
+            ->leftJoin('identities as OI', 'objects.identity_id', 'OI.id')
             ->whereIn('objects.mongo_id', $objectMongoIds)
+            ->whereIn('objects.id', function ($query) use ($objectMongoIds) {
+                $query->select(DB::raw('MIN(O.id)'))
+                    ->from('objects AS O')
+                    ->whereIn('O.mongo_id', $objectMongoIds)
+                    ->groupBy(DB::raw('IFNULL(O.cluster_id, UUID())'));
+            })
             ->select([
-                'objects.id',
-                'objects.identity_id',
-                'objects.mongo_id',
-                'objects.image',
-                'objects.video_result',
-                'identities.name',
-                'identities.images',
+                'objects.*',
+                'OI.name as identity_name',
+                'OI.images as identity_images',
+                'CI.name as cluster_identity_name',
+                'CI.images as cluster_identity_images',
+                'processes.name as process_name',
             ])
-            ->orderBy('objects.track_id')
-            ->with('appearances')
             ->get();
+        $objects = DatabaseHelper::blendObjectsIdentity($objects);
+        $objects = $this->getAppearances($objects);
 
         foreach ($objects as &$object) {
-            $searchedObject = Arr::first($searchedObjects, function ($searchedObject) use ($object) {
-                return $searchedObject->object_id === $object->mongo_id;
-            });
-            $object->confidence = ($searchedObject->confidence ?? 0) * 100;
+            $object->confidence_rate = null;
+            foreach ($searchedObjects as $searchedObject) {
+                if ($searchedObject->object_id == $object->mongo_id) {
+                    $object->distance = $searchedObject->search_distance;
+                }
+            }
         }
+        $objects = array_values($objects->sortBy('distance')->toArray());
 
         return $this->success($objects);
     }
