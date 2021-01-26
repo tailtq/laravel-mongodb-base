@@ -247,20 +247,25 @@ class ProcessController extends Controller
      */
     public function searchFace(Request $request)
     {
-        $ids = json_decode($request->get('process_ids'));
+        $ids = json_decode($request->get('process_ids', '[]'));
         $searchType = $request->get('search_type');
         $processes = Process::whereIn('id', $ids)->get();
 
-        $file = $request->file('file');
-        $imageUrl = $this->uploadFile($file);
-
         $url = config('app.ai_server') . "/processes/faces/searching";
-        $requestBody = [
-            'image_url' => $imageUrl,
+        $payload = [
             'process_ids' => $processes->pluck('mongo_id')->all(),
             'type_search' => $searchType,
+            'threshold' => $searchType === 'face' ? 1.05 : 0.7
         ];
-        $response = $this->sendPOSTRequest($url, $requestBody, $this->getDefaultHeaders());
+
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $payload['image_url'] = $this->uploadFile($file);
+        } else {
+            $objectId = $request->get('object_id');
+            $payload['object_id'] = DB::table('objects')->where('id', $objectId)->first()->mongo_id;
+        }
+        $response = $this->sendPOSTRequest($url, $payload, $this->getDefaultHeaders());
         $searchedObjects = $response->body;
         $objectMongoIds = Arr::pluck($searchedObjects, 'object_id');
 
@@ -268,6 +273,7 @@ class ProcessController extends Controller
         // laravel receive image --> save to min_io + search
 
         $objects = DB::table('objects')
+            ->join('processes', 'objects.process_id', 'processes.id')
             ->leftJoin('clusters', 'objects.cluster_id', 'clusters.id')
             ->leftJoin('identities as CI', 'clusters.identity_id', 'CI.id')
             ->leftJoin('identities as OI', 'objects.identity_id', 'OI.id')
@@ -284,10 +290,21 @@ class ProcessController extends Controller
                 'OI.images as identity_images',
                 'CI.name as cluster_identity_name',
                 'CI.images as cluster_identity_images',
+                'processes.name as process_name',
             ])
             ->get();
         $objects = DatabaseHelper::blendObjectsIdentity($objects);
         $objects = $this->getAppearances($objects);
+
+        foreach ($objects as &$object) {
+            $object->confidence_rate = null;
+            foreach ($searchedObjects as $searchedObject) {
+                if ($searchedObject->object_id == $object->mongo_id) {
+                    $object->distance = $searchedObject->search_distance;
+                }
+            }
+        }
+        $objects = array_values($objects->sortBy('distance')->toArray());
 
         return $this->success($objects);
     }

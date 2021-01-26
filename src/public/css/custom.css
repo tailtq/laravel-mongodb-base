@@ -1,0 +1,13 @@
+.original-avatar {
+	max-width: 50px;
+	max-height: 50px;
+}
+
+.original-body {
+	width: 32px;
+	height: 64px;
+}
+
+button.badge {
+	border: none;
+}
