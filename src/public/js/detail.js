@@ -515,6 +515,7 @@ function initSearchFace() {
         sending: function (file, xhr, formData) {
             addSpinningIcon($('.dropzone-submit'), true);
             formData.append('process_ids', JSON.stringify([$('.process').data('id')]));
+            formData.append('search_type', $('[name="search_type"]:checked').val());
         },
         success: function (res) {
             const { data } = JSON.parse(res.xhr.response);
@@ -529,14 +530,16 @@ function initSearchFace() {
             data.forEach((element) => {
                 let appearance = '';
                 element.appearances.forEach((element) => {
-                    appearance += `<span class="badge badge-primary mr-1">
-                                       ${getTimeString(element.frame_from, element.frame_to, fps, renderHour)}
-                                   </span>`;
+                    appearance += `
+                        <span class="badge badge-primary mr-1">
+                            ${getTimeString(element.frame_from, element.frame_to, fps, renderHour)}
+                        </span>`;
                 });
+                element.images = JSON.parse(element.images);
 
                 $('.search-face__result .list-unstyled').append(`
                     <li class="media d-block d-sm-flex mb-3 align-items-center" data-id="${element.id}">
-                        <img src="${element.image}" class="mb-3 mb-sm-0 mr-3 img-fluid" style="height: 80px;">
+                        <img src="${element.images[0]}" class="mb-3 mb-sm-0 mr-3 img-fluid" style="height: 80px;">
 
                         <div class="media-body">
                             <p class="mt-0 mb-1">
