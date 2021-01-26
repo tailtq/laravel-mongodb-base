@@ -218,6 +218,7 @@
 
                     if (!processes[processId]) {
                         loadNewProcesses(Object.keys(processes).map(e => parseInt(e)));
+                        return;
                     }
                     const existingProcess = processes[processId];
                     existingProcess.totalAppearances = totalAppearances;
@@ -246,6 +247,12 @@
                 }),
                 success: function (res) {
                     res.data.forEach((process) => {
+                        processes[process.id] = {
+                            totalAppearances: process.total_appearances,
+                            totalObjects: process.total_objects,
+                            totalIdentified: process.total_identified,
+                            totalUnidentified: process.total_unidentified,
+                        };
                         $('.monitor-manager').append(`
                             <div class="monitor-block mb-3"
                                  data-id="${process.id}"
@@ -270,26 +277,41 @@
                                 <table class="table table-bordered">
                                     <tbody>
                                         <tr>
-                                            <td colspan="2">
-                                                <a href="" target="_blank">
+                                            <td colspan="8">
+                                                <a href="/processes/${process.id}" target="_blank">
                                                     <b>${process.name}</b>
                                                 </a>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td><b>Số lượt người xuất hiện</b></td>
+                                            <td class="text-center" title="Số lượt người xuất hiện">
+                                                <b class="display-5">
+                                                    <i class="mdi mdi-walk"></i>
+                                                </b>
+                                            </td>
                                             <td class="statistic__total-appearances">${process.total_appearances}</td>
-                                        </tr>
-                                        <tr>
-                                            <td><b>Số người</b></td>
+
+                                            <td class="text-center" title="Số người">
+                                                <b class="display-5">
+                                                    <i class="mdi mdi-account-group"></i>
+                                                </b>
+                                            </td>
                                             <td class="statistic__total-objects">${process.total_objects}</td>
                                         </tr>
+
                                         <tr>
-                                            <td><b>Số người phát hiện được danh tính</b></td>
+                                            <td class="text-center" title="Số người phát hiện được danh tính">
+                                                <b class="display-5">
+                                                    <i class="mdi mdi-card-account-details"></i>
+                                                </b>
+                                            </td>
                                             <td class="statistic__total-identified">${process.total_identified}</td>
-                                        </tr>
-                                        <tr>
-                                            <td><b>Số người không phát hiện được danh tính</b></td>
+
+                                            <td class="text-center" title="Số người không phát hiện được danh tính">
+                                                <b class="display-5">
+                                                    <i class="mdi mdi-account-question"></i>
+                                                </b>
+                                            </td>
                                             <td class="statistic__total-unidentified">${process.total_unidentified}</td>
                                         </tr>
                                     </tbody>
