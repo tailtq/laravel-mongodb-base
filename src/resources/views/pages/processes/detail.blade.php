@@ -293,6 +293,26 @@
                         <div class="dz-message">Kéo ảnh vào đây để tải lên</div>
                     </div>
 
+                    <div class="form-group d-flex">
+                        <p style="height: 29px; margin: 10px 10px 10px 0">Loại tìm kiếm: </p>
+
+                        <div class="form-check form-check-flat form-check-primary mr-4">
+                            <label class="form-check-label">
+                                <input type="radio" class="form-check-input" value="face" name="search_type" checked>
+                                Khuôn mặt
+                                <i class="input-frame"></i>
+                            </label>
+                        </div>
+
+                        <div class="form-check form-check-flat form-check-primary">
+                            <label class="form-check-label">
+                                <input type="radio" class="form-check-input" value="body" name="search_type">
+                                Thân hình
+                                <i class="input-frame"></i>
+                            </label>
+                        </div>
+                    </div>
+
                     <div class="text-center mt-3">
                         <button class="btn btn-primary dropzone-submit">Tìm kiếm</button>
                     </div>
