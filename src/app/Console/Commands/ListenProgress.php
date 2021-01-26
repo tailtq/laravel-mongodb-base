@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Events\ObjectVideoRendered;
 use App\Events\ProgressChange;
 use App\Models\Process;
 use App\Traits\RequestAPI;
@@ -55,6 +56,11 @@ class ListenProgress extends Command
             if ($process) {
                 Log::info(json_encode($event));
 
+                if ($event->status === 'rendered' && !empty($event->mongo_id)) {
+                    $this->getRenderingObjectEvent($event, $process);
+                    return;
+                }
+
                 if ($event->status === 'rendered') {
                     $videoResult = object_get($event, 'video_url');
                     $process->video_result = $videoResult;
@@ -75,11 +81,13 @@ class ListenProgress extends Command
                         $process->done_time = Carbon::now();
                     }
                     $process->save();
+                    $event->status = $process->status;
                 }
 
                 $data = [
                     'id' => $process->id,
-                    'status' => $process->status,
+                    'status' => $event->status,
+                    'video_result' => $process->video_result,
                     'progress' => $event->progress ?? 0,
                     'frame_index' => $event->frame_index ?? null,
                 ];
@@ -101,5 +109,15 @@ class ListenProgress extends Command
             'process_ids' => [$processMongoId]
         ];
         $this->sendPOSTRequest($url, $payload, $this->getDefaultHeaders());
+    }
+
+    public function getRenderingObjectEvent($event, $process)
+    {
+        DB::table('objects')->where('mongo_id', $event->mongo_id)->update([
+            'video_result' => $event->url
+        ]);
+        $object = DB::table('objects')->where('mongo_id', $event->mongo_id)->first();
+
+        broadcast(new ObjectVideoRendered($process->id, $object));
     }
 }

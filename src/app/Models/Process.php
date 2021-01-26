@@ -12,7 +12,6 @@ class Process extends Model
         'detecting' => 'detecting',
         'detected' => 'detected',
         'clustering' => 'clustering',
-//        'rendering' => 'rendering',
         'done' => 'done',
         'error' => 'error',
     ];
