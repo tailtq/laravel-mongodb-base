@@ -423,6 +423,11 @@ Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChan
             .addClass('btn-success')
             .removeClass('btn-secondary')
             .data('href', videoResult);
+
+        Toast.fire({
+            type: 'success',
+            title: 'Tổng hợp video hoàn tất',
+        });
     }
 });
 
