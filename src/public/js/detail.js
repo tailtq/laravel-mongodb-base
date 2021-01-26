@@ -131,6 +131,13 @@ function getLightboxBlock(images, id) {
             ` : ``;
 }
 
+function addZero(i) {
+    if (i < 10) {
+        i = '0' + i;
+    }
+    return i;
+}
+
 function buildTimeRanges(appearances) {
     let timeRanges = '';
 
@@ -143,8 +150,8 @@ function buildTimeRanges(appearances) {
         if (isRealtime) {
             const timeFrom = new Date(value.time_from);
             const timeTo = new Date(value.time_from);
-            time += `${timeFrom.getHours()}:${timeFrom.getMinutes()}:${timeFrom.getSeconds()}`;
-            time += ` - ${timeTo.getHours()}:${timeTo.getMinutes()}:${timeTo.getSeconds()}`;
+            time += `${addZero(timeFrom.getHours())}:${addZero(timeFrom.getMinutes())}:${addZero(timeFrom.getSeconds())}`;
+            time += ` - ${addZero(timeTo.getHours())}:${addZero(timeTo.getMinutes())}:${addZero(timeTo.getSeconds())}`;
         } else {
             time = getTimeString(value.frame_from, value.frame_to, fps, renderHour);
         }

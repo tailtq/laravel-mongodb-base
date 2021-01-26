@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Helpers\DatabaseHelper;
 use App\Http\Requests\ProcessCreateRequest;
 use App\Models\Camera;
-use App\Models\ObjectAppearance;
 use App\Models\Process;
 use App\Models\TrackedObject;
 use App\Traits\AnalysisTrait;
