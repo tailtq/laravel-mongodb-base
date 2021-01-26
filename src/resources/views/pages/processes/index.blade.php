@@ -4,6 +4,7 @@
     <link href="{{ my_asset('assets/plugins/jquery-steps/jquery.steps.css') }}" rel="stylesheet" />
     <link href="{{ my_asset('assets/plugins/sweetalert2/sweetalert2.min.css') }}" rel="stylesheet" />
     <link href="{{ my_asset('assets/plugins/dropzone/dropzone.min.css') }}" rel="stylesheet" />
+    <link href="{{ my_asset('css/custom.css') }}" rel="stylesheet"/>
 @endpush
 
 @section('content')
@@ -18,9 +19,19 @@
             <h6 class="card-title d-flex justify-content-md-between align-items-center">
                 <div>Danh sách luồng xử lý</div>
 
-                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal">
-                    Tạo mới
-                </button>
+                <div>
+                    <button type="button"
+                            data-toggle="modal"
+                            data-target="#searchFaceModal"
+                            class="btn btn-primary btn-search text-white search-face__btn">
+                        <i class="link-icon icon__normal-size" data-feather="search" style="width: 13px; height: 13px;"></i>
+                        Tìm kiếm
+                    </button>
+
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal">
+                        Tạo mới
+                    </button>
+                </div>
             </h6>
 
             <div class="table-responsive">
@@ -410,6 +421,8 @@
             </div>
         </div>
     </div>
+
+    @include('pages.processes.search_form')
 @endsection
 
 @push('plugin-scripts')
@@ -424,7 +437,13 @@
     <script src="{{ my_asset('js/custom.js') }}"></script>
     <script src="{{ my_asset('js/shapes/circle.js') }}"></script>
     <script src="{{ my_asset('js/geometry.js') }}"></script>
+    <script src="{{ my_asset('js/util.js') }}"></script>
+    <script src="{{ my_asset('js/search_form.js') }}"></script>
     <script>
+        const isRealtime = false;
+        const fps = 20;
+        const renderHour = false;
+
         $(document).ready(function () {
             $('[name="started_at"]').inputmask();
 

@@ -1,6 +1,8 @@
 @extends('layout.master')
 
 @push('plugin-styles')
+    <link href="{{ my_asset('assets/plugins/dropzone/dropzone.min.css') }}" rel="stylesheet"/>
+    <link href="{{ my_asset('css/custom.css') }}" rel="stylesheet"/>
     <style>
         .monitor-sidebar {
             position: fixed;
@@ -77,30 +79,36 @@
     <div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
         <h4 class="mb-3 mb-md-0">Màn hình giám sát</h4>
 
-{{--        <button class="btn btn-primary sidebar__btn-open">Danh sách đối tượng</button>--}}
+        <button type="button"
+                data-toggle="modal"
+                data-target="#searchFaceModal"
+                class="btn btn-primary btn-search text-white search-face__btn">
+            <i class="link-icon icon__normal-size" data-feather="search"></i>
+            Tìm kiếm
+        </button>
     </div>
 
-    <div class="nav hidden monitor-sidebar bg-white d-block">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <h5>Danh sách đối tượng</h5>
+{{--    <div class="nav monitor-sidebar bg-white d-block">--}}
+{{--        <div class="d-flex justify-content-between align-items-center mb-2">--}}
+{{--            <h5>Danh sách đối tượng</h5>--}}
 
-            <a href="#" class="sidebar__close-btn mr-2 text-black">x</a>
-        </div>
+{{--            <a href="#" class="sidebar__close-btn mr-2 text-black">x</a>--}}
+{{--        </div>--}}
 
-        <ul class="nav flex-column list-unstyled monitor__objects">
-            {{--            @for ($i = 0; $i < 10; $i++)--}}
-            {{--                <li class="media mb-2">--}}
-            {{--                    <img class="mr-2"--}}
-            {{--                         src="data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2264%22%20height%3D%2264%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder_176ec726fa7%20text%20%7B%20fill%3Argba(255%2C255%2C255%2C.75)%3Bfont-weight%3Anormal%3Bfont-family%3AHelvetica%2C%20monospace%3Bfont-size%3A10pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder_176ec726fa7%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20fill%3D%22%23777%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%2213.8359375%22%20y%3D%2236.65%22%3E64x64%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E"--}}
-            {{--                         alt="Generic placeholder image">--}}
-            {{--                    <div class="media-body">--}}
-            {{--                        <p class="mt-0 mb-1"><b>Nguyen Le Van A</b></p>--}}
-            {{--                        11:00 - 55:00--}}
-            {{--                    </div>--}}
-            {{--                </li>--}}
-            {{--            @endfor--}}
-        </ul>
-    </div>
+{{--        <ul class="nav flex-column list-unstyled monitor__objects">--}}
+{{--            @for ($i = 0; $i < 10; $i++)--}}
+{{--                <li class="media mb-2">--}}
+{{--                    <img class="mr-2"--}}
+{{--                         src="data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2264%22%20height%3D%2264%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder_176ec726fa7%20text%20%7B%20fill%3Argba(255%2C255%2C255%2C.75)%3Bfont-weight%3Anormal%3Bfont-family%3AHelvetica%2C%20monospace%3Bfont-size%3A10pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder_176ec726fa7%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20fill%3D%22%23777%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%2213.8359375%22%20y%3D%2236.65%22%3E64x64%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E"--}}
+{{--                         alt="Generic placeholder image">--}}
+{{--                    <div class="media-body">--}}
+{{--                        <p class="mt-0 mb-1"><b>Nguyen Le Van A</b></p>--}}
+{{--                        11:00 - 55:00--}}
+{{--                    </div>--}}
+{{--                </li>--}}
+{{--            @endfor--}}
+{{--        </ul>--}}
+{{--    </div>--}}
 
     <div class="d-flex monitor-manager">
         @if (count($processes) == 0)
@@ -173,10 +181,20 @@
             </div>
         @endforeach
     </div>
+
+    @include('pages.processes.search_form')
 @endsection
 
 @push('custom-scripts')
+    <script>
+        const isRealtime = false;
+        const fps = 20;
+        const renderHour = false;
+    </script>
+    <script src="{{ my_asset('assets/plugins/dropzone/dropzone.min.js') }}"></script>
     <script src="{{ my_asset('assets/plugins/flv/flv.min.js') }}"></script>
+    <script src="{{ my_asset('js/util.js') }}"></script>
+    <script src="{{ my_asset('js/search_form.js') }}"></script>
     <script>
         const processes = {};
 
