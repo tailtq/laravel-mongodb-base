@@ -121,14 +121,14 @@ function getTimeString(frameFrom, frameTo, fps, renderHour) {
     return `${renderHour ? `${hourFrom}:` : ''}${minFrom}:${secondFrom} - ${renderHour ? `${hourTo}:` : ''}${minTo}:${secondTo}`;
 }
 
-function getLightboxBlock(images, id) {
+function renderIdentity(images, id) {
     images = images ? JSON.parse(images) : null;
 
     return images ? `
-                <a href="${images[0].url}" data-lightbox="object-${id}">
-                    <img src="${images[0].url}" style="width: inherit; height: 60px;" alt="">
-                </a>
-            ` : ``;
+        <a href="${images[0].url}" data-lightbox="object-${id}">
+            <img src="${images[0].url}" style="width: inherit; height: 60px;" alt="">
+        </a>
+    ` : ``;
 }
 
 function addZero(i) {
@@ -199,8 +199,8 @@ function renderBlock(object, appearances = []) {
             <td class="text-center">
                 ${avatar ? `<img src="${avatar}" alt="image" style="width: inherit; height: 60px;">` : ''}
             </td>
-            <td class="text-center">${getLightboxBlock(object.identity_images, object.id)}</td>
-            <td>${object.identity_name || 'Không xác định'}</td>
+            <td class="text-center">${renderIdentity(object.identity_images, object.id)}</td>
+            <td>${renderIdentityName(object.identity_name, object.confidence_rate) || 'Không xác định'}</td>
             <td>
                 ${buildTimeRanges(appearances)}
             </td>
@@ -236,10 +236,17 @@ function renderBlockInOrder(html, order, trackIds) {
     }
 }
 
+function renderIdentityName(identityName, confidenceRate) {
+    if (!identityName) {
+        return null;
+    }
+    return `${identityName} (${confidenceRate}%)`;
+}
+
 function renderObjectWithIdentity($element, object) {
     $element.attr('data-identity-id', object.identity_id).removeAttr('style');
-    $element.find('td:nth-child(3)').html(getLightboxBlock(object.identity_images, object.id));
-    $element.find('td:nth-child(4)').text(object.identity_name);
+    $element.find('td:nth-child(3)').html(renderIdentity(object.identity_images, object.id, object.confidence_rate));
+    $element.find('td:nth-child(4)').text(renderIdentityName(object.identity_name, object.confidence_rate));
     $element.find('td:nth-child(6)').html(`
         <a href="#"
            data-video-result=""
@@ -532,7 +539,9 @@ function initSearchFace() {
                         <img src="${element.image}" class="mb-3 mb-sm-0 mr-3 img-fluid" style="height: 80px;">
 
                         <div class="media-body">
-                            <p class="mt-0 mb-1"><b>${element.identity_name || 'Không xác định'}</b></p>
+                            <p class="mt-0 mb-1">
+                                <b>${renderIdentityName(element.identity_name, element.confidence_rate) || 'Không xác định'}</b>
+                            </p>
                             <div>
                                 <p>Thời gian xuất hiện:</p>
                                 ${appearance}
