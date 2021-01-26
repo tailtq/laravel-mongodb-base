@@ -138,28 +138,30 @@
                         </td>
                     </tr>
                     <tr>
-                        <td title="Số lượt người xuất hiện">
+                        <td class="text-center" title="Số lượt người xuất hiện">
                             <b class="display-5">
                                 <i class="mdi mdi-walk"></i>
                             </b>
                         </td>
                         <td class="statistic__total-appearances">{{ $process->total_appearances }}</td>
 
-                        <td title="Số người">
+                        <td class="text-center" title="Số người">
                             <b class="display-5">
                                 <i class="mdi mdi-account-group"></i>
                             </b>
                         </td>
                         <td class="statistic__total-objects">{{ $process->total_objects }}</td>
+                    </tr>
 
-                        <td title="Số người phát hiện được danh tính">
+                    <tr>
+                        <td class="text-center" title="Số người phát hiện được danh tính">
                             <b class="display-5">
                                 <i class="mdi mdi-card-account-details"></i>
                             </b>
                         </td>
                         <td class="statistic__total-identified">{{ $process->total_identified }}</td>
 
-                        <td title="Số người không phát hiện được danh tính">
+                        <td class="text-center" title="Số người không phát hiện được danh tính">
                             <b class="display-5">
                                 <i class="mdi mdi-account-question"></i>
                             </b>
