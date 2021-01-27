@@ -277,7 +277,6 @@ class ProcessController extends Controller
             ->leftJoin('clusters', 'objects.cluster_id', 'clusters.id')
             ->leftJoin('identities as CI', 'clusters.identity_id', 'CI.id')
             ->leftJoin('identities as OI', 'objects.identity_id', 'OI.id')
-            ->whereIn('objects.mongo_id', $objectMongoIds)
             ->whereIn('objects.id', function ($query) use ($objectMongoIds) {
                 $query->select(DB::raw('MIN(O.id)'))
                     ->from('objects AS O')
@@ -294,7 +293,7 @@ class ProcessController extends Controller
             ])
             ->get();
         $objects = DatabaseHelper::blendObjectsIdentity($objects);
-        $objects = $this->getAppearances($objects);
+        $objects = $this->getAppearances($objects, $processes->count() > 0);
 
         foreach ($objects as &$object) {
             $object->confidence_rate = null;

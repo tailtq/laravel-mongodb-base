@@ -38,15 +38,16 @@ trait AnalysisTrait
         ];
     }
 
-    public function getAppearances($objects)
+    public function getAppearances($objects, $findWithProcess = true)
     {
         foreach ($objects as $object) {
             if ($object->cluster_id) {
-                $object->appearances = DB::table('objects')
-                    ->where('cluster_id', $object->cluster_id)
-                    ->where('process_id', $object->process_id)
-                    ->orderBy('track_id')
-                    ->get();
+                $query = DB::table('objects')->where('cluster_id', $object->cluster_id);
+
+                if ($findWithProcess) {
+                    $query = $query->where('process_id', $object->process_id);
+                }
+                $object->appearances = $query->orderBy('track_id')->get();
             } else {
                 $object->appearances = [clone $object];
             }
