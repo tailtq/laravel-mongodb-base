@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ProgressChange;
 use App\Helpers\DatabaseHelper;
 use App\Http\Requests\ProcessCreateRequest;
 use App\Models\Camera;
@@ -15,6 +16,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
 
 class ProcessController extends Controller
 {
@@ -48,8 +50,9 @@ class ProcessController extends Controller
         if (!$process) {
             abort(404);
         }
-        if ($process->status === Process::STATUS['done']) {
+        if ($process->status === Process::STATUS['done'] || $process->status === Process::STATUS['stopped']) {
             $process->detecting_duration = $this->parseTime($process->detecting_start_time, $process->detecting_end_time);
+            $process->total_duration = $this->parseTime($process->detecting_start_time, $process->done_time);
         }
         $processData = $this->sendGETRequest(
             config('app.ai_server') . "/processes/$process->mongo_id", [], $this->getDefaultHeaders()
@@ -163,8 +166,17 @@ class ProcessController extends Controller
             return $this->error($processData->body->message, 400);
         }
         DB::table('processes')->where('id', $request->processId)->update([
-            'status' => Process::STATUS['stopped']
+            'status' => Process::STATUS['stopped'],
+            'detecting_end_time' => Carbon::now(),
+            'done_time' => Carbon::now(),
         ]);
+        broadcast(new ProgressChange($process->id, [
+            'status' => Process::STATUS['stopped'],
+        ]));
+//        Redis::connection('client-publisher')->publish('progress', json_encode([
+//            'process_id' => $process->mongo_id,
+//            'status' => Process::STATUS['stopped'],
+//        ]));
 
         return $this->success('Kết thúc thành công');
     }
@@ -319,10 +331,8 @@ class ProcessController extends Controller
         if (!$process) {
             return $this->error('RESOURCE_NOT_FOUND', 404);
         }
-        if ($process->status === Process::STATUS['done']) {
+        if ($process->status === Process::STATUS['done'] || $process->status === Process::STATUS['stopped']) {
             $process->detecting_duration = $this->parseTime($process->detecting_start_time, $process->detecting_end_time);
-            $process->matching_duration = $this->parseTime($process->matching_start_time, $process->grouping_start_time);
-            $process->rendering_duration = $this->parseTime($process->rendering_start_time, $process->done_time);
             $process->total_duration = $this->parseTime($process->detecting_start_time, $process->done_time);
         }
 

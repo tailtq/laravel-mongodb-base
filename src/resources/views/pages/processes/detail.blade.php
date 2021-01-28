@@ -84,7 +84,7 @@
 
                     <div class="dropdown" style="display: inline-block">
                         <button class="btn btn-primary dropdown-toggle export-statistic__btn"
-                                @if($process->status != 'done')
+                                @if($process->status != 'done' && $process->status != 'stopped')
                                 disabled
                                 @endif
                                 type="button"
@@ -171,7 +171,7 @@
 
                         <div>
                             <button class="btn {{ $process->video_result ? 'btn-success' : 'btn-secondary' }} render-video__btn"
-                               @if($process->status != 'done')
+                               @if($process->status != 'done' && $process->status != 'stopped')
                                disabled
                                @endif
                                data-href="{{ $process->video_result }}">
