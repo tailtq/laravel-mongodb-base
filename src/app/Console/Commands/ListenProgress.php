@@ -69,17 +69,21 @@ class ListenProgress extends Command
                     $data['video_result'] = $videoResult;
                 }
                 if ($process->status !== Process::STATUS['done']
+//                    && $process->status !== Process::STATUS['stopped']
                     && $process->status != $event->status
                     && in_array($event->status, array_values(Process::STATUS))) {
                     $process->status = $event->status;
 
                     if ($event->status === Process::STATUS['detected']) {
                         $process->detecting_end_time = Carbon::now();
-                        $process->grouping_start_time = Carbon::now();
                     }
                     if ($event->status === Process::STATUS['done']) {
                         $process->done_time = Carbon::now();
                     }
+//                    if ($event->status === Process::STATUS['stopped']) {
+//                        $process->detecting_end_time = Carbon::now();
+//                        $process->done_time = Carbon::now();
+//                    }
                     $process->save();
                     $event->status = $process->status;
                 }
@@ -93,6 +97,7 @@ class ListenProgress extends Command
                 ];
                 broadcast(new ProgressChange($process->id, $data));
 
+//                if ($process->status === Process::STATUS['detected'] || $process->status === Process::STATUS['stopped']) {
                 if ($process->status === Process::STATUS['detected']) {
                     Log::info("Called clustering");
                     $this->runClustering($process->mongo_id);
