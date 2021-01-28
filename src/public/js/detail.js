@@ -135,7 +135,7 @@ function renderBlock(object, appearances = []) {
             <td width="50px" class="text-center">
                 <a href="#"
                    data-video-result="${object.video_result || ''}"
-                   style="display: ${globalStatus === 'done' ? 'inline' : 'none'}"
+                   style="display: ${(globalStatus === 'done' || globalStatus === 'stopped') ? 'inline' : 'none'}"
                    class="render-single-object icon__normal-font-size ${object.video_result ? 'text-success' : 'text-secondary'}">
                     ${object.video_result ? `<i class="mdi mdi-play"></i>` : '<i class="mdi mdi-video-switch"></i>'}
                 </a>
@@ -220,13 +220,11 @@ function renderTime() {
         success: function (res) {
             const {
                 detecting_duration: detectingDuration,
-                // matching_duration: matchingDuration,
                 rendering_duration: renderingDuration,
                 total_duration: totalDuration,
             } = res.data;
 
             $('.process__detecting-duration').html(detectingDuration);
-            // $('.process__matching-duration').html(matchingDuration);
             $('.process__rendering-duration').html(renderingDuration);
             $('.process__total-duration').html(totalDuration);
         },
@@ -326,11 +324,13 @@ Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChan
             $processStatus.removeClass('badge-success').addClass('badge-danger');
         }
     }
-    if (status === 'done') {
-        Toast.fire({
-            type: 'success',
-            title: 'Tiến trình đã hoàn thành',
-        });
+    if (status === 'done' || status === 'stopped') {
+        if (status === 'done') {
+            Toast.fire({
+                type: 'success',
+                title: 'Tiến trình đã hoàn thành',
+            });
+        }
         flvPlayer.destroy();
 
         $('.export-statistic__btn').removeAttr('disabled');
@@ -343,7 +343,7 @@ Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChan
         $element.css({width: `${progress}%`});
         $element.attr('aria-valuenow', progress);
         $element.text(`${progress}%`);
-    } else if (status === 'error' || status === 'stopped') {
+    } else if (status === 'error') {
         flvPlayer.destroy();
     } else if (status === 'rendered') {
         $('.render-video__btn')
