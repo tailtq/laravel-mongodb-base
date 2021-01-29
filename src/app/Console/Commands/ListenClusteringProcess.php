@@ -113,8 +113,10 @@ class ListenClusteringProcess extends Command
             })
             ->select([
                 'objects.*',
+                'OI.id as identity_id',
                 'OI.name as identity_name',
                 'OI.images as identity_images',
+                'CI.id as cluster_identity_id',
                 'CI.name as cluster_identity_name',
                 'CI.images as cluster_identity_images',
             ])
