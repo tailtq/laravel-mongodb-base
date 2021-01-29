@@ -35,8 +35,6 @@ function handleSearch(res) {
                     <p class="mt-0 mb-1">
                         <b>
                             ${renderIdentityName(element.identity_name, element.confidence_rate) || 'Không xác định'}
-                            -
-                            <a target="_blank" href="/processes/${element.process_id}">${element.process_name}</a>
                         </b>
                     </p>
                     <div>

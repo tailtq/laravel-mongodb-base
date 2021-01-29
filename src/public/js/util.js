@@ -2,10 +2,7 @@ function renderIdentityName(identityName, confidenceRate) {
     if (!identityName) {
         return null;
     }
-    if (!confidenceRate) {
-        return identityName;
-    }
-    return `${identityName} (${confidenceRate}%)`;
+    return identityName;
 }
 
 function buildTimeRanges(appearances) {
