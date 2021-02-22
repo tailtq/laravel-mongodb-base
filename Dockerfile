@@ -6,6 +6,8 @@ RUN apk add --update curl \
     nodejs \
     nodejs-npm
 
+RUN apk add --upgrade nghttp2-libs
+
 RUN node -v \
     npm -v
 
@@ -14,7 +16,12 @@ RUN npm install -g laravel-echo-server
 RUN npm install -g socket.io
 RUN npm install -g socket.io-client
 RUN npm install
-RUN supervisorctl reload
+RUN supervisord -c /etc/supervisor/supervisord.conf
+
+RUN chown -R root:root /var/www
+#USER www-data
+
+RUN chmod -R 755 /var/www
 
 #CMD ["redis-server"]
 #
