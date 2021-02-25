@@ -1,0 +1,17 @@
+<?php
+
+namespace Modules\{{moduleName}}\Repositories;
+
+use Infrastructure\BaseRepository;
+use Modules\{{moduleName}}\Models\{{moduleName}};
+
+class {{moduleName}}Repository extends BaseRepository
+{
+    /**
+     * {{moduleName}}Repository constructor.
+     */
+    public function __construct()
+    {
+        parent::__construct({{moduleName}}::class);
+    }
+}
