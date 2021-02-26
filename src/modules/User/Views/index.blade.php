@@ -16,30 +16,19 @@
                         <th>Tên</th>
                         <th>Email</th>
                         <th>Ngày tạo</th>
-                        <th>Tùy chọn</th>
                     </tr>
                     </thead>
                     <tbody>
                     @php
-                        $index = $users->perPage() * ($users->currentPage() - 1);
+                        $index = $items->perPage() * ($items->currentPage() - 1);
                     @endphp
 
-                    @foreach ($users as $user)
+                    @foreach ($items as $item)
                         <tr>
                             <th class="text-center">{{ ++$index }}</th>
-                            <td>{{ $user->name }}</td>
-                            <td>{{ $user->email }}</td>
-                            <td>{{ $user->created_at->format('H:i d-m-Y') }}</td>
-                            <td>
-                                <form action="{{ route('users.delete', $user->id) }}" method="POST">
-                                    @csrf
-                                    @method('DELETE')
-
-                                    <button class="btn btn-danger btn-icon">
-                                        <i data-feather="trash"></i>
-                                    </button>
-                                </form>
-                            </td>
+                            <td>{{ $item->name }}</td>
+                            <td>{{ $item->email }}</td>
+                            <td>{{ $item->created_at->format('H:i d-m-Y') }}</td>
                         </tr>
                     @endforeach
                     </tbody>
@@ -48,5 +37,5 @@
         </div>
     </div>
 
-    {{ $users->links('vendor.pagination.bootstrap-4') }}
+    {{ $items->links('vendor.pagination.bootstrap-4') }}
 @endsection

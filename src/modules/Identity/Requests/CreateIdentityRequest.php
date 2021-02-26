@@ -2,9 +2,9 @@
 
 namespace Modules\Identity\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
+use Infrastructure\Requests\BaseCRUDRequest;
 
-class CreateIdentityRequest extends FormRequest
+class CreateIdentityRequest extends BaseCRUDRequest
 {
     /**
      * Determine if the user is authorized to make this request.

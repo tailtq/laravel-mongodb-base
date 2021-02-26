@@ -2,9 +2,9 @@
 
 namespace Modules\{{moduleName}}\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\BaseCRUDRequest;
 
-class Create{{moduleName}}Request extends FormRequest
+class Create{{moduleName}}Request extends BaseCRUDRequest
 {
     /**
      * Determine if the user is authorized to make this request.
