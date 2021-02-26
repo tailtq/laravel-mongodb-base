@@ -14,10 +14,11 @@ class IdentityService extends BaseService
 {
     /**
      * IdentityService constructor.
+     * @param \Modules\Identity\Repositories\IdentityRepository $repository
      */
-    public function __construct()
+    public function __construct(IdentityRepository $repository)
     {
-        $this->repository = app(IdentityRepository::class);
+        $this->repository = $repository;
     }
 
     /**
@@ -88,7 +89,7 @@ class IdentityService extends BaseService
             ]);
         }
 
-        return $this->repository->update(['id' => $id], [
+        return $this->repository->updateBy(['id' => $id], [
             'name' => $data['name'],
             'status' => !empty($data['status']) ? 'tracking' : 'untracking',
             'info' => $data['info'],
