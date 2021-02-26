@@ -22,16 +22,6 @@ Route::group(['middleware' => ['auth'], 'namespace' => 'App\Http\Controllers'], 
 
     Route::get('/', 'DashboardController@index')->name('dashboard.index');
 
-    Route::group(['prefix' => 'users'], function () {
-        Route::get('/', 'UserController@list')->name('users');
-
-        Route::get('/create', 'UserController@create')->name('users.create');
-
-        Route::post('/create', 'UserController@store')->name('users.create');
-
-        Route::delete('/{id}', 'UserController@delete')->name('users.delete');
-    });
-
     Route::group(['prefix' => 'processes'], function () {
         Route::get('/', 'ProcessController@index')->name('processes');
 

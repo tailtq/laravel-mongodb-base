@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Events\ProgressChange;
 use App\Helpers\DatabaseHelper;
 use App\Http\Requests\ProcessCreateRequest;
-use App\Models\Camera;
 use App\Models\Process;
 use App\Models\TrackedObject;
 use App\Traits\AnalysisTrait;
@@ -17,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
+use Modules\Camera\Models\Camera;
 
 class ProcessController extends Controller
 {

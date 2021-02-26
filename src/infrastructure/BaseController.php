@@ -8,7 +8,6 @@ use Illuminate\Support\MessageBag;
 use Illuminate\Foundation\Http\FormRequest;
 use Infrastructure\Exceptions\CustomException;
 use Infrastructure\Requests\BaseCRUDRequest;
-use Modules\Identity\Requests\CreateIdentityRequest;
 use Infrastructure\Exceptions\ResourceNotFoundException;
 
 class BaseController
@@ -91,11 +90,11 @@ class BaseController
     }
 
     /**
-     * @param \Modules\Identity\Requests\CreateIdentityRequest $request
+     * @param \Infrastructure\Requests\BaseCRUDRequest $request
      * @param $id
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
      */
-    public function update(CreateIdentityRequest $request, $id)
+    public function update(BaseCRUDRequest $request, $id)
     {
         $data = $request->validated();
         $result = $this->service->update($data, $id);
