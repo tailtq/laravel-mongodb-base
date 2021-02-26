@@ -5,8 +5,7 @@
         <div class="card-body">
             <h6 class="card-title d-flex justify-content-md-between align-items-center">
                 <div>Danh sách camera</div>
-                <button data-href="{{ route('cameras.create') }}"
-                        type="button"
+                <button type="button"
                         data-toggle="modal"
                         data-target="#modal"
                         class="btn btn-primary btn-create">Tạo mới</button>

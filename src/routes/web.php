@@ -14,9 +14,11 @@
 // Application layer
 
 
-Auth::routes(['register' => false]);
+Route::group(['namespace' => 'App\Http\Controllers'], function () {
+    Auth::routes(['register' => false]);
+});
 
-Route::group(['middleware' => ['auth']], function () {
+Route::group(['middleware' => ['auth'], 'namespace' => 'App\Http\Controllers'], function () {
 
     Route::get('/', 'DashboardController@index')->name('dashboard.index');
 
@@ -42,20 +44,6 @@ Route::group(['middleware' => ['auth']], function () {
         Route::put('/{id}', 'IdentityController@update')->name('identities.edit');
 
         Route::delete('/{id}', 'IdentityController@delete')->name('identities.delete');
-    });
-
-    Route::group(['prefix' => 'cameras'], function () {
-        Route::get('/', 'CameraController@index')->name('cameras');
-
-        Route::get('/create', 'CameraController@create')->name('cameras.create');
-
-        Route::post('/create', 'CameraController@store')->name('cameras.store');
-
-        Route::get('/{id}', 'CameraController@edit')->name('cameras.edit');
-
-        Route::put('/{id}', 'CameraController@update')->name('cameras.edit');
-
-        Route::delete('/{id}', 'CameraController@delete')->name('cameras.delete');
     });
 
     Route::group(['prefix' => 'processes'], function () {
@@ -97,6 +85,12 @@ Route::group(['middleware' => ['auth']], function () {
     Route::group(['prefix' => '/monitors'], function () {
         Route::get('/', 'MonitorController@index')->name('monitors');
         Route::post('/new-processes', 'MonitorController@getNewProcesses')->name('monitors.new-processes');
+    });
+});
+
+Route::group(['middleware' => ['auth']], function () {
+    Route::group(['prefix' => 'cameras'], function () {
+        include __DIR__ . '/../modules/Camera/routes.php';
     });
 });
 
