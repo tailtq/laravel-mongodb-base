@@ -11,4 +11,15 @@ class CommonHelper
 
         return "$filename.$extension";
     }
+
+    /**
+     * @param array $arr
+     * @return bool
+     */
+    public static function isAssociativeArray(array $arr)
+    {
+        if ($arr === []) return false;
+
+        return array_keys($arr) !== range(0, count($arr) - 1);
+    }
 }

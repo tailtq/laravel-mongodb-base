@@ -14,4 +14,13 @@ class {{moduleName}}Service extends BaseService
     {
         $this->repository = app({{moduleName}}Repository::class);
     }
+
+    /**
+     * @param string|null $mongoId
+     * @return string
+     */
+    protected function getAIUrl(string $mongoId = null)
+    {
+        return config('app.ai_server') . '/{{moduleName}}' . ($mongoId ? "/$mongoId" : '');
+    }
 }
