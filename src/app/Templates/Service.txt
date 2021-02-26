@@ -21,6 +21,6 @@ class {{moduleName}}Service extends BaseService
      */
     protected function getAIUrl(string $mongoId = null)
     {
-        return config('app.ai_server') . '/{{moduleName}}' . ($mongoId ? "/$mongoId" : '');
+        return config('app.ai_server') . '/{{moduleNamePlural}}' . ($mongoId ? "/$mongoId" : '');
     }
 }

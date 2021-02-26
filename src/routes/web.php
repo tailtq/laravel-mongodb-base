@@ -88,12 +88,6 @@ Route::group(['middleware' => ['auth'], 'namespace' => 'App\Http\Controllers'], 
     });
 });
 
-Route::group(['middleware' => ['auth']], function () {
-    Route::group(['prefix' => 'cameras'], function () {
-        include __DIR__ . '/../modules/Camera/routes.php';
-    });
-});
-
 // 404 for undefined routes
 Route::any('/{page?}', function () {
     return View::make('pages.template.error.404');

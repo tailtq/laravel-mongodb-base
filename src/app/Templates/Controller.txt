@@ -13,7 +13,7 @@ class {{moduleName}}Controller extends BaseController
      */
     public function __construct({{moduleName}}Service $service)
     {
-        parent::__construct('{{moduleName}}', '{{moduleName}}s');
+        parent::__construct('{{moduleName}}', '{{moduleNamePlural}}');
         $this->service = $service;
     }
 }
