@@ -177,6 +177,7 @@ return [
         Modules\Camera\CameraServiceProvider::class,
         Modules\Identity\IdentityServiceProvider::class,
         Modules\User\UserServiceProvider::class,
+        Modules\Media\MediaServiceProvider::class,
 
         // initialize last to ignore 404 error
         App\Providers\RouteServiceProvider::class,

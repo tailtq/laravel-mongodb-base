@@ -9,10 +9,11 @@ class {{moduleName}}Service extends BaseService
 {
     /**
      * {{moduleName}}Service constructor.
+     * @param \Modules\{{moduleName}}\Repositories\{{moduleName}}Repository $repository
      */
-    public function __construct()
+    public function __construct({{moduleName}}Repository $repository)
     {
-        $this->repository = app({{moduleName}}Repository::class);
+        $this->repository = $repository;
     }
 
     /**

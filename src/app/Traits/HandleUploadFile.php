@@ -25,6 +25,10 @@ trait HandleUploadFile
         return $disk->url($filePath);
     }
 
+    /**
+     * @param $path
+     * @return array
+     */
     public function listFiles($path)
     {
         $disk = Storage::disk('minio');

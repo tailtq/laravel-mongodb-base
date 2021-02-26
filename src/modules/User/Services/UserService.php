@@ -11,10 +11,11 @@ class UserService extends BaseService
 {
     /**
      * UserService constructor.
+     * @param \Modules\User\Repositories\UserRepository $repository
      */
-    public function __construct()
+    public function __construct(UserRepository $repository)
     {
-        $this->repository = app(UserRepository::class);
+        $this->repository = $repository;
     }
 
     /**

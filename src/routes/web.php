@@ -54,10 +54,6 @@ Route::group(['middleware' => ['auth'], 'namespace' => 'App\Http\Controllers'], 
         Route::post('/{id}/rendering', 'TrackedObjectController@startRendering');
     });
 
-    Route::group(['prefix' => '/medias'], function () {
-        Route::post('/', 'MediaController@create')->name('medias.create');
-    });
-
     Route::group(['prefix' => '/monitors'], function () {
         Route::get('/', 'MonitorController@index')->name('monitors');
         Route::post('/new-processes', 'MonitorController@getNewProcesses')->name('monitors.new-processes');
