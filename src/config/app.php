@@ -173,8 +173,12 @@ return [
         App\Providers\AuthServiceProvider::class,
         App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
-        App\Providers\RouteServiceProvider::class,
 
+        Modules\Camera\CameraServiceProvider::class,
+        Modules\Identity\IdentityServiceProvider::class,
+
+        // initialize last to ignore 404 error
+        App\Providers\RouteServiceProvider::class,
     ],
 
     /*

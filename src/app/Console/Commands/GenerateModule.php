@@ -11,7 +11,9 @@ class GenerateModule extends Command
      *
      * @var string
      */
-    protected $signature = 'module:generate {moduleName} {--sourceDirectory=app/Templates} {--destinationDirectory=modules}';
+    protected $signature = 'module:generate {moduleName} {moduleNamePlural}
+                                            {--sourceDirectory=app/Templates}
+                                            {--destinationDirectory=modules}';
 
     /**
      * The console command description.
@@ -19,7 +21,7 @@ class GenerateModule extends Command
      * @var string
      */
     protected $description = 'Generate new module.
-                        Ex: `php artisan module:generate Process
+                        Ex: `php artisan module:generate Process Processes
                                 --sourceDirectory=app/Templates
                                 --destinationDirectory=modules`';
 
@@ -39,41 +41,45 @@ class GenerateModule extends Command
     public function handle()
     {
         $moduleName = $this->argument('moduleName');
+        $moduleNamePlural = strtolower($this->argument('moduleNamePlural'));
         $sourceDirectory = $this->option('sourceDirectory');
         $destinationDirectory = $this->option('destinationDirectory') . '/' . $moduleName;
 
-        $content = $this->addModuleName("{$sourceDirectory}/Controller.txt", $moduleName);
-        $this->mkdirMkFileSaveContent("{$destinationDirectory}/Controllers/{$moduleName}Controller.php", $content);
+        $files = [
+            ["{$sourceDirectory}/Controller.txt", "{$destinationDirectory}/Controllers/{$moduleName}Controller.php"],
+            ["{$sourceDirectory}/CreateRequest.txt", "{$destinationDirectory}/Requests/Create{$moduleName}Request.php"],
+            ["{$sourceDirectory}/Model.txt", "{$destinationDirectory}/Models/{$moduleName}.php"],
+            ["{$sourceDirectory}/Repository.txt", "{$destinationDirectory}/Repositories/{$moduleName}Repository.php"],
+            ["{$sourceDirectory}/Service.txt", "{$destinationDirectory}/Services/{$moduleName}Service.php"],
+            ["{$sourceDirectory}/routes.txt", "{$destinationDirectory}/routes.php"],
+            ["{$sourceDirectory}/ServiceProvider.txt", "{$destinationDirectory}/{$moduleName}ServiceProvider.php"],
+        ];
 
-        $content = $this->addModuleName("{$sourceDirectory}/CreateRequest.txt", $moduleName);
-        $this->mkdirMkFileSaveContent("{$destinationDirectory}/Requests/Create{$moduleName}Request.php", $content);
-
-        $content = $this->addModuleName("{$sourceDirectory}/Model.txt", $moduleName);
-        $this->mkdirMkFileSaveContent("{$destinationDirectory}/Models/{$moduleName}.php", $content);
-
-        $content = $this->addModuleName("{$sourceDirectory}/Repository.txt", $moduleName);
-        $this->mkdirMkFileSaveContent("{$destinationDirectory}/Repositories/{$moduleName}Repository.php", $content);
-
-        $content = $this->addModuleName("{$sourceDirectory}/Service.txt", $moduleName);
-        $this->mkdirMkFileSaveContent("{$destinationDirectory}/Services/{$moduleName}Service.php", $content);
-
-        $content = $this->addModuleName("{$sourceDirectory}/routes.txt", $moduleName);
-        $this->mkdirMkFileSaveContent("{$destinationDirectory}/routes.php", $content);
+        foreach ($files as $pair) {
+            $source = $pair[0];
+            $destination = $pair[1];
+            $content = $this->addModuleName($source, $moduleName, $moduleNamePlural);
+            $this->mkdirMkFileSaveContent($destination, $content);
+        }
     }
 
     /**
      * Parse a template file and pass module name into the content
      * @param $filePath
      * @param $moduleName
+     * @param $moduleNamePlural
      * @return string
      */
-    private function addModuleName($filePath, $moduleName)
+    private function addModuleName($filePath, $moduleName, $moduleNamePlural)
     {
         $file = fopen($filePath, 'r');
         $content = fread($file, filesize($filePath));
         fclose($file);
 
-        return str_replace('{{moduleName}}', $moduleName, $content);
+        $content = str_replace('{{moduleName}}', $moduleName, $content);
+        $content = str_replace('{{moduleNamePlural}}', $moduleNamePlural, $content);
+
+        return $content;
     }
 
     /**

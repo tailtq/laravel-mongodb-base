@@ -1,6 +1,6 @@
 <?php
 
-Route::group(['namespace' => 'Modules\Camera\Controllers'], function () {
+Route::group(['middleware' => ['auth']], function () {
     Route::get('/', 'CameraController@index')->name('cameras');
 
     Route::post('/', 'CameraController@store')->name('cameras.store');

@@ -5,9 +5,11 @@ namespace Infrastructure;
 use App\Traits\RequestAPI;
 use App\Traits\ResponseTrait;
 use Illuminate\Support\MessageBag;
+use Illuminate\Foundation\Http\FormRequest;
 use Infrastructure\Exceptions\CustomException;
-use Infrastructure\Exceptions\ResourceNotFoundException;
 use Infrastructure\Requests\BaseCRUDRequest;
+use Modules\Identity\Requests\CreateIdentityRequest;
+use Infrastructure\Exceptions\ResourceNotFoundException;
 
 class BaseController
 {
@@ -89,11 +91,11 @@ class BaseController
     }
 
     /**
-     * @param \Infrastructure\Requests\BaseCRUDRequest $request
+     * @param \Modules\Identity\Requests\CreateIdentityRequest $request
      * @param $id
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
      */
-    public function update(BaseCRUDRequest $request, $id)
+    public function update(CreateIdentityRequest $request, $id)
     {
         $data = $request->validated();
         $result = $this->service->update($data, $id);
@@ -125,10 +127,10 @@ class BaseController
 
     /**
      * @param \Infrastructure\Exceptions\CustomException $result
-     * @param \Infrastructure\Requests\BaseCRUDRequest $request
+     * @param \Illuminate\Foundation\Http\FormRequest $request
      * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
      */
-    protected function returnFailedResult(CustomException $result, BaseCRUDRequest $request)
+    protected function returnFailedResult(CustomException $result, FormRequest $request)
     {
         if ($request->ajax()) {
             return $this->error($result->getData()->message, $result->getCode());

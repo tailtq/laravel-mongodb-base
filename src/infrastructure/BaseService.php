@@ -3,7 +3,6 @@
 namespace Infrastructure;
 
 use App\Traits\RequestAPI;
-use Illuminate\Support\Facades\Log;
 use Infrastructure\Exceptions\CustomException;
 use Infrastructure\Exceptions\ResourceNotFoundException;
 
@@ -43,8 +42,6 @@ abstract class BaseService
         // Proceed AI request
         $response = $this->sendPOSTRequest($this->getAIUrl(), $data, $this->getDefaultHeaders());
         if (!$response->status) {
-            Log::error('AI FAILED ' . json_encode($response->message));
-            
             return new CustomException('AI_FAILED', $response->statusCode, (object)[
                 'message' => $response->message,
             ]);
@@ -68,8 +65,6 @@ abstract class BaseService
         // Proceed AI request
         $response = $this->sendPUTRequest($this->getAIUrl($item->mongo_id), $data, $this->getDefaultHeaders());
         if (!$response->status) {
-            Log::error('AI FAILED ' . json_encode($response->message));
-            
             return new CustomException('AI_FAILED', $response->statusCode, (object)[
                 'message' => $response->message,
             ]);
@@ -90,8 +85,6 @@ abstract class BaseService
         // Proceed AI request
         $response = $this->sendDELETERequest($this->getAIUrl($item->mongo_id), [], $this->getDefaultHeaders());
         if (!$response->status) {
-            Log::error('AI FAILED ' . json_encode($response->message));
-
             return new CustomException('AI_FAILED', $response->statusCode, (object)[
                 'message' => $response->message,
             ]);
