@@ -21,22 +21,22 @@
                     </thead>
                     <tbody>
                     @php
-                        $index = $identities->perPage() * ($identities->currentPage() - 1);
+                        $index = $items->perPage() * ($items->currentPage() - 1);
                     @endphp
 
-                    @foreach ($identities as $identity)
+                    @foreach ($items as $item)
                         <tr>
                             <th class="text-center">{{ ++$index }}</th>
-                            <td><img src="{{ !empty($identity->images[0]['url'] ) ? $identity->images[0]['url'] : asset('img/icon-avatar-default.png')}}" alt=""></td>
-                            <td>{{ $identity->name }}</td>
-                            <td>{{ $identity->created_at->format('H:i d-m-Y') }}</td>
+                            <td><img src="{{ !empty($item->images[0]['url'] ) ? $item->images[0]['url'] : asset('img/icon-avatar-default.png')}}" alt=""></td>
+                            <td>{{ $item->name }}</td>
+                            <td>{{ $item->created_at->format('H:i d-m-Y') }}</td>
                             <td>
-                                <a class="btn btn-warning btn-icon" href="{{ route('identities.edit', $identity->id) }}" style="line-height: 2">
+                                <a class="btn btn-warning btn-icon" href="{{ route('identities.edit', $item->id) }}" style="line-height: 2">
                                     <i data-feather="edit"></i>
                                 </a>
 
                                 <form onsubmit="return confirm('Bạn có chắc chắn không?');"
-                                      action="{{ route('identities.delete', $identity->id) }}"
+                                      action="{{ route('identities.delete', $item->id) }}"
                                       method="POST"
                                       class="d-inline">
                                     @csrf
@@ -55,5 +55,5 @@
         </div>
     </div>
 
-    {{ $identities->links('vendor.pagination.bootstrap-4') }}
+    {{ $items->links('vendor.pagination.bootstrap-4') }}
 @endsection

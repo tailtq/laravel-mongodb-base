@@ -3,11 +3,13 @@
 Route::group(['middleware' => ['auth']], function () {
     Route::get('/', '{{moduleName}}Controller@index')->name('{{moduleNamePlural}}');
     
-    Route::get('/create', '{{moduleName}}Controller@index')->name('{{moduleNamePlural}}');
+    Route::get('/create', '{{moduleName}}Controller@create')->name('{{moduleNamePlural}}.create');
 
     Route::post('/create', '{{moduleName}}Controller@store')->name('{{moduleNamePlural}}.store');
 
-    Route::put('/{id}', '{{moduleName}}Controller@update')->name('{{moduleNamePlural}}.edit');
+    Route::get('/{id}', '{{moduleName}}Controller@edit')->name('{{moduleNamePlural}}.edit');
+
+    Route::put('/{id}', '{{moduleName}}Controller@update')->name('{{moduleNamePlural}}.update');
 
     Route::delete('/{id}', '{{moduleName}}Controller@delete')->name('{{moduleNamePlural}}.delete');
 });

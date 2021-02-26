@@ -32,20 +32,6 @@ Route::group(['middleware' => ['auth'], 'namespace' => 'App\Http\Controllers'], 
         Route::delete('/{id}', 'UserController@delete')->name('users.delete');
     });
 
-    Route::group(['prefix' => 'identities'], function () {
-        Route::get('/', 'IdentityController@index')->name('identities');
-
-        Route::get('/create', 'IdentityController@create')->name('identities.create');
-
-        Route::post('/create', 'IdentityController@store')->name('identities.store');
-
-        Route::get('/{id}', 'IdentityController@edit')->name('identities.edit');
-
-        Route::put('/{id}', 'IdentityController@update')->name('identities.edit');
-
-        Route::delete('/{id}', 'IdentityController@delete')->name('identities.delete');
-    });
-
     Route::group(['prefix' => 'processes'], function () {
         Route::get('/', 'ProcessController@index')->name('processes');
 
