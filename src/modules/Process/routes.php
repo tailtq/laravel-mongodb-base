@@ -16,4 +16,12 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/render-video', 'ProcessController@renderVideo')->name('processes.render');
 
     Route::get('/{id}/objects', 'ProcessController@getObjects')->name('processes.objects');
+
+    Route::get('/{id}/detail', 'ProcessController@getDetailAfterSuccessOrStop')->name('processes.durations');
+
+    Route::get('/{id}/export/before-grouping', 'ProcessController@exportBeforeGrouping')->name('processes.export.before-grouping');
+
+    Route::get('/{id}/export/after-grouping', 'ProcessController@exportAfterGrouping')->name('processes.export.after-grouping');
+
+    Route::post('/search-faces', 'ProcessController@searchFace')->name('processes.search-face');
 });

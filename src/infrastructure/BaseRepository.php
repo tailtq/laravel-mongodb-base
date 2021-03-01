@@ -24,10 +24,14 @@ class BaseRepository
         $shouldPaginate = true,
         array $paginationOptions = ['perPage' => 10]
     ) {
+        $query = gettype($condition) == 'object'
+            ? $condition($this->model)
+            : $this->model->where($condition);
+
         if (!$shouldPaginate) {
-            return $this->model->where($condition)->get();
+            return $query->get();
         }
-        return $this->model->where($condition)->paginate($paginationOptions['perPage']);
+        return $query->paginate($paginationOptions['perPage']);
     }
 
     /**
