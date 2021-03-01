@@ -37,5 +37,10 @@ class ProcessServiceProvider extends RouteServiceProvider
             ->middleware('web')
             ->namespace($this->namespace)
             ->group(base_path('modules/Process/routes.php'));
+
+        Route::prefix('objects')
+            ->middleware('web')
+            ->namespace($this->namespace)
+            ->group(base_path('modules/Process/routes-object.php'));
     }
 }

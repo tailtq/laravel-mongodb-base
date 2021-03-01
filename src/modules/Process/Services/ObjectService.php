@@ -2,9 +2,10 @@
 
 namespace Modules\Process\Services;
 
-use App\Helpers\DatabaseHelper;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Arr;
 use Infrastructure\BaseService;
+use Infrastructure\Exceptions\CustomException;
+use Infrastructure\Exceptions\ResourceNotFoundException;
 use Modules\Process\Repositories\ObjectRepository;
 
 class ObjectService extends BaseService
@@ -33,12 +34,61 @@ class ObjectService extends BaseService
     }
 
     /**
+     * @param array $searchedObjects
+     * @param bool $findWithProcess
+     * @return mixed
+     */
+    public function getObjectsAfterSearchFace(array $searchedObjects, bool $findWithProcess)
+    {
+        $mongoIds = Arr::pluck($searchedObjects, 'object_id');
+
+        $objects = $this->repository->getObjectsAfterSearchFace($mongoIds);
+        $objects = self::blendObjectsIdentity($objects);
+        $objects = $this->assignAppearances($objects, $findWithProcess);
+
+        foreach ($objects as &$object) {
+            $object->confidence_rate = null;
+            foreach ($searchedObjects as $searchedObject) {
+                if ($searchedObject->object_id == $object->mongo_id) {
+                    $object->distance = $searchedObject->search_distance;
+                }
+            }
+        }
+        $objects = array_values($objects->sortBy('distance')->toArray());
+
+        return $objects;
+    }
+
+    /**
+     * @param $id
+     * @return bool|\Infrastructure\Exceptions\CustomException|\Infrastructure\Exceptions\ResourceNotFoundException
+     */
+    public function startRendering($id)
+    {
+        $object = $this->repository->findById($id);
+
+        if (!$object) {
+            return new ResourceNotFoundException();
+        }
+        $url = config('app.ai_server') . '/processes/faces/rendering';
+        $payload = ['object_id' => $object->mongo_id];
+        $response = $this->sendPOSTRequest($url, $payload, $this->getDefaultHeaders());
+
+        if (!$response->status) {
+            return new CustomException('AI_FAILED', $response->statusCode, (object)[
+                'message' => $response->message,
+            ]);
+        }
+        return true;
+    }
+
+    /**
      * Get appearances which were clustered (by one process or all processes)
      * @param $objects
      * @param bool $findWithProcess
      * @return mixed
      */
-    public function assignAppearances($objects, $findWithProcess = true)
+    protected function assignAppearances($objects, $findWithProcess = true)
     {
         foreach ($objects as $object) {
             if ($object->cluster_id) {

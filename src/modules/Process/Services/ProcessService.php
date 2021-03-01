@@ -4,11 +4,13 @@ namespace Modules\Process\Services;
 
 use App\Events\ProgressChange;
 use App\Traits\AnalysisTrait;
+use App\Traits\HandleUploadFile;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Infrastructure\BaseService;
+use Infrastructure\Exceptions\BaseException;
 use Infrastructure\Exceptions\CustomException;
 use Infrastructure\Exceptions\ResourceNotFoundException;
 use Modules\Camera\Services\CameraService;
@@ -17,7 +19,7 @@ use Modules\Process\Repositories\ProcessRepository;
 
 class ProcessService extends BaseService
 {
-    use AnalysisTrait;
+    use AnalysisTrait, HandleUploadFile;
 
     /** @var \Modules\Camera\Services\CameraService $cameraService */
     protected $cameraService;
@@ -61,14 +63,10 @@ class ProcessService extends BaseService
      */
     public function getDetailPageData($id)
     {
-        $item = $this->repository->findById($id, array_merge(['*'], $this->getStatistic($id)), ['camera']);
+        $item = $this->getProcessDetail($id);
 
-        if (!$item) {
-            return new ResourceNotFoundException();
-        }
-        if ($item->status === Process::STATUS['done'] || $item->status === Process::STATUS['stopped']) {
-            $item->detecting_duration = $this->parseTime($item->detecting_start_time, $item->detecting_end_time);
-            $item->total_duration = $this->parseTime($item->detecting_start_time, $item->done_time);
+        if ($item instanceof ResourceNotFoundException) {
+            return $item;
         }
         $processData = $this->sendGETRequest($this->getAIUrl($item->mongo_id), [], $this->getDefaultHeaders());
         $item->config = $processData->status ? $processData->body->config : null;
@@ -92,7 +90,7 @@ class ProcessService extends BaseService
             ? Carbon::createFromFormat('H:i d-m-Y', $data['started_at'])->format('Y/m/d H:i:s')
             : null;
 
-        $response = $this->sendPOSTRequest(config('app.ai_server') . '/processes', [
+        $response = $this->sendPOSTRequest($this->getAIUrl(), [
             'camera' => $camera ? $camera->mongo_id : null,
             'name' => $data['name'],
             'url' => $camera ? null : $data['video_url'],
@@ -141,20 +139,12 @@ class ProcessService extends BaseService
      */
     public function startProcess($id)
     {
-        $process = $this->repository->findById($id);
+        $result = $this->callAIService($id, 'start', 'GET');
 
-        if (!$process) {
-            return new ResourceNotFoundException();
+        if ($result instanceof BaseException) {
+            return $result;
         }
-        $processData = $this->sendGETRequest(
-            $this->getAIUrl("$process->mongo_id/start"), [], $this->getDefaultHeaders()
-        );
-        if (!$processData->status) {
-            return new CustomException('AI FAILED', 500, (object)[
-                'message' => $processData->body->message
-            ]);
-        }
-        return DB::table('processes')->where('id', $id)->update([
+        return $this->repository->updateBy(['id' => $id], [
             'detecting_start_time' => Carbon::now(),
             'status' => Process::STATUS['detecting'],
         ]);
@@ -166,25 +156,17 @@ class ProcessService extends BaseService
      */
     public function stopProcess($id)
     {
-        $process = $this->repository->findById($id);
+        $result = $this->callAIService($id, 'stop', 'GET');
 
-        if (!$process) {
-            return new ResourceNotFoundException();
+        if ($result instanceof BaseException) {
+            return $result;
         }
-        $processData = $this->sendGETRequest(
-            $this->getAIUrl("$process->mongo_id/stop"), [], $this->getDefaultHeaders()
-        );
-        if (!$processData->status) {
-            return new CustomException('AI FAILED', 500, (object)[
-                'message' => $processData->body->message
-            ]);
-        }
-        $result = DB::table('processes')->where('id', $id)->update([
+        $result = $this->repository->updateBy(['id' => $id], [
             'status' => Process::STATUS['stopped'],
             'done_time' => Carbon::now(),
             'detecting_end_time' => Carbon::now(),
         ]);
-        broadcast(new ProgressChange($process->id, [
+        broadcast(new ProgressChange($id, [
             'status' => Process::STATUS['stopped'],
         ]));
 
@@ -193,24 +175,27 @@ class ProcessService extends BaseService
 
     /**
      * @param $id
+     * @param null $additionalPath
+     * @param string $method
      * @return mixed
      */
-    public function renderVideo($id)
+    public function callAIService($id, $additionalPath = null, $method = 'GET')
     {
         $process = $this->repository->findById($id);
+        $path = $additionalPath ? "$process->mongo_id/$additionalPath" : $process->mongo_id;
 
         if (!$process) {
             return new ResourceNotFoundException();
         }
-        $response = $this->sendGETRequest(
-            $this->getAIUrl("$process->mongo_id/rendering"), [], $this->getDefaultHeaders()
+        $response = $this->{"send{$method}Request"}(
+            $this->getAIUrl($path), [], $this->getDefaultHeaders()
         );
         if (!$response->status) {
             return new CustomException('AI FAILED', 500, (object)[
                 'message' => $response->body->message
             ]);
         }
-        return true;
+        return [$process, $response];
     }
 
     /**
@@ -229,19 +214,67 @@ class ProcessService extends BaseService
     public function delete($id)
     {
         $this->setObjectService();
+        $result = $this->callAIService($id, null, 'DELETE');
 
-        $process = $this->repository->findById($id);
-        if (!$process) {
-            return new ResourceNotFoundException();
+        if ($result instanceof ResourceNotFoundException) {
+            return $result;
         }
-        // ignore AI's response
-        $this->sendDELETERequest(
-            $this->getAIUrl($process->mongo_id), [], $this->getDefaultHeaders()
-        );
         $this->objectService->deleteBy(['process_id' => $id]);
         $this->repository->deleteBy(['id' => $id]);
 
         return true;
+    }
+
+    /**
+     * @param $id
+     * @return \Illuminate\Database\Eloquent\Model|\Infrastructure\Exceptions\ResourceNotFoundException
+     */
+    public function getProcessDetail(int $id)
+    {
+        $item = $this->repository->findById($id, array_merge(['*'], $this->getStatistic($id)), ['camera']);
+
+        if (!$item) {
+            return new ResourceNotFoundException();
+        }
+        if ($item->status === Process::STATUS['done'] || $item->status === Process::STATUS['stopped']) {
+            $item->detecting_duration = $this->parseTime($item->detecting_start_time, $item->detecting_end_time);
+            $item->total_duration = $this->parseTime($item->detecting_start_time, $item->done_time);
+        }
+        return $item;
+    }
+
+    /**
+     * @param array $ids
+     * @param string $searchType
+     * @param \Illuminate\Http\UploadedFile|null $file
+     * @param int|null $objectId
+     * @return \Infrastructure\Exceptions\ResourceNotFoundException|mixed
+     */
+    public function searchFace(array $ids, string $searchType, $file = null, $objectId = null)
+    {
+        $processes = $this->repository->listBy(function ($query) use ($ids) {
+            $query->whereIn('id', $ids);
+        }, false);
+        $payload = [
+            'process_ids' => $processes->pluck('mongo_id')->all(),
+            'type_search' => $searchType,
+            'threshold' => $searchType === 'face' ? 1.05 : 0.7
+        ];
+        if ($file) {
+            $payload['image_url'] = $this->uploadFile($file);
+        } else {
+            $object = $this->objectService->findById($objectId);
+
+            if (!$object) {
+                return new ResourceNotFoundException();
+            }
+            $payload['object_id'] = $object->mongo_id;
+        }
+        $response = $this->sendPOSTRequest(
+            $this->getAIUrl('faces/searching'), $payload, $this->getDefaultHeaders()
+        );
+
+        return $this->objectService->getObjectsAfterSearchFace($response->body, $processes->count() > 0);
     }
 
     /**

@@ -6,7 +6,6 @@ use App\Traits\RequestAPI;
 use App\Traits\ResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\MessageBag;
-use Illuminate\Foundation\Http\FormRequest;
 use Infrastructure\Exceptions\CustomException;
 use Infrastructure\Requests\BaseCRUDRequest;
 use Infrastructure\Exceptions\ResourceNotFoundException;
