@@ -2,8 +2,11 @@
 
 namespace Modules\Media\Controllers;
 
+use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Infrastructure\BaseController;
+use Infrastructure\Exceptions\BadRequestException;
+use Infrastructure\Exceptions\CustomException;
 use Modules\Media\Requests\CreateMediaRequest;
 use Modules\Media\Services\MediaService;
 
@@ -19,6 +22,10 @@ class MediaController extends BaseController
         $this->service = $service;
     }
 
+    /**
+     * @param \Modules\Media\Requests\CreateMediaRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function storeNew(CreateMediaRequest $request)
     {
         $urls = [];
@@ -32,5 +39,21 @@ class MediaController extends BaseController
         }
 
         return $this->success($urls);
+    }
+
+    /**
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
+     */
+    public function createThumbnail(Request $request)
+    {
+        $result = $this->service->createThumbnail($request->get('video_url'));
+
+        if ($result instanceof CustomException) {
+            return $this->returnFailedResult($result, $request);
+        } else if ($result instanceof BadRequestException) {
+            return $this->error($result->getMessage(), $result->getCode());
+        }
+        return $this->success(['thumbnail' => $result]);
     }
 }

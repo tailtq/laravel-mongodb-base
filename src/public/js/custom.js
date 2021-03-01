@@ -111,7 +111,7 @@ function initWizardForProcess() {
 
                 // Get thumbnail for drawing recognition boundary
                 $.ajax({
-                    url: '/processes/thumbnails',
+                    url: '/medias/thumbnails',
                     type: 'POST',
                     dataType: 'json',
                     contentType: 'application/json; charset=UTF-8',

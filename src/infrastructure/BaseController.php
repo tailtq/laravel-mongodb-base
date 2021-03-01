@@ -4,6 +4,7 @@ namespace Infrastructure;
 
 use App\Traits\RequestAPI;
 use App\Traits\ResponseTrait;
+use Illuminate\Http\Request;
 use Illuminate\Support\MessageBag;
 use Illuminate\Foundation\Http\FormRequest;
 use Infrastructure\Exceptions\CustomException;
@@ -42,7 +43,7 @@ class BaseController
     {
         $items = $this->service->paginate();
 
-        return $this->view('index', [
+        return view("pages.$this->route.index", [
             'items' => $items
         ]);
     }
@@ -52,7 +53,7 @@ class BaseController
      */
     public function create()
     {
-        return $this->view('create');
+        return view("pages.$this->route.create");
     }
 
     /**
@@ -84,7 +85,7 @@ class BaseController
         if ($item instanceof ResourceNotFoundException) {
             abort(404);
         }
-        return $this->view('edit', [
+        return view("pages.$this->route.edit", [
             'item' => $item,
         ]);
     }
@@ -126,10 +127,10 @@ class BaseController
 
     /**
      * @param \Infrastructure\Exceptions\CustomException $result
-     * @param \Illuminate\Foundation\Http\FormRequest $request
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
      */
-    protected function returnFailedResult(CustomException $result, FormRequest $request)
+    protected function returnFailedResult(CustomException $result, Request $request)
     {
         if ($request->ajax()) {
             return $this->error($result->getData()->message, $result->getCode());
@@ -138,15 +139,5 @@ class BaseController
         $messageBag->add('message', $result->getData()->message);
 
         return redirect()->back()->withErrors($messageBag)->withInput($request->all());
-    }
-
-    /**
-     * @param string $path
-     * @param array $data
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
-    protected function view(string $path, array $data = [])
-    {
-        return view("$this->moduleName.Views.$path", $data);
     }
 }

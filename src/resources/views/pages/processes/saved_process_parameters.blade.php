@@ -21,25 +21,25 @@
                                        placeholder="Nhập tên"
                                        name="name"
                                        disabled
-                                       value="{{ old('name', $process->name) }}">
+                                       value="{{ old('name', $item->name) }}">
                             </div>
 
                             <div class="form-group">
                                 <label>Loại tiến trình *</label>
                                 <select name="process_type" class="form-control" disabled>
-                                    <option value="camera" {{ $process->camera_id ? 'selected' : '' }}>Camera</option>
-                                    <option value="video" {{ $process->video_url ? 'selected' : '' }}>Video</option>
+                                    <option value="camera" {{ $item->camera_id ? 'selected' : '' }}>Camera</option>
+                                    <option value="video" {{ $item->video_url ? 'selected' : '' }}>Video</option>
                                 </select>
                             </div>
 
-                            <div class="form-group {{ !$process->camera_id ? 'd-none' : '' }}">
+                            <div class="form-group {{ !$item->camera_id ? 'd-none' : '' }}">
                                 <label>Camera *</label>
                                 <select name="camera_id" class="form-control" data-type="number" disabled>
                                     <option value="0">Chọn camera</option>
 
                                     @foreach($cameras as $camera)
                                         <option value="{{ $camera->id }}"
-                                                {{ $camera->id == $process->camera_id ? 'selected' : '' }}
+                                                {{ $camera->id == $item->camera_id ? 'selected' : '' }}
                                                 data-url="{{ $camera->url }}">
                                             {{ $camera->name }}
                                         </option>
@@ -47,21 +47,21 @@
                                 </select>
                             </div>
 
-                            <div class="form-group {{ !$process->video_url ? 'd-none' : '' }}">
+                            <div class="form-group {{ !$item->video_url ? 'd-none' : '' }}">
                                 <label>Đường dẫn *</label>
                                 <input type="text"
                                        class="form-control"
                                        placeholder="Nhập video"
                                        name="video_url"
                                        disabled
-                                       value="{{ old('video_url', $process->camera ? $process->camera->url : $process->video_url) }}">
+                                       value="{{ old('video_url', $item->camera ? $item->camera->url : $item->video_url) }}">
                             </div>
 
-                            <div class="form-group {{ !$process->video_url ? 'd-none' : '' }}">
+                            <div class="form-group {{ !$item->video_url ? 'd-none' : '' }}">
                                 <label>Ngày bắt đầu</label>
                                 <input class="form-control mb-4 mb-md-0" disabled
                                        name="started_at"
-                                       value="{{ $process->started_at ? $process->started_at->format('H:i d-m-Y') : '' }}" />
+                                       value="{{ $item->started_at ? $item->started_at->format('H:i d-m-Y') : '' }}" />
                             </div>
 
                             <div class="form-group">
@@ -70,7 +70,7 @@
                                           cols="30"
                                           rows="10"
                                           disabled
-                                          class="form-control mb-0">{{ old('description', $process->description) }}</textarea>
+                                          class="form-control mb-0">{{ old('description', $item->description) }}</textarea>
                             </div>
                         </section>
 
@@ -85,7 +85,7 @@
                                                placeholder="Nhập thông số"
                                                name="detection_scale"
                                                disabled
-                                               value="{{ old('detection_scale', object_get($process->config, 'detection_scale')) }}">
+                                               value="{{ old('detection_scale', object_get($item->config, 'detection_scale')) }}">
                                     </div>
                                 </div>
 
@@ -97,7 +97,7 @@
                                                placeholder="Nhập thông số"
                                                name="frame_drop"
                                                disabled
-                                               value="{{ old('frame_drop', object_get($process->config, 'frame_drop')) }}">
+                                               value="{{ old('frame_drop', object_get($item->config, 'frame_drop')) }}">
                                     </div>
                                 </div>
 
@@ -109,7 +109,7 @@
                                                placeholder="Nhập thông số"
                                                name="frame_step"
                                                disabled
-                                               value="{{ old('frame_step', object_get($process->config, 'frame_step')) }}">
+                                               value="{{ old('frame_step', object_get($item->config, 'frame_step')) }}">
                                     </div>
                                 </div>
                             </div>
@@ -123,7 +123,7 @@
                                                placeholder="Nhập thông số"
                                                name="max_pitch"
                                                disabled
-                                               value="{{ old('max_pitch', object_get($process->config, 'max_pitch')) }}">
+                                               value="{{ old('max_pitch', object_get($item->config, 'max_pitch')) }}">
                                     </div>
                                 </div>
 
@@ -135,7 +135,7 @@
                                                placeholder="Nhập thông số"
                                                name="max_roll"
                                                disabled
-                                               value="{{ old('max_roll', object_get($process->config, 'max_roll')) }}">
+                                               value="{{ old('max_roll', object_get($item->config, 'max_roll')) }}">
                                     </div>
                                 </div>
 
@@ -147,7 +147,7 @@
                                                placeholder="Nhập thông số"
                                                name="max_yaw"
                                                disabled
-                                               value="{{ old('max_yaw', object_get($process->config, 'max_yaw')) }}">
+                                               value="{{ old('max_yaw', object_get($item->config, 'max_yaw')) }}">
                                     </div>
                                 </div>
                             </div>
@@ -161,7 +161,7 @@
                                                placeholder="Nhập thông số"
                                                name="min_face_size"
                                                disabled
-                                               value="{{ old('min_face_size', object_get($process->config, 'min_face_size')) }}">
+                                               value="{{ old('min_face_size', object_get($item->config, 'min_face_size')) }}">
                                     </div>
                                 </div>
 
@@ -173,7 +173,7 @@
                                                placeholder="Nhập thông số"
                                                name="tracking_scale"
                                                disabled
-                                               value="{{ old('tracking_scale', object_get($process->config, 'tracking_scale')) }}">
+                                               value="{{ old('tracking_scale', object_get($item->config, 'tracking_scale')) }}">
                                     </div>
                                 </div>
 
@@ -185,7 +185,7 @@
                                                placeholder="Nhập thông số"
                                                name="biometric_threshold"
                                                disabled
-                                               value="{{ old('biometric_threshold', object_get($process->config, 'biometric_threshold')) }}">
+                                               value="{{ old('biometric_threshold', object_get($item->config, 'biometric_threshold')) }}">
                                     </div>
                                 </div>
                             </div>
@@ -199,7 +199,7 @@
                                                placeholder="Nhập thông số"
                                                name="min_head_confidence"
                                                disabled
-                                               value="{{ old('min_head_confidence', object_get($process->config, 'min_head_confidence')) }}">
+                                               value="{{ old('min_head_confidence', object_get($item->config, 'min_head_confidence')) }}">
                                     </div>
                                 </div>
 
@@ -211,7 +211,7 @@
                                                placeholder="Nhập thông số"
                                                name="min_face_confidence"
                                                disabled
-                                               value="{{ old('min_face_confidence', object_get($process->config, 'min_face_confidence')) }}">
+                                               value="{{ old('min_face_confidence', object_get($item->config, 'min_face_confidence')) }}">
                                     </div>
                                 </div>
 
@@ -223,7 +223,7 @@
                                                placeholder="Nhập thông số"
                                                name="min_body_confidence"
                                                disabled
-                                               value="{{ old('min_body_confidence', object_get($process->config, 'min_body_confidence')) }}">
+                                               value="{{ old('min_body_confidence', object_get($item->config, 'min_body_confidence')) }}">
                                     </div>
                                 </div>
                             </div>
@@ -237,7 +237,7 @@
                                                placeholder="Nhập thông số"
                                                name="write_data_step"
                                                disabled
-                                               value="{{ old('write_data_step', object_get($process->config, 'write_data_step')) }}">
+                                               value="{{ old('write_data_step', object_get($item->config, 'write_data_step')) }}">
                                     </div>
                                 </div>
 
@@ -249,7 +249,7 @@
                                                placeholder="Nhập thông số"
                                                name="write_video_step"
                                                disabled
-                                               value="{{ old('write_video_step', object_get($process->config, 'write_video_step')) }}">
+                                               value="{{ old('write_video_step', object_get($item->config, 'write_video_step')) }}">
                                     </div>
                                 </div>
                             </div>
@@ -259,7 +259,7 @@
                         <section>
                             <div class="d-flex h-100 justify-content-center align-items-center">
                                 <div class="position-relative h-100 mr-3">
-                                    <img src="{{ $process->thumbnail }}"
+                                    <img src="{{ $item->thumbnail }}"
                                          style="width: 451px;"
                                          id="canvas-img"
                                          class="h-100">
@@ -302,7 +302,7 @@
                             <p class="error text-danger mt-2 text-center canvas__error-message"></p>
 
                             <input type="hidden" name="regions"
-                                   value="{{ json_encode(object_get($process->config, 'regions', [])) }}">
+                                   value="{{ json_encode(object_get($item->config, 'regions', [])) }}">
                         </section>
                     </form>
                 </div>
