@@ -23,6 +23,14 @@ abstract class BaseService
     }
 
     /**
+     * @return \Illuminate\Support\Collection
+     */
+    public function listAll()
+    {
+        return $this->repository->listBy([], false);
+    }
+
+    /**
      * @param int $id
      * @return \Illuminate\Database\Eloquent\Model|\Infrastructure\Exceptions\ResourceNotFoundException
      */
@@ -91,5 +99,14 @@ abstract class BaseService
         }
 
         return $this->repository->deleteBy(['id' => $id]);
+    }
+
+    /**
+     * @param $condition
+     * @return mixed
+     */
+    public function deleteBy($condition)
+    {
+        return $this->repository->deleteBy($condition);
     }
 }

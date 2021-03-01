@@ -4,10 +4,12 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5>Tìm kiếm đối tượng</h5>
+
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
+
             <div class="modal-body">
                 <div class="dropzone search-face__dropzone">
                     <div class="dz-message">Kéo ảnh vào đây để tải lên</div>

@@ -32,11 +32,13 @@ class BaseRepository
 
     /**
      * @param int $id
+     * @param array $columns
+     * @param array $relations
      * @return \Illuminate\Database\Eloquent\Model
      */
-    public function findById(int $id)
+    public function findById(int $id, array $columns = ['*'], array $relations = [])
     {
-        return $this->model->find($id);
+        return $this->model->select($columns)->with($relations)->find($id);
     }
 
     /**
@@ -63,8 +65,7 @@ class BaseRepository
                 $element['updated_at'] = Carbon::now();
             }
         }
-
-        return $this->model->insert($data);
+        return $this->model->insertGetId($data);
     }
 
     /**

@@ -178,6 +178,7 @@ return [
         Modules\Identity\IdentityServiceProvider::class,
         Modules\User\UserServiceProvider::class,
         Modules\Media\MediaServiceProvider::class,
+        Modules\Process\ProcessServiceProvider::class,
 
         // initialize last to ignore 404 error
         App\Providers\RouteServiceProvider::class,

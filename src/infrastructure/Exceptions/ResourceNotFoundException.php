@@ -4,8 +4,8 @@ namespace Infrastructure\Exceptions;
 
 class ResourceNotFoundException extends BaseException
 {
-    public function __construct()
+    public function __construct($message = 'RESOURCE_NOT_FOUND')
     {
-        parent::__construct('RESOURCE_NOT_FOUND', 404);
+        parent::__construct($message, 404);
     }
 }

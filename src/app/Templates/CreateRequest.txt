@@ -2,7 +2,7 @@
 
 namespace Modules\{{moduleName}}\Requests;
 
-use App\Http\Requests\BaseCRUDRequest;
+use Infrastructure\Requests\BaseCRUDRequest;
 
 class Create{{moduleName}}Request extends BaseCRUDRequest
 {

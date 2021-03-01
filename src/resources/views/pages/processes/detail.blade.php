@@ -24,7 +24,7 @@
     <nav class="page-breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ route('processes') }}">Luồng xử lý</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{{ $process->name }}</li>
+            <li class="breadcrumb-item active" aria-current="page">{{ $item->name }}</li>
         </ol>
     </nav>
 
@@ -32,13 +32,13 @@
         <div class="card-body w-100">
             <div class="d-flex justify-content-md-between align-items-center mb-3">
                 <h5 class="card-title process"
-                    data-id="{{ $process->id }}"
-                    data-mongo-id="{{ $process->mongo_id }}">
-                    {{ $process->name }}
+                    data-id="{{ $item->id }}"
+                    data-mongo-id="{{ $item->mongo_id }}">
+                    {{ $item->name }}
                     &nbsp;
                     <span class="
                         badge
-                        @if($process->status == 'error' || $process->status == 'stopped')
+                        @if($item->status == 'error' || $item->status == 'stopped')
                             badge-danger
                         @else
                             badge-success
@@ -46,13 +46,13 @@
                             text-uppercase
                             process__status
                     ">
-                        {{ __('status.' . $process->status, [], 'vi') }}
+                        {{ __('status.' . $item->status, [], 'vi') }}
                     </span>
                 </h5>
 
                 <div style="display: inline-block">
                     <button type="button"
-                            @if($process->status != 'ready')
+                            @if($item->status != 'ready')
                             disabled
                             @endif
                             class="btn btn-success btn-start">
@@ -61,7 +61,7 @@
                     </button>
 
                     <button type="button"
-                            @if($process->status != 'detecting' && $process->status != 'grouping')
+                            @if($item->status != 'detecting' && $item->status != 'grouping')
                             disabled
                             @endif
                             class="btn btn-danger btn-stop">
@@ -84,7 +84,7 @@
 
                     <div class="dropdown" style="display: inline-block">
                         <button class="btn btn-primary dropdown-toggle export-statistic__btn"
-                                @if($process->status != 'done' && $process->status != 'stopped')
+                                @if($item->status != 'done' && $item->status != 'stopped')
                                 disabled
                                 @endif
                                 type="button"
@@ -98,12 +98,12 @@
                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                             <a class="dropdown-item"
                                target="_blank"
-                               href="{{ route('processes.export.before-grouping', ['id' => $process->id]) }}">
+                               href="{{ route('processes.export.before-grouping', ['id' => $item->id]) }}">
                                 Trước nhất thể hoá
                             </a>
                             <a class="dropdown-item"
                                target="_blank"
-                               href="{{ route('processes.export.after-grouping', ['id' => $process->id]) }}">
+                               href="{{ route('processes.export.after-grouping', ['id' => $item->id]) }}">
                                 Sau nhất thể hoá
                             </a>
                         </div>
@@ -120,42 +120,42 @@
                     <table class="table table-bordered statistical-table">
                         <tr>
                             <th>Số lượt người xuất hiện</th>
-                            <td class="statistic__total-appearances" width="30%">{{ $process->total_appearances }}</td>
+                            <td class="statistic__total-appearances" width="30%">{{ $item->total_appearances }}</td>
                         </tr>
                         <tr>
                             <th>Số người</th>
-                            <td class="statistic__total-objects" width="30%">{{ $process->total_objects }}</td>
+                            <td class="statistic__total-objects" width="30%">{{ $item->total_objects }}</td>
                         </tr>
                         <tr>
                             <th>Số người phát hiện được danh tính</th>
-                            <td class="statistic__total-identified" width="30%">{{ $process->total_identified }}</td>
+                            <td class="statistic__total-identified" width="30%">{{ $item->total_identified }}</td>
                         </tr>
                         <tr>
                             <th>Số người không phát hiện được danh tính</th>
-                            <td class="statistic__total-unidentified" width="30%">{{ $process->total_unidentified }}</td>
+                            <td class="statistic__total-unidentified" width="30%">{{ $item->total_unidentified }}</td>
                         </tr>
                         <tr>
                             <th>Thời gian nhận diện</th>
                             <td class="process__detecting-duration" width="30%">
-                                {{ $process->detecting_duration }}
+                                {{ $item->detecting_duration }}
                             </td>
                         </tr>
                         {{--                        <tr>--}}
                         {{--                            <th>Thời gian kiểm tra định danh</th>--}}
                         {{--                            <td class="process__matching-duration" width="30%">--}}
-                        {{--                                {{ $process->matching_duration }}--}}
+                        {{--                                {{ $item->matching_duration }}--}}
                         {{--                            </td>--}}
                         {{--                        </tr>--}}
                         {{--                        <tr>--}}
                         {{--                            <th>Thời gian tổng hợp video</th>--}}
                         {{--                            <td class="process__rendering-duration" width="30%">--}}
-                        {{--                                {{ $process->rendering_duration }}--}}
+                        {{--                                {{ $item->rendering_duration }}--}}
                         {{--                            </td>--}}
                         {{--                        </tr>--}}
                         <tr>
                             <th>Tổng thời gian</th>
                             <td class="process__total-duration" width="30%">
-                                {{ $process->total_duration }}
+                                {{ $item->total_duration }}
                             </td>
                         </tr>
                     </table>
@@ -170,11 +170,11 @@
                         </div>
 
                         <div>
-                            <button class="btn {{ $process->video_result ? 'btn-success' : 'btn-secondary' }} render-video__btn"
-                               @if($process->status != 'done' && $process->status != 'stopped')
+                            <button class="btn {{ $item->video_result ? 'btn-success' : 'btn-secondary' }} render-video__btn"
+                               @if($item->status != 'done' && $item->status != 'stopped')
                                disabled
                                @endif
-                               data-href="{{ $process->video_result }}">
+                               data-href="{{ $item->video_result }}">
                                 Tổng hợp video
                             </button>
                         </div>
@@ -239,7 +239,7 @@
     </div>
 
     <!-- Modal -->
-    @include('pages.processes.modal_process')
+    @include('pages.processes.saved_process_parameters')
     @include('pages.processes.search_form')
 @endsection
 
@@ -259,15 +259,15 @@
     <script src="{{ my_asset('js/geometry.js') }}"></script>
     <script>
         // define global variables
-        const processId = '{{ $process->id }}';
+        const processId = '{{ $item->id }}';
         const allStatus = <?= json_encode(__('status', [], 'vi'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
         // render objects
-        const frameDrop = {{ object_get($process->config, 'frame_drop', 1) }};
-        const fps = Math.round(parseInt('{{ $process->fps }}', 10) / frameDrop);
+        const frameDrop = {{ object_get($item->config, 'frame_drop', 1) }};
+        const fps = Math.round(parseInt('{{ $item->fps }}', 10) / frameDrop);
         // const renderHour = totalFrames / fps / 3600 >= 1;
-        const renderHour = parseInt('{{ $process->camera_id ? 1 : 0 }}');
-        const isRealtime = parseInt('{{ $process->camera_id ? 1 : 0 }}');
-        let globalStatus = '{{ $process->status }}';
+        const renderHour = parseInt('{{ $item->camera_id ? 1 : 0 }}');
+        const isRealtime = parseInt('{{ $item->camera_id ? 1 : 0 }}');
+        let globalStatus = '{{ $item->status }}';
 
         isDrawing = false;
         loadCanvas();
@@ -277,7 +277,7 @@
         const flvPlayer = flvjs.createPlayer({
             type: 'flv',
             isLive: true,
-            url: '{{ env('STREAMING_SERVER') }}/{{ $process->mongo_id }}.flv'
+            url: '{{ env('STREAMING_SERVER') }}/{{ $item->mongo_id }}.flv'
         });
         flvPlayer.attachMediaElement(videoElement);
 
