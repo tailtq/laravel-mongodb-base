@@ -66,7 +66,8 @@ trait RequestAPI
     {
         return [
             'X-API-KEY' => config('app.ai_api_key'),
-            'Authorization' => 'Bearer ' . session('ai_token'),
+            'Authorization' => 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjYwMzcyNTAxNmM0MzI5OGRhNmJlMTc3NiIsImV4cCI6MTYxNDc1Mzc4NH0.WCs1zsrW82B5A9N6PjPcDFn2lMGx72joiYZqF4KrOT4',
+//            'Authorization' => 'Bearer ' . session('ai_token'),
         ];
     }
 

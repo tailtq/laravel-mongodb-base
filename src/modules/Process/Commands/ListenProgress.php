@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Console\Commands;
+namespace Modules\Process\Commands;
 
-use App\Events\ObjectVideoRendered;
-use App\Events\ProgressChange;
+use Modules\Process\Events\ObjectVideoRendered;
+use Modules\Process\Events\ProgressChange;
 use App\Models\Process;
 use App\Traits\RequestAPI;
 use Carbon\Carbon;
@@ -11,6 +11,9 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
+use Modules\Process\Services\ClusterService;
+use Modules\Process\Services\ObjectService;
+use Modules\Process\Services\ProcessService;
 
 class ListenProgress extends Command
 {
@@ -31,13 +34,26 @@ class ListenProgress extends Command
     protected $description = 'Listen status and progress event from AI';
 
     /**
+     * @var \Modules\Process\Services\ObjectService $objectService
+     */
+    protected $objectService;
+
+    /**
+     * @var \Modules\Process\Services\ProcessService $processService
+     */
+    protected $processService;
+
+    /**
      * Create a new command instance.
      *
-     * @return void
+     * @param \Modules\Process\Services\ProcessService $processService
+     * @param \Modules\Process\Services\ObjectService $objectService
      */
-    public function __construct()
+    public function __construct(ProcessService $processService, ObjectService $objectService)
     {
         parent::__construct();
+        $this->processService = $processService;
+        $this->objectService = $objectService;
     }
 
     /**
@@ -51,7 +67,7 @@ class ListenProgress extends Command
             if (!$event) {
                 return;
             }
-            $process = Process::where('mongo_id', $event->process_id)->first();
+            $process = $this->processService->findBy(['mongo_id' => $event->process_id]);
 
             if ($process) {
                 Log::info(json_encode($event));
@@ -60,31 +76,34 @@ class ListenProgress extends Command
                     $this->getRenderingObjectEvent($event, $process);
                     return;
                 }
+                $updateData = [];
 
                 if ($event->status === 'rendered') {
                     $videoResult = object_get($event, 'video_url');
-                    $process->video_result = $videoResult;
-                    $process->save();
-
+                    $updateData['video_result'] = $videoResult;
                     $data['video_result'] = $videoResult;
                 }
                 if ($process->status !== Process::STATUS['done']
 //                    && $process->status !== Process::STATUS['stopped']
                     && $process->status != $event->status
                     && in_array($event->status, array_values(Process::STATUS))) {
-                    $process->status = $event->status;
+                    $updateData['status'] = $event->status;
 
                     if ($event->status === Process::STATUS['detected']) {
-                        $process->detecting_end_time = Carbon::now();
+                        $updateData['detecting_end_time'] = Carbon::now();
                     }
                     if ($event->status === Process::STATUS['done']) {
-                        $process->done_time = Carbon::now();
+                        $updateData['done_time'] = Carbon::now();
                     }
 //                    if ($event->status === Process::STATUS['stopped']) {
-//                        $process->detecting_end_time = Carbon::now();
-//                        $process->done_time = Carbon::now();
+//                        $updateData['detecting_end_time'] = Carbon::now();
+//                        $updateData['done_time'] = Carbon::now();
 //                    }
-                    $process->save();
+                }
+                if (count($updateData) > 0) {
+                    $this->processService->updateBy(['id' => $process->id], $updateData);
+                    $process = $this->processService->findById($process->id);
+
                     $event->status = $process->status;
                 }
 
@@ -99,7 +118,6 @@ class ListenProgress extends Command
 
 //                if ($process->status === Process::STATUS['detected'] || $process->status === Process::STATUS['stopped']) {
                 if ($process->status === Process::STATUS['detected']) {
-                    Log::info("Called clustering");
                     $this->runClustering($process->mongo_id);
                 }
             }
@@ -114,14 +132,16 @@ class ListenProgress extends Command
             'process_ids' => [$processMongoId]
         ];
         $this->sendPOSTRequest($url, $payload, $this->getDefaultHeaders());
+
+        Log::info("Clustering: $url");
     }
 
     public function getRenderingObjectEvent($event, $process)
     {
-        DB::table('objects')->where('mongo_id', $event->mongo_id)->update([
-            'video_result' => $event->url
+        $this->objectService->updateBy(['mongo_id' => $event->mongo_id], [
+            'video_result' => $event->url,
         ]);
-        $object = DB::table('objects')->where('mongo_id', $event->mongo_id)->first();
+        $object = $this->objectService->findBy(['mongo_id' => $event->mongo_id]);
 
         broadcast(new ObjectVideoRendered($process->id, $object));
     }

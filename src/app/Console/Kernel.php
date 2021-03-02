@@ -3,9 +3,9 @@
 namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
-use App\Console\Commands\ListenProgress;
-use App\Console\Commands\ListenTrackingProcess;
-use App\Console\Commands\ListenClusteringProcess;
+use Modules\Process\Commands\ListenProgress;
+use Modules\Process\Commands\ListenTrackingProcess;
+use Modules\Process\Commands\ListenClusteringProcess;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
 class Kernel extends ConsoleKernel

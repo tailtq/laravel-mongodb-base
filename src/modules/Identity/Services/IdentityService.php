@@ -25,7 +25,7 @@ class IdentityService extends BaseService
      * @param array $data
      * @return \Infrastructure\Exceptions\CustomException
      */
-    public function create(array $data)
+    public function createAndSync(array $data)
     {
         // Proceed AI request
         $response = $this->sendPOSTRequest($this->getAIUrl(), [

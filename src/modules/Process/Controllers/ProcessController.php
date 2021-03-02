@@ -52,7 +52,7 @@ class ProcessController extends BaseController
     public function storeNew(CreateProcessRequest $request)
     {
         $data = $request->validated();
-        $result = $this->service->create($data);
+        $result = $this->service->createAndSync($data);
 
         if ($result instanceof CustomException) {
             return $this->returnFailedResult($result, $request);
@@ -146,7 +146,7 @@ class ProcessController extends BaseController
         } else if ($result instanceof CustomException) {
             abort(400);
         }
-        return redirect($result->body->url);
+        return redirect($result['response']->body->url);
     }
 
     /**
@@ -162,7 +162,7 @@ class ProcessController extends BaseController
         } else if ($result instanceof CustomException) {
             abort(400);
         }
-        return redirect($result->body->url);
+        return redirect($result['response']->body->url);
     }
 
     /**

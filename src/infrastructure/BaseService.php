@@ -17,35 +17,12 @@ abstract class BaseService
 
     abstract protected function getAIUrl(string $mongoId = null);
 
-    public function paginate()
-    {
-        return $this->repository->listBy();
-    }
-
-    /**
-     * @return \Illuminate\Support\Collection
-     */
-    public function listAll()
-    {
-        return $this->repository->listBy([], false);
-    }
-
-    /**
-     * @param int $id
-     * @return \Illuminate\Database\Eloquent\Model|\Infrastructure\Exceptions\ResourceNotFoundException
-     */
-    public function findById(int $id)
-    {
-        $item = $this->repository->findById($id);
-
-        return $item ? $item : new ResourceNotFoundException();
-    }
-
+    // View handler function
     /**
      * @param array $data
-     * @return \Infrastructure\Exceptions\CustomException
+     * @return array|bool|\Infrastructure\Exceptions\CustomException|int
      */
-    public function create(array $data)
+    public function createAndSync(array $data)
     {
         // Proceed AI request
         $response = $this->sendPOSTRequest($this->getAIUrl(), $data, $this->getDefaultHeaders());
@@ -99,6 +76,84 @@ abstract class BaseService
         }
 
         return $this->repository->deleteBy(['id' => $id]);
+    }
+
+    // Base functions
+    /**
+     * @return mixed
+     */
+    public function paginate()
+    {
+        return $this->repository->listBy();
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection
+     */
+    public function listAll()
+    {
+        return $this->repository->listBy([], false);
+    }
+
+    /**
+     * @param array|\Closure $condition
+     * @param bool $shouldPaginate
+     * @return \Illuminate\Support\Collection
+     */
+    public function listBy($condition, $shouldPaginate = false)
+    {
+        return $this->repository->listBy($condition, $shouldPaginate);
+    }
+
+    /**
+     * @param int $id
+     * @return \Illuminate\Database\Eloquent\Model|\Infrastructure\Exceptions\ResourceNotFoundException
+     */
+    public function findById(int $id)
+    {
+        $item = $this->repository->findById($id);
+
+        return $item ? $item : new ResourceNotFoundException();
+    }
+
+    /**
+     * @param array|\Closure $condition
+     * @return mixed
+     */
+    public function findBy($condition)
+    {
+        $item = $this->repository->findBy($condition);
+
+        return $item ? $item : new ResourceNotFoundException();
+    }
+
+    /**
+     * @param array $data
+     * @param bool $indexedReturningId
+     * @return array|bool|int
+     */
+    public function create(array $data, $indexedReturningId = false)
+    {
+        return $this->repository->create($data, $indexedReturningId);
+    }
+
+    /**
+     * @param array|\Closure $condition
+     * @param array $data
+     * @return mixed
+     */
+    public function updateBy($condition, array $data)
+    {
+        return $this->repository->updateBy($condition, $data);
+    }
+
+    /**
+     * @param string $conditionColumn
+     * @param array $data
+     */
+    public function updateMany(string $conditionColumn, array $data)
+    {
+        $this->repository->updateMany($conditionColumn, $data);
     }
 
     /**

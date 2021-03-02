@@ -4,11 +4,13 @@ namespace Infrastructure;
 
 use App\Helpers\CommonHelper;
 use Carbon\Carbon;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 
 class BaseRepository
 {
     /**
-     * @var \Illuminate\Database\Eloquent\Model $model;
+     * @var \Illuminate\Database\Eloquent\Model $model ;
      */
     protected $model;
 
@@ -23,7 +25,8 @@ class BaseRepository
         $condition = [],
         $shouldPaginate = true,
         array $paginationOptions = ['perPage' => 10]
-    ) {
+    )
+    {
         $query = gettype($condition) == 'object'
             ? $condition($this->model)
             : $this->model->where($condition);
@@ -46,7 +49,7 @@ class BaseRepository
     }
 
     /**
-     * @param array|closure $condition
+     * @param array|\Closure $condition
      * @return \Illuminate\Database\Eloquent\Model
      */
     public function findBy($condition)
@@ -56,24 +59,35 @@ class BaseRepository
 
     /**
      * @param array $data
-     * @return
+     * @param bool $indexedReturningId
+     * @return int|array|bool
      */
-    public function create(array $data)
+    public function create(array $data, bool $indexedReturningId = false)
     {
         if (CommonHelper::isAssociativeArray($data)) {
             $data['created_at'] = Carbon::now();
             $data['updated_at'] = Carbon::now();
         } else {
+            $ids = [];
+
             foreach ($data as &$element) {
                 $element['created_at'] = Carbon::now();
                 $element['updated_at'] = Carbon::now();
+
+                if ($indexedReturningId) {
+                    $ids[] = $this->model->insertGetId($element);
+                }
             }
+            if ($indexedReturningId) {
+                return $ids;
+            }
+            return $this->model->insert($data);
         }
         return $this->model->insertGetId($data);
     }
 
     /**
-     * @param array|closure $condition
+     * @param array|\Closure $condition
      * @param array $data
      * @return
      */
@@ -85,7 +99,75 @@ class BaseRepository
     }
 
     /**
-     * @param array|closure $condition
+     * @param string $conditionColumn
+     * @param array $data
+     */
+    public function updateMany(string $conditionColumn, array $data)
+    {
+        /*
+         * UPDATE movements SET
+                movement_miles = CASE movement_id
+                    WHEN 278 THEN 3.50
+                    WHEN 279 THEN 0.00
+                    WHEN 280 THEN 0.00
+                END,
+                movement_km = CASE movement_id
+                    WHEN 278 THEN 5.63
+                    WHEN 279 THEN 0.00
+                    WHEN 280 THEN 0.00
+                END
+                WHERE movement_id IN (278,279,280)
+        */
+        if (count($data) === 0) {
+            return;
+        }
+        $table = $this->model->getTable();
+        $keys = array_keys($data[0]);
+        $keys = array_filter($keys, function ($key) use ($conditionColumn) {
+            return $key !== $conditionColumn;
+        });
+
+        $query = "UPDATE `$table` SET ";
+        $sets = [];
+        $totalConditionIsString = false;
+
+        foreach ($keys as $key) {
+            $set = "`$key` = CASE `$conditionColumn` ";
+            $updatingString = "";
+
+            foreach ($data as $row) {
+                $condition = $row[$conditionColumn];
+                $value = in_array(gettype($row[$key]), ['string', 'object']) ? "'$row[$key]'" : $row[$key];
+                $value = $value === null ? 'NULL' : $value;
+
+                $condition = is_string($condition) ? "'$condition'" : $condition;
+                $totalConditionIsString = is_string($condition);
+
+                if ($value !== "'false'") {
+                    $updatingString .= "WHEN $condition THEN $value ";
+                }
+            }
+            if ($updatingString) {
+                $set .= $updatingString;
+                $set .= ' END';
+                $sets[] = $set;
+            }
+        }
+
+        if ($totalConditionIsString) {
+            foreach ($data as &$element) {
+                $element[$conditionColumn] = '"' . $element[$conditionColumn] . '"';
+            }
+        }
+        $totalCondition = implode(', ', Arr::pluck($data, $conditionColumn));
+        $query .= implode(', ', $sets);
+        $query .= " WHERE `$conditionColumn` IN ($totalCondition)";
+
+        DB::statement($query);
+    }
+
+    /**
+     * @param array|\Closure $condition
      * @return
      */
     public function deleteBy($condition)

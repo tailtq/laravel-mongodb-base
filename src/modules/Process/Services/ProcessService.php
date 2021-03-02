@@ -2,7 +2,7 @@
 
 namespace Modules\Process\Services;
 
-use App\Events\ProgressChange;
+use Modules\Process\Events\ProgressChange;
 use App\Traits\AnalysisTrait;
 use App\Traits\HandleUploadFile;
 use Carbon\Carbon;
@@ -79,12 +79,13 @@ class ProcessService extends BaseService
 
     /**
      * @param array $data
-     * @return \Infrastructure\Exceptions\CustomException
+     * @return array|bool|\Infrastructure\Exceptions\CustomException|int
      */
-    public function create($data)
+    public function createAndSync(array $data)
     {
         $cameraId = Arr::get($data, 'camera_id');
         $camera = $cameraId ? $this->cameraService->findById($cameraId) : null;
+        $camera = !($camera instanceof ResourceNotFoundException) ? $camera : null;
 
         $startedAt = Arr::get($data, 'started_at')
             ? Carbon::createFromFormat('H:i d-m-Y', $data['started_at'])->format('Y/m/d H:i:s')
@@ -182,11 +183,11 @@ class ProcessService extends BaseService
     public function callAIService($id, $additionalPath = null, $method = 'GET')
     {
         $process = $this->repository->findById($id);
-        $path = $additionalPath ? "$process->mongo_id/$additionalPath" : $process->mongo_id;
 
         if (!$process) {
             return new ResourceNotFoundException();
         }
+        $path = $additionalPath ? "$process->mongo_id/$additionalPath" : $process->mongo_id;
         $response = $this->{"send{$method}Request"}(
             $this->getAIUrl($path), [], $this->getDefaultHeaders()
         );
@@ -195,7 +196,7 @@ class ProcessService extends BaseService
                 'message' => $response->body->message
             ]);
         }
-        return [$process, $response];
+        return ['process' => $process, 'response' => $response];
     }
 
     /**
@@ -204,6 +205,8 @@ class ProcessService extends BaseService
      */
     public function getObjects($id)
     {
+        $this->setObjectService();
+
         return $this->objectService->getObjectsByProcess($id);
     }
 
@@ -231,8 +234,7 @@ class ProcessService extends BaseService
      */
     public function getProcessDetail(int $id)
     {
-        $item = $this->repository->findById($id, array_merge(['*'], $this->getStatistic($id)), ['camera']);
-
+        $item = $this->repository->getDetailWithStatistic($id, ['camera']);
         if (!$item) {
             return new ResourceNotFoundException();
         }
@@ -252,14 +254,17 @@ class ProcessService extends BaseService
      */
     public function searchFace(array $ids, string $searchType, $file = null, $objectId = null)
     {
+        $this->setObjectService();
+
         $processes = $this->repository->listBy(function ($query) use ($ids) {
-            $query->whereIn('id', $ids);
+            return $query->whereIn('id', $ids);
         }, false);
         $payload = [
             'process_ids' => $processes->pluck('mongo_id')->all(),
             'type_search' => $searchType,
             'threshold' => $searchType === 'face' ? 1.05 : 0.7
         ];
+
         if ($file) {
             $payload['image_url'] = $this->uploadFile($file);
         } else {
@@ -273,6 +278,11 @@ class ProcessService extends BaseService
         $response = $this->sendPOSTRequest(
             $this->getAIUrl('faces/searching'), $payload, $this->getDefaultHeaders()
         );
+        if (!$response->status) {
+            return new CustomException('AI FAILED', 500, (object)[
+                'message' => $response->body->message
+            ]);
+        }
 
         return $this->objectService->getObjectsAfterSearchFace($response->body, $processes->count() > 0);
     }
