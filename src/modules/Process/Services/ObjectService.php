@@ -60,6 +60,30 @@ class ObjectService extends BaseService
     }
 
     /**
+     * @param $mongoIds
+     * @return mixed
+     */
+    public function getFirstObjectsByMongoIds($mongoIds)
+    {
+        $objects = $this->repository->getFirstObjectsByMongoIds($mongoIds);
+        $objects = self::blendObjectsIdentity($objects);
+
+        return $objects;
+    }
+
+    /**
+     * @param $ids
+     * @return mixed
+     */
+    public function getObjectsByIds($ids)
+    {
+        $objects = $this->repository->getObjectsByIds($ids);
+        $objects = self::blendObjectsIdentity($objects);
+
+        return $objects;
+    }
+
+    /**
      * @param $id
      * @return bool|\Infrastructure\Exceptions\CustomException|\Infrastructure\Exceptions\ResourceNotFoundException
      */
@@ -83,12 +107,12 @@ class ObjectService extends BaseService
     }
 
     /**
-     * Get appearances which were clustered (by one process or all processes)
+     * Assign appearances to clustered objects (by one process or all processes)
      * @param $objects
      * @param bool $findWithProcess
      * @return mixed
      */
-    protected function assignAppearances($objects, $findWithProcess = true)
+    public function assignAppearances($objects, $findWithProcess = true)
     {
         foreach ($objects as $object) {
             if ($object->cluster_id) {

@@ -62,7 +62,7 @@ class BaseController
     public function store(BaseCRUDRequest $request)
     {
         $data = $request->validated();
-        $result = $this->service->create($data);
+        $result = $this->service->createAndSync($data);
 
         if ($result instanceof CustomException) {
             return $this->returnFailedResult($result, $request);

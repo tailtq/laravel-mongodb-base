@@ -1,15 +1,17 @@
 <?php
 
-namespace App\Console\Commands;
+namespace Modules\Process\Commands;
 
-use App\Events\AnalysisProceeded;
-use App\Events\ClusteringProceeded;
-use App\Helpers\DatabaseHelper;
+use Modules\Identity\Services\IdentityService;
+use Modules\Process\Events\AnalysisProceeded;
+use Modules\Process\Events\ClusteringProceeded;
 use App\Traits\AnalysisTrait;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
+use Modules\Process\Services\ClusterService;
+use Modules\Process\Services\ObjectService;
+use Modules\Process\Services\ProcessService;
 
 class ListenClusteringProcess extends Command
 {
@@ -30,13 +32,44 @@ class ListenClusteringProcess extends Command
     protected $description = 'Listen clustering process from AI server';
 
     /**
+     * @var \Modules\Identity\Services\IdentityService $identityService
+     */
+    protected $identityService;
+
+    /**
+     * @var \Modules\Process\Services\ProcessService $processService
+     */
+    protected $processService;
+
+    /**
+     * @var \Modules\Process\Services\ClusterService $clusterService
+     */
+    protected $clusterService;
+
+    /**
+     * @var \Modules\Process\Services\ObjectService $objectService
+     */
+    protected $objectService;
+
+    /**
      * Create a new command instance.
      *
-     * @return void
+     * @param \Modules\Identity\Services\IdentityService $identityService
+     * @param \Modules\Process\Services\ProcessService $processService
+     * @param \Modules\Process\Services\ClusterService $clusterService
+     * @param \Modules\Process\Services\ObjectService $objectService
      */
-    public function __construct()
-    {
+    public function __construct(
+        IdentityService $identityService,
+        ProcessService $processService,
+        ClusterService $clusterService,
+        ObjectService $objectService
+    ) {
         parent::__construct();
+        $this->identityService = $identityService;
+        $this->processService = $processService;
+        $this->clusterService = $clusterService;
+        $this->objectService = $objectService;
     }
 
     /**
@@ -52,78 +85,40 @@ class ListenClusteringProcess extends Command
             }
             $totalMongoIds = [];
             $clusterMongoIds = Arr::pluck($clusters, '_id');
-            $existingClusters = DB::table('clusters')
-                ->whereIn('mongo_id', $clusterMongoIds)
-                ->select(['id', 'identity_id', 'mongo_id'])
-                ->get();
-            DatabaseHelper::updateMultiple($this->getClusteringTypes($clusters), 'mongo_id', 'objects');
+            $existingClusters = $this->clusterService->listBy(function ($query) use ($clusterMongoIds) {
+                return $query->whereIn('mongo_id', $clusterMongoIds);
+            }, false);
+
+            $this->objectService->updateMany('mongo_id', $this->getClusteringTypes($clusters));
 
             foreach ($clusters as &$cluster) {
                 $existingCluster = Arr::first($existingClusters, function ($existingCluster) use ($cluster) {
                     return $existingCluster->mongo_id == $cluster->_id;
                 });
-
                 if (!$existingCluster) {
                     $identity = null;
 
                     if (object_get($cluster, 'identity')) {
-                        $identity = DB::table('identities')
-                            ->where('mongo_id', $cluster->identity)
-                            ->select(['id'])
-                            ->first();
+                        $identity = $this->identityService->findBy(['mongo_id' => $cluster->identity]);
                     }
-                    $cluster->id = DB::table('clusters')->insertGetId([
+                    $cluster->id = $this->clusterService->create([
                         'identity_id' => $identity ? $identity->id : null,
                         'mongo_id' => $cluster->_id,
                     ]);
                 } else {
                     $cluster->id = $existingCluster->id;
                 }
-                $objectMongoIds = array_map(function ($object) {
-                    return $object->object;
-                }, $cluster->objects);
+                $objectMongoIds = Arr::pluck($cluster->objects, 'object');
 
-                DB::table('objects')
-                    ->whereIn('mongo_id', $objectMongoIds)
-                    ->update(['cluster_id' => $cluster->id]);
+                $this->objectService->updateBy(function ($query) use ($objectMongoIds) {
+                    return $query->whereIn('mongo_id', $objectMongoIds);
+                }, ['cluster_id' => $cluster->id]);
 
                 $totalMongoIds = array_merge($totalMongoIds, $objectMongoIds);
             }
-
-            $objects = $this->getClusteredObjects($totalMongoIds);
+            $objects = $this->objectService->getFirstObjectsByMongoIds($totalMongoIds);
             $this->publishClusteringDataToEachProcess($objects);
         });
-    }
-
-    /**
-     * @param $objectMongoIds array[string]
-     * @return \Illuminate\Support\Collection
-     */
-    public function getClusteredObjects($objectMongoIds)
-    {
-        $objects = DB::table('objects')
-            ->leftJoin('clusters', 'objects.cluster_id', 'clusters.id')
-            ->leftJoin('identities as CI', 'clusters.identity_id', 'CI.id')
-            ->leftJoin('identities as OI', 'objects.identity_id', 'OI.id')
-            ->whereIn('objects.id', function ($query) use ($objectMongoIds) {
-                $query->select([DB::raw('MIN(id)')])
-                    ->from('objects')
-                    ->whereIn('mongo_id', $objectMongoIds)
-                    ->groupBy(['cluster_id', 'process_id']);
-            })
-            ->select([
-                'objects.*',
-                'OI.id as identity_id',
-                'OI.name as identity_name',
-                'OI.images as identity_images',
-                'CI.id as cluster_identity_id',
-                'CI.name as cluster_identity_name',
-                'CI.images as cluster_identity_images',
-            ])
-            ->get();
-        $objects = DatabaseHelper::blendObjectsIdentity($objects);
-
-        return $objects;
     }
 
     /**
@@ -135,19 +130,18 @@ class ListenClusteringProcess extends Command
         $processes = $objects->groupBy('process_id');
 
         foreach ($processes as $processId => $groupedObjects) {
-            $process = DB::table('processes')->where('id', $processId)->select(
-                array_merge(['id'], $this->getStatistic($processId))
-            )->first();
+            $process = $this->processService->getProcessDetail($processId);
 
             $processesNewFormat[] = $process;
-            $groupedObjects = $this->getAppearances($groupedObjects);
+            $groupedObjects = $this->objectService->assignAppearances($groupedObjects);
 
+            // publish objects to process detail
             broadcast(new ClusteringProceeded([
                 'statistic' => $process,
                 'grouped_objects' => $groupedObjects,
             ], "process.$processId.cluster"));
         }
-
+        // publish statistical numbers to monitoring page
         broadcast(new AnalysisProceeded($processesNewFormat));
     }
 

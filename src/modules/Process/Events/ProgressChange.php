@@ -1,32 +1,33 @@
 <?php
 
-namespace App\Events;
+namespace Modules\Process\Events;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PresenceChannel;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class AnalysisProceeded implements ShouldBroadcast
+class ProgressChange implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     private $processId;
     private $data;
-    private $channel;
 
     /**
      * Create a new event instance.
      *
+     * @param $processId
      * @param $data
-     * @param string $channel
      */
-    public function __construct($data, $channel = 'monitor.analysis')
+    public function __construct($processId, $data)
     {
+        $this->processId = $processId;
         $this->data = $data;
-        $this->channel = $channel;
     }
 
     /**
@@ -36,7 +37,7 @@ class AnalysisProceeded implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new Channel($this->channel);
+        return new Channel("process.$this->processId.progress");
     }
 
     public function broadcastWith()

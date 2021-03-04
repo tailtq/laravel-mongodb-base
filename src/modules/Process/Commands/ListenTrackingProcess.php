@@ -1,17 +1,18 @@
 <?php
 
-namespace App\Console\Commands;
+namespace Modules\Process\Commands;
 
-use App\Events\AnalysisProceeded;
-use App\Events\ObjectsAppear;
-use App\Helpers\DatabaseHelper;
+use Infrastructure\Exceptions\ResourceNotFoundException;
+use Modules\Identity\Services\IdentityService;
+use Modules\Process\Events\AnalysisProceeded;
+use Modules\Process\Events\ObjectsAppear;
 use App\Traits\AnalysisTrait;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
+use Modules\Process\Services\ObjectService;
+use Modules\Process\Services\ProcessService;
 
 class ListenTrackingProcess extends Command
 {
@@ -31,14 +32,23 @@ class ListenTrackingProcess extends Command
      */
     protected $description = 'Listen tracking process from AI server';
 
+    protected $objectService;
+    protected $processService;
+    protected $identityService;
+
     /**
      * Create a new command instance.
      *
-     * @return void
+     * @param \Modules\Identity\Services\IdentityService $identityService
+     * @param \Modules\Process\Services\ProcessService $processService
+     * @param \Modules\Process\Services\ObjectService $objectService
      */
-    public function __construct()
+    public function __construct(IdentityService $identityService, ProcessService $processService, ObjectService $objectService)
     {
         parent::__construct();
+        $this->identityService = $identityService;
+        $this->objectService = $objectService;
+        $this->processService = $processService;
     }
 
     /**
@@ -52,25 +62,23 @@ class ListenTrackingProcess extends Command
             if (!$data) {
                 return;
             }
-//            Log::info(json_encode($data));
-            $process = DB::table('processes')
-                ->where('mongo_id', $data->process_id)
-                ->select(['id', 'mongo_id'])
-                ->first();
+            $process = $this->processService->findBy(['mongo_id' => $data->process_id]);
 
-            if (!$process) {
+            if ($process instanceof ResourceNotFoundException) {
                 return;
             }
             $objs = $data->objects_data;
             $objMongoIds = Arr::pluck($objs, '_id');
             $identityMongoIds = Arr::pluck($objs, 'identity');
 
-            $identities = DB::table('identities')->whereIn('mongo_id', $identityMongoIds)->get();
-            $existingObjs = DB::table('objects')
-                ->whereIn('mongo_id', $objMongoIds)
-                ->select(['id', 'mongo_id'])
-                ->get();
+            $identities = $this->identityService->listBy(function ($query) use ($identityMongoIds) {
+                return $query->whereIn('mongo_id', $identityMongoIds);
+            });
+            $existingObjs = $this->objectService->listBy(function ($query) use ($objMongoIds) {
+                return $query->where('mongo_id', $objMongoIds);
+            });
             $updatingObjs = [];
+            $creatingObjs = [];
             $reQueryObjIds = [];
 
             foreach ($objs as $obj) {
@@ -105,7 +113,7 @@ class ListenTrackingProcess extends Command
                     $reQueryObjIds[] = $existingObj->id;
                 } else {
                     # insert new object
-                    $reQueryObjIds[] = DB::table('objects')->insertGetId([
+                    $creatingObjs[] = [
                         'process_id' => $process->id,
                         'identity_id' => $identityId,
                         'track_id' => $obj->track_id,
@@ -119,12 +127,17 @@ class ListenTrackingProcess extends Command
                         'confidence_rate' => object_get($obj, 'confidence_rate'),
                         'created_at' => Carbon::now(),
                         'updated_at' => Carbon::now(),
-                    ]);
+                    ];
                 }
             }
             if (count($updatingObjs) !== 0) {
-                # update many objects
-                DatabaseHelper::updateMultiple($updatingObjs, 'id', 'objects');
+                $this->objectService->updateMany('id', $updatingObjs);
+            }
+            if (count($creatingObjs) !== 0) {
+                $reQueryObjIds = array_merge(
+                    $reQueryObjIds,
+                    $this->objectService->create($data, true)
+                );
             }
             $this->queryAndBroadcastResult($reQueryObjIds, $process->id);
         });
@@ -138,28 +151,11 @@ class ListenTrackingProcess extends Command
     public function queryAndBroadcastResult($ids, $processId)
     {
         # broadcast to detail page
-        $objects = DB::table('objects')
-            ->leftJoin('clusters', 'objects.cluster_id', 'clusters.id')
-            ->leftJoin('identities as CI', 'clusters.identity_id', 'CI.id')
-            ->leftJoin('identities as OI', 'objects.identity_id', 'OI.id')
-            ->whereIn('objects.id', $ids)
-            ->select([
-                'objects.*',
-                'OI.id as identity_id',
-                'OI.name as identity_name',
-                'OI.images as identity_images',
-                'CI.id as cluster_identity_id',
-                'CI.name as cluster_identity_name',
-                'CI.images as cluster_identity_images',
-            ])
-            ->get();
-        $objects = DatabaseHelper::blendObjectsIdentity($objects);
+        $objects = $this->objectService->getObjectsByIds($ids);
         broadcast(new ObjectsAppear($processId, $objects, "process.$processId.objects"));
 
         # broadcast to monitor page
-        $process = DB::table('processes')->where('id', $processId)->select(
-            array_merge(['id'], $this->getStatistic($processId))
-        )->first();
+        $process = $this->processService->getProcessDetail($processId);
         broadcast(new AnalysisProceeded([$process]));
         broadcast(new AnalysisProceeded($process, "process.$processId.analysis"));
     }
@@ -192,9 +188,6 @@ class ListenTrackingProcess extends Command
         if (empty($obj->body_ids)) {
             return [];
         }
-
-        return array_map(function ($body) {
-            return $body->url;
-        }, $obj->body_ids);
+        return Arr::pluck($obj->body_ids, 'url');
     }
 }

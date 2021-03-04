@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Events;
+namespace Modules\Process\Events;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -9,23 +9,24 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class ObjectVideoRendered implements ShouldBroadcast
+class AnalysisProceeded implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     private $processId;
     private $data;
+    private $channel;
 
     /**
      * Create a new event instance.
      *
-     * @param $processId
      * @param $data
+     * @param string $channel
      */
-    public function __construct($processId, $data)
+    public function __construct($data, $channel = 'monitor.analysis')
     {
-        $this->processId = $processId;
         $this->data = $data;
+        $this->channel = $channel;
     }
 
     /**
@@ -35,7 +36,7 @@ class ObjectVideoRendered implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new Channel("process.$this->processId.objects");
+        return new Channel($this->channel);
     }
 
     public function broadcastWith()

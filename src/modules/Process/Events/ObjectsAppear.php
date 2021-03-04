@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Events;
+namespace Modules\Process\Events;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -9,7 +9,7 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class ClusteringProceeded implements ShouldBroadcast
+class ObjectsAppear implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -20,11 +20,13 @@ class ClusteringProceeded implements ShouldBroadcast
     /**
      * Create a new event instance.
      *
+     * @param $processId
      * @param $data
      * @param string $channel
      */
-    public function __construct($data, $channel = 'monitor.clustering')
+    public function __construct($processId, $data, $channel = 'monitor.tracking')
     {
+        $this->processId = $processId;
         $this->data = $data;
         $this->channel = $channel;
     }
@@ -42,6 +44,7 @@ class ClusteringProceeded implements ShouldBroadcast
     public function broadcastWith()
     {
         return [
+            'processId' => $this->processId,
             'data' => $this->data,
         ];
     }
