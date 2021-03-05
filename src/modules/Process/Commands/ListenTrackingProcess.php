@@ -136,7 +136,7 @@ class ListenTrackingProcess extends Command
             if (count($creatingObjs) !== 0) {
                 $reQueryObjIds = array_merge(
                     $reQueryObjIds,
-                    $this->objectService->create($data, true)
+                    $this->objectService->create($creatingObjs, true)
                 );
             }
             $this->queryAndBroadcastResult($reQueryObjIds, $process->id);
