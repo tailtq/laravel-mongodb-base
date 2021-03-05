@@ -3,15 +3,15 @@
 namespace Modules\Process\Services;
 
 use Infrastructure\BaseService;
-use Modules\Process\Repositories\ObjectRepository;
+use Modules\Process\Repositories\ClusterRepository;
 
 class ClusterService extends BaseService
 {
     /**
      * ObjectService constructor.
-     * @param \Modules\Process\Repositories\ObjectRepository $repository
+     * @param \Modules\Process\Repositories\ClusterRepository $repository
      */
-    public function __construct(ObjectRepository $repository)
+    public function __construct(ClusterRepository $repository)
     {
         $this->repository = $repository;
     }

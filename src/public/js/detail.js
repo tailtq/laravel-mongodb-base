@@ -231,7 +231,7 @@ function renderTime() {
     });
 }
 
-Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectsAppear', (res) => {
+Echo.channel(`process.${processId}.objects`).listen('.Modules\\Process\\Events\\ObjectsAppear', (res) => {
     $('.socket__message').remove();
 
     res.data.forEach((object) => {
@@ -259,7 +259,7 @@ Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectsAppear
     reloadIcons();
 });
 
-Echo.channel(`process.${processId}.cluster`).listen('.App\\Events\\ClusteringProceeded', (res) => {
+Echo.channel(`process.${processId}.cluster`).listen('.Modules\\Process\\Events\\ClusteringProceeded', (res) => {
     res.data.grouped_objects.forEach((object) => {
         const $element = $(`.socket-render tbody tr[data-track-id="${object.track_id}"]`);
 
@@ -288,7 +288,7 @@ Echo.channel(`process.${processId}.cluster`).listen('.App\\Events\\ClusteringPro
     $('td.statistic__total-unidentified').html(totalUnidentified);
 });
 
-Echo.channel(`process.${processId}.analysis`).listen('.App\\Events\\AnalysisProceeded', (res) => {
+Echo.channel(`process.${processId}.analysis`).listen('.Modules\\Process\\Events\\AnalysisProceeded', (res) => {
     const {
         total_appearances: totalAppearances,
         total_objects: totalObjects,
@@ -302,7 +302,7 @@ Echo.channel(`process.${processId}.analysis`).listen('.App\\Events\\AnalysisProc
     $('td.statistic__total-unidentified').html(totalUnidentified);
 });
 
-Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChange', (res) => {
+Echo.channel(`process.${processId}.progress`).listen('.Modules\\Process\\Events\\ProgressChange', (res) => {
     console.log(res.data);
     const {
         status,
@@ -358,7 +358,7 @@ Echo.channel(`process.${processId}.progress`).listen('.App\\Events\\ProgressChan
     }
 });
 
-Echo.channel(`process.${processId}.objects`).listen('.App\\Events\\ObjectVideoRendered', function (res) {
+Echo.channel(`process.${processId}.objects`).listen('.Modules\\Process\\Events\\ObjectVideoRendered', function (res) {
     const { data } = res;
 
     $(`.socket-render tbody tr[data-id="${data.id}"] td:last-child a`)

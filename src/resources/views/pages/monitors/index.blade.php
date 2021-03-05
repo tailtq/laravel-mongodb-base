@@ -223,7 +223,7 @@
         }
 
         function listenAnalysisEvent() {
-            Echo.channel('monitor.analysis').listen('.App\\Events\\AnalysisProceeded', function (res) {
+            Echo.channel('monitor.analysis').listen('.Modules\\Process\\Events\\AnalysisProceeded', function (res) {
                 console.log(res);
                 res.data.forEach((process) => {
                     const {

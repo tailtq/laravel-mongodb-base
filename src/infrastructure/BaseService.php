@@ -118,13 +118,14 @@ abstract class BaseService
 
     /**
      * @param array|\Closure $condition
+     * @param null $default
      * @return mixed
      */
-    public function findBy($condition)
+    public function findBy($condition, $default = null)
     {
         $item = $this->repository->findBy($condition);
 
-        return $item ? $item : new ResourceNotFoundException();
+        return $item ? $item : ($default == 'error' ? new ResourceNotFoundException() : $default);
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace Modules\Process\Commands;
 
+use Infrastructure\Exceptions\ResourceNotFoundException;
 use Modules\Process\Events\ObjectVideoRendered;
 use Modules\Process\Events\ProgressChange;
 use App\Models\Process;
@@ -69,7 +70,7 @@ class ListenProgress extends Command
             }
             $process = $this->processService->findBy(['mongo_id' => $event->process_id]);
 
-            if ($process) {
+            if (!($process instanceof ResourceNotFoundException)) {
                 Log::info(json_encode($event));
 
                 if ($event->status === 'rendered' && !empty($event->mongo_id)) {
