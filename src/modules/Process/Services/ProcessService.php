@@ -193,7 +193,7 @@ class ProcessService extends BaseService
         );
         if (!$response->status) {
             return new CustomException('AI FAILED', 500, (object)[
-                'message' => $response->body->message
+                'message' => $response->message
             ]);
         }
         return ['process' => $process, 'response' => $response];

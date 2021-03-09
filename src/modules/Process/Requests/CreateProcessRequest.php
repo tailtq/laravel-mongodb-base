@@ -43,6 +43,7 @@ class CreateProcessRequest extends BaseCRUDRequest
             'write_data_step' => 'numeric',
             'regions' => 'array',
             'thumbnail' => 'required|string',
+            'camera_id' => 'numeric',
         ];
     }
 }
