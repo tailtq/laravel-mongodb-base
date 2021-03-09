@@ -182,7 +182,7 @@
         @endforeach
     </div>
 
-    @include('modules.Process.Views.search_form')
+    @include('pages.processes.search_form')
 @endsection
 
 @push('custom-scripts')
