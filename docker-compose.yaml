@@ -44,3 +44,8 @@ services:
             PMA_HOSTS: db
             PMA_USER: dbuser
             PMA_PASSWORD: user123
+    composer:
+        image: composer:latest
+        command: bash -c "composer install"
+        volumes:
+            - ./src:/app
