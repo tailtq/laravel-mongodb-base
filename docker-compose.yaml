@@ -5,7 +5,7 @@ services:
     api:
         build: .
         ports:
-            - 9000:80
+            - 9005:80
             - 6001:6001
         depends_on:
             - db
@@ -24,23 +24,10 @@ services:
         environment:
             - PHP_MEM_LIMIT=2048M
     db:
-        image: mysql:5.7
+        image: mongo
+        restart: always
         ports:
-            - 3301:3306
+            - 27021:27017
         environment:
-            MYSQL_ROOT_PASSWORD: root
-            MYSQL_DATABASE: db
-            MYSQL_USER: dbuser
-            MYSQL_PASSWORD: user123
-        volumes:
-            - ./src/storage/mysql:/var/lib/mysql
-    phpmyadmin:
-        image: phpmyadmin/phpmyadmin
-        ports:
-            - 9022:80
-        depends_on:
-            - db
-        environment:
-            PMA_HOSTS: db
-            PMA_USER: dbuser
-            PMA_PASSWORD: user123
+            MONGO_INITDB_ROOT_USERNAME: admin
+            MONGO_INITDB_ROOT_PASSWORD: 12345

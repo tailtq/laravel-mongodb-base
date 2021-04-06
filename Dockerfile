@@ -1,5 +1,13 @@
 FROM kun391/phpup:3.0
 
+RUN apk --update add --virtual build-dependencies build-base openssl-dev autoconf \
+      && pecl install mongodb \
+      && docker-php-ext-enable mongodb \
+      && apk del build-dependencies build-base openssl-dev autoconf \
+      && apk add --no-cache $PHPIZE_DEPS \
+          && pecl install xdebug \
+          && docker-php-ext-enable xdebug
+
 RUN apk add --update redis
 
 RUN apk add --update curl \
