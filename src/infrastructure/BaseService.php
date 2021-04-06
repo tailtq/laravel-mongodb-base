@@ -25,15 +25,13 @@ abstract class BaseService
     public function createAndSync(array $data)
     {
         // Proceed AI request
-        $response = $this->sendPOSTRequest($this->getAIUrl(), $data, $this->getDefaultHeaders());
-        if (!$response->status) {
-            return new CustomException('AI_FAILED', $response->statusCode, (object)[
-                'message' => $response->message,
-            ]);
-        }
-        return $this->repository->create(array_merge($data, [
-            'mongo_id' => $response->body->_id
-        ]));
+//        $response = $this->sendPOSTRequest($this->getAIUrl(), $data, $this->getDefaultHeaders());
+//        if (!$response->status) {
+//            return new CustomException('AI_FAILED', $response->statusCode, (object)[
+//                'message' => $response->message,
+//            ]);
+//        }
+        return $this->repository->create($data);
     }
 
     /**

@@ -2,12 +2,16 @@
 
 namespace Modules\User\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Carbon\Carbon;
 use Illuminate\Notifications\Notifiable;
+use Jenssegers\Mongodb\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
     use Notifiable;
+
+    protected $primaryKey = '_id';
+    protected $connection = 'mongodb';
 
     /**
      * The attributes that are mass assignable.

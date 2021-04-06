@@ -2,9 +2,9 @@
 
 namespace Modules\Camera\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Infrastructure\BaseModel;
 
-class Camera extends Model
+class Camera extends BaseModel
 {
     /**
      * The attributes that are mass assignable.

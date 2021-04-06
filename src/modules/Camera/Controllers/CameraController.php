@@ -9,7 +9,7 @@ class CameraController extends BaseController
 {
     /**
      * CameraController constructor.
-     * @param \Modules\Camera\Services\CameraService $service
+     * @param CameraService $service
      */
     public function __construct(CameraService $service)
     {

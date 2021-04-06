@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Infrastructure\BaseModel;
 
-class TrackedObject extends Model
+class TrackedObject extends BaseModel
 {
     protected $fillable = [
         'identity_id',

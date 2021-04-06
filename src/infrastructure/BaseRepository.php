@@ -6,6 +6,7 @@ use App\Helpers\CommonHelper;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use MongoDB\BSON\UTCDateTime;
 
 class BaseRepository
 {
@@ -64,15 +65,19 @@ class BaseRepository
      */
     public function create(array $data, bool $indexedReturningId = false)
     {
+        if (!empty($data['password'])) {
+            $data['password'] = \Hash::make($data['password']);
+        }
+
         if (CommonHelper::isAssociativeArray($data)) {
-            $data['created_at'] = Carbon::now();
-            $data['updated_at'] = Carbon::now();
+            $data['created_at'] = dateNow();
+            $data['updated_at'] = dateNow();
         } else {
             $ids = [];
 
             foreach ($data as &$element) {
-                $element['created_at'] = Carbon::now();
-                $element['updated_at'] = Carbon::now();
+                $element['created_at'] = dateNow();
+                $element['updated_at'] = dateNow();
 
                 if ($indexedReturningId) {
                     $ids[] = $this->model->insertGetId($element);
@@ -83,6 +88,7 @@ class BaseRepository
             }
             return $this->model->insert($data);
         }
+
         return $this->model->insertGetId($data);
     }
 
@@ -93,7 +99,7 @@ class BaseRepository
      */
     public function updateBy($condition, array $data)
     {
-        $data['updated_at'] = Carbon::now();
+        $data['updated_at'] = Carbon::now()->format('Y-m-d H:i:s');
 
         return $this->model->where($condition)->update($data);
     }

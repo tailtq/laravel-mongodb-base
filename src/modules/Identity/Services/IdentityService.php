@@ -29,10 +29,10 @@ class IdentityService extends BaseService
     {
         // Proceed AI request
         $response = $this->sendPOSTRequest($this->getAIUrl(), [
-            'name' => $data['name'],
-            'status' => !empty($data['status']) ? 'tracking' : 'untracking',
+            'name'        => $data['name'],
+            'status'      => !empty($data['status']) ? 'tracking' : 'untracking',
             'card_number' => $data['card_number'],
-            'images' => Arr::pluck($data['images'], 'url'),
+            'images'      => Arr::pluck($data['images'], 'url'),
         ], $this->getDefaultHeaders());
 
         if (!$response->status) {
@@ -44,10 +44,10 @@ class IdentityService extends BaseService
         $this->sendGETRequest($this->getAIUrl(), $this->getDefaultHeaders());
         $data = array_merge($data, [
             'mongo_id' => $response->body->_id,
-            'status' => !empty($data['status']) ? 'tracking' : 'untracking',
-            'images' => json_encode(array_map(function ($index, $element) use ($response) {
+            'status'   => !empty($data['status']) ? 'tracking' : 'untracking',
+            'images'   => json_encode(array_map(function ($index, $element) use ($response) {
                 return [
-                    'url' => $element['url'],
+                    'url'      => $element['url'],
                     'mongo_id' => $response->body->facial_data[$index]->face_id
                 ];
             }, array_keys($data['images']), $data['images'])),
@@ -73,10 +73,10 @@ class IdentityService extends BaseService
         });
         // Proceed AI request
         $response = $this->sendPUTRequest($this->getAIUrl($item->mongo_id), [
-            'name' => $data['name'],
-            'status' => !empty($data['status']) ? 'tracking' : 'untracking',
+            'name'        => $data['name'],
+            'status'      => !empty($data['status']) ? 'tracking' : 'untracking',
             'card_number' => $data['card_number'],
-            'images' => Arr::pluck($newImages, 'url'),
+            'images'      => Arr::pluck($newImages, 'url'),
         ], $this->getDefaultHeaders());
 
         if (!$response->status) {
@@ -89,16 +89,16 @@ class IdentityService extends BaseService
         foreach ($newImages as $index => $image) {
             array_push($oldImages, [
                 'mongo_id' => $response->body->facial_data[$index]['face_id'],
-                'url' => $image['url']
+                'url'      => $image['url']
             ]);
         }
 
         return $this->repository->updateBy(['id' => $id], [
-            'name' => $data['name'],
-            'status' => !empty($data['status']) ? 'tracking' : 'untracking',
-            'info' => $data['info'],
+            'name'        => $data['name'],
+            'status'      => !empty($data['status']) ? 'tracking' : 'untracking',
+            'info'        => $data['info'],
             'card_number' => $data['card_number'],
-            'images' => json_encode($oldImages),
+            'images'      => json_encode($oldImages),
         ]);
     }
 

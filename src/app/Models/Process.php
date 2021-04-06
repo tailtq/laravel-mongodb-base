@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Infrastructure\BaseModel;
 
-class Process extends Model
+class Process extends BaseModel
 {
     const STATUS = [
         'ready' => 'ready',

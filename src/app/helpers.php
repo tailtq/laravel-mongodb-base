@@ -1,5 +1,7 @@
 <?php
 
+use MongoDB\BSON\UTCDateTime;
+
 function active_class($path, $active = 'active') {
   return call_user_func_array('Request::is', (array)$path) ? $active : '';
 }
@@ -17,4 +19,8 @@ function my_asset($path) {
 //    $isHttps = strpos(env('APP_URL'), 'https');
 
 //    return app('url')->asset($path, $isHttps);
+}
+
+function dateNow(){
+    return new MongoDB\BSON\UTCDateTime();
 }

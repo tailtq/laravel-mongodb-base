@@ -2,11 +2,14 @@
 
 namespace Modules\Camera;
 
-use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider;
+use Illuminate\Support\Facades\Route;
 
 class CameraServiceProvider extends RouteServiceProvider
 {
+    /**
+     * @var string
+     */
     protected $namespace = 'Modules\Camera\Controllers';
 
     /**
