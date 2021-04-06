@@ -1,7 +1,6 @@
 version: "3"
 
 services:
-    # container for API
     api:
         build: .
         ports:
@@ -31,4 +30,8 @@ services:
         environment:
             MONGO_INITDB_ROOT_USERNAME: admin
             MONGO_INITDB_ROOT_PASSWORD: 12345
-
+    composer:
+        image: composer:2.0
+        command: bash -c "cd /app && composer install"
+        volumes:
+            - ./src:/app
