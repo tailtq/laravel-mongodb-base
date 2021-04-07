@@ -15,12 +15,17 @@ class CreateIdentitiesTable extends Migration
     {
         Schema::create('identities', function (Blueprint $table) {
             $table->integerIncrements('id');
+
+            $table->unsignedInteger('process')->nullable();
+            $table->foreign('process')->references('id')->on('processes');
+
             $table->string('name');
             $table->string('card_number', 20);
-            $table->json('images')->nullable();
+            $table->string('type', 20);
             $table->string('status')->default('tracking'); // tracking, untracking
             $table->text('info')->nullable();
-            $table->string('mongo_id')->nullable();
+            $table->json('matching_face_ids')->default('[]');
+            $table->json('clustering_face_ids')->default('[]');
             $table->timestamps();
         });
     }
@@ -32,6 +37,9 @@ class CreateIdentitiesTable extends Migration
      */
     public function down()
     {
+        Schema::table('identities', function (Blueprint $table) {
+            $table->dropForeign(['process']);
+        });
         Schema::dropIfExists('identities');
     }
 }

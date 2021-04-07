@@ -15,10 +15,10 @@ class CreateClustersTable extends Migration
     {
         Schema::create('clusters', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('identity_id')->nullable();
-            $table->foreign('identity_id')->references('id')->on('identities');
-            $table->string('mongo_id');
-            $table->timestamps();
+            $table->unsignedInteger('identity')->nullable();
+            $table->foreign('identity')->references('id')->on('identities');
+            $table->string('type');
+            $table->timestamp('created_at')->nullable();
         });
     }
 
@@ -29,6 +29,9 @@ class CreateClustersTable extends Migration
      */
     public function down()
     {
+        Schema::table('clusters', function (Blueprint $table) {
+            $table->dropForeign(['identity']);
+        });
         Schema::dropIfExists('clusters');
     }
 }

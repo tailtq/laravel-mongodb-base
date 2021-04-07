@@ -15,15 +15,30 @@ class CreateObjectsTable extends Migration
     {
         Schema::create('objects', function (Blueprint $table) {
             $table->integerIncrements('id');
-            $table->unsignedInteger('identity_id')->nullable();
-            $table->unsignedInteger('process_id');
-            $table->string('mongo_id');
-            $table->unsignedInteger('track_id');
-            $table->string('image');
-            $table->timestamps();
+            $table->unsignedInteger('process');
+            $table->foreign('process')->references('id')->on('processes');
 
-            $table->foreign('identity_id')->references('id')->on('identities');
-            $table->foreign('process_id')->references('id')->on('processes');
+            $table->unsignedInteger('identity')->nullable();
+            $table->foreign('identity')->references('id')->on('identities');
+
+            $table->bigInteger('uuid');
+            $table->unsignedInteger('track_id');
+            $table->json('face_ids')->default('[]');
+            $table->json('body_ids')->default('[]');
+            $table->json('avatars')->default('[]');
+            $table->unsignedInteger('from_frame')->nullable();
+            $table->unsignedInteger('to_frame')->nullable();
+            $table->dateTime('from_time')->nullable();
+            $table->dateTime('to_time')->nullable();
+
+            $table->boolean('have_new_body')->default(false);
+            $table->boolean('have_new_face')->default(false);
+
+            $table->unsignedInteger('confidence_rate')->nullable();
+            $table->float('similarity_distance')->nullable();
+
+            $table->string('video_result')->nullable();
+            $table->timestamps();
         });
     }
 
@@ -35,7 +50,7 @@ class CreateObjectsTable extends Migration
     public function down()
     {
         Schema::table('objects', function (Blueprint $table) {
-            $table->dropForeign(['identity_id']);
+            $table->dropForeign(['process', 'identity']);
         });
         Schema::dropIfExists('objects');
     }

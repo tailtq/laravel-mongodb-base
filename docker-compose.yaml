@@ -3,6 +3,7 @@ version: "3"
 services:
     api:
         build: .
+        restart: always
         ports:
             - 9005:80
             - 6001:6001
@@ -30,8 +31,8 @@ services:
         environment:
             MONGO_INITDB_ROOT_USERNAME: admin
             MONGO_INITDB_ROOT_PASSWORD: 12345
-    composer:
-        image: composer:2.0
-        command: bash -c "cd /app && composer install"
-        volumes:
-            - ./src:/app
+#    composer:
+#        image: composer:2.0
+#        command: bash -c "cd /app && composer update"
+#        volumes:
+#            - ./src:/app
