@@ -22,7 +22,7 @@ class UserService extends BaseService
      * @param array $data
      * @return \Illuminate\Http\RedirectResponse|\Infrastructure\Exceptions\CustomException
      */
-    public function create(array $data)
+    public function create(array $data, $id = false)
     {
         $response = $this->sendPOSTRequest($this->getAIUrl('register'), $data, [
             'X-API-KEY' => config('app.ai_api_key')
