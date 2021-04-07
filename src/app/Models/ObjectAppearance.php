@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Infrastructure\BaseModel;
 
-class ObjectAppearance extends Model
+class ObjectAppearance extends BaseModel
 {
     protected $fillable = [
         'object_id',

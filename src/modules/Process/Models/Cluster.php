@@ -2,14 +2,14 @@
 
 namespace Modules\Process\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Infrastructure\BaseModel;
 
-class Cluster extends Model
+class Cluster extends BaseModel
 {
     protected $fillable = [
         'identity_id',
         'mongo_id',
     ];
 
-    protected $table = 'clusters';
+    protected $collection = 'clusters';
 }

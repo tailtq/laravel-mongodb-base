@@ -2,8 +2,9 @@
 
 namespace Modules\User\Controllers;
 
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Infrastructure\BaseController;
-use Modules\Identity\Requests\CreateIdentityRequest;
 use Modules\User\Requests\CreateUserRequest;
 use Modules\User\Services\UserService;
 
@@ -11,7 +12,7 @@ class UserController extends BaseController
 {
     /**
      * UserController constructor.
-     * @param \Modules\User\Services\UserService $service
+     * @param UserService $service
      */
     public function __construct(UserService $service)
     {
@@ -20,8 +21,8 @@ class UserController extends BaseController
     }
 
     /**
-     * @param \Modules\User\Requests\CreateUserRequest $request
-     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+     * @param CreateUserRequest $request
+     * @return RedirectResponse|JsonResponse
      */
     public function storeNew(CreateUserRequest $request)
     {

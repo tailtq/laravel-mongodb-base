@@ -2,9 +2,9 @@
 
 namespace Modules\Process\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Infrastructure\BaseModel;
 
-class TrackedObject extends Model
+class TrackedObject extends BaseModel
 {
     /**
      * The attributes that are mass assignable.
@@ -23,7 +23,7 @@ class TrackedObject extends Model
         'identified' => 'identified',
     ];
 
-    protected $table = 'objects';
+    protected $collection = 'objects';
 
     public function process()
     {

@@ -2,11 +2,13 @@
 
 namespace Modules\Process\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Infrastructure\BaseModel;
 use Modules\Camera\Models\Camera;
 
-class Process extends Model
+class Process extends BaseModel
 {
+    protected $collection = 'processes';
+
     const STATUS = [
         'ready' => 'ready',
         'stopped' => 'stopped',

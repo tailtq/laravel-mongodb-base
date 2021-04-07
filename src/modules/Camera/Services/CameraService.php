@@ -9,7 +9,7 @@ class CameraService extends BaseService
 {
     /**
      * CameraService constructor.
-     * @param \Modules\Camera\Repositories\CameraRepository $repository
+     * @param CameraRepository $repository
      */
     public function __construct(CameraRepository $repository)
     {

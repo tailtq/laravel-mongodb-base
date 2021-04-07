@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Infrastructure\BaseModel;
 
-class Identity extends Model
+class Identity extends BaseModel
 {
     public const STATUS = [
         'tracking' => 'tracking',
