@@ -12,6 +12,6 @@ class Camera extends BaseModel
      * @var array
      */
     protected $fillable = [
-        'name', 'url', 'mongo_id'
+        'name', 'url'
     ];
 }
