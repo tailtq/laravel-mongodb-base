@@ -60,13 +60,14 @@ trait RequestAPI
     }
 
     /**
+     * @param null $token
      * @return array
      */
-    protected function getDefaultHeaders()
+    protected function getDefaultHeaders($token = null): array
     {
         return [
             'X-API-KEY' => config('app.ai_api_key'),
-            'Authorization' => 'Bearer ' . (env('DEFAULT_TOKEN') ?? session('ai_token')),
+            'Authorization' => 'Bearer ' . ($token ?? session('ai_token')),
         ];
     }
 

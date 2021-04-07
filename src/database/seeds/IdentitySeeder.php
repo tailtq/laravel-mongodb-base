@@ -1,10 +1,10 @@
 <?php
 
-use App\Models\Identity;
 use App\Traits\RequestAPI;
 use Faker\Factory;
 use Illuminate\Database\Seeder;
 use App\Traits\HandleUploadFile;
+use Illuminate\Http\Request;
 
 class IdentitySeeder extends Seeder
 {
@@ -17,6 +17,7 @@ class IdentitySeeder extends Seeder
      */
     public function run()
     {
+        $token = $this->getAIToken();
         $urls = $this->listFiles('identity_cards');
         $faker = Factory::create();
 
@@ -24,6 +25,7 @@ class IdentitySeeder extends Seeder
             $chunks = explode('/', $url);
             $name = str_replace(['%20', '_'], ' ', $chunks[count($chunks) - 1]);
             $name = str_replace(['.JPG', 'passport', 'GPLX', '.png', '.jpg'], '', $name);
+            $name = trim($name);
 
             $data = [
                 'name' => $name,
@@ -37,23 +39,22 @@ class IdentitySeeder extends Seeder
                 'status' => !empty($data['status']) ? 'tracking' : 'untracking',
                 'card_number' => $data['card_number'],
                 'images' => $data['images'],
-            ], $this->getDefaultHeaders());
+            ], $this->getDefaultHeaders($token));
 
-            if (!$response->status) {
-                var_dump($response->status);
-                continue;
-            }
-
-            $data['mongo_id'] = $response->body->_id;
-            $data['images'] = array_map(function ($index, $element) use ($response) {
-                return [
-                    'url' => $element,
-                    'mongo_id' => $response->body->facial_data[$index]->face_id
-                ];
-            }, array_keys($data['images']), $data['images']);
-
-            Identity::create($data);
+            $status = $response->status ? 'Created' : 'Failed';
+            echo "$name: $status\n";
+            continue;
         }
+    }
+
+    protected function getAIToken()
+    {
+        $response = $this->sendPOSTRequest(config('app.ai_server') . '/users/login', [], [
+            'X-API-KEY' => config('app.ai_api_key'),
+            'Authorization' => 'Basic ' . base64_encode('admin@gmail.com:123')
+        ]);
+
+        return $response->body->token;
     }
 
     private function randomCardNumber($faker)
