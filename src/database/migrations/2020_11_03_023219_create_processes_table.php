@@ -15,16 +15,30 @@ class CreateProcessesTable extends Migration
     {
         Schema::create('processes', function (Blueprint $table) {
             $table->integerIncrements('id');
-            $table->unsignedInteger('user_id');
+            $table->unsignedInteger('camera')->nullable();
+            $table->foreign('camera')->references('id')->on('cameras');
+            $table->unsignedInteger('user');
+            $table->foreign('user')->references('id')->on('users');
+
+            $table->bigInteger('uuid');
             $table->string('name');
+            $table->string('url')->nullable(); // old: video_url
+            $table->dateTime('started_at')->nullable();
+            $table->string('file_root');
+            $table->json('config');
             $table->string('thumbnail');
-            $table->string('video_url');
             $table->text('description')->nullable();
             $table->string('status')->default('ready'); // ready, running, paused, stopped
-            $table->string('mongo_id')->nullable();
+            $table->integer('fps')->default(1);
+            $table->integer('total_time')->default(0);
+            $table->integer('total_frames')->default(0);
+            $table->string('video_detecting_result')->nullable();
+            $table->string('video_result')->nullable();
+            $table->dateTime('detecting_start_time')->nullable();
+            $table->dateTime('detecting_end_time')->nullable();
+            $table->dateTime('rendering_start_time')->nullable();
+            $table->dateTime('done_time')->nullable();
             $table->timestamps();
-
-            $table->foreign('user_id')->references('id')->on('users');
         });
     }
 
@@ -36,7 +50,7 @@ class CreateProcessesTable extends Migration
     public function down()
     {
         Schema::table('processes', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
+            $table->dropForeign(['camera', 'user']);
         });
         Schema::dropIfExists('processes');
     }
