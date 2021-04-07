@@ -27,7 +27,12 @@
                     @foreach ($items as $item)
                         <tr>
                             <th class="text-center">{{ ++$index }}</th>
-                            <td><img src="{{ !empty($item->images[0]['url'] ) ? $item->images[0]['url'] : asset('img/icon-avatar-default.png')}}" alt=""></td>
+                            <td>
+                                <img src="{{ !empty($item->matching_face_ids[0]['original_url'] )
+                                                ? $item->matching_face_ids[0]['original_url']
+                                                : asset('img/icon-avatar-default.png')}}"
+                                     alt="">
+                            </td>
                             <td>{{ $item->name }}</td>
                             <td>{{ $item->created_at->format('H:i d-m-Y') }}</td>
                             <td>

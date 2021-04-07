@@ -3,6 +3,8 @@
 namespace Infrastructure;
 
 use App\Traits\RequestAPI;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Infrastructure\Exceptions\CustomException;
 use Infrastructure\Exceptions\ResourceNotFoundException;
 
@@ -11,7 +13,7 @@ abstract class BaseService
     use RequestAPI;
 
     /**
-     * @var \Infrastructure\BaseRepository $repository;
+     * @var BaseRepository $repository;
      */
     protected $repository;
 
@@ -20,57 +22,39 @@ abstract class BaseService
     // View handler function
     /**
      * @param array $data
-     * @return array|bool|\Infrastructure\Exceptions\CustomException|int
+     * @return array|bool|CustomException|int
      */
     public function createAndSync(array $data)
     {
-        // Proceed AI request
-//        $response = $this->sendPOSTRequest($this->getAIUrl(), $data, $this->getDefaultHeaders());
-//        if (!$response->status) {
-//            return new CustomException('AI_FAILED', $response->statusCode, (object)[
-//                'message' => $response->message,
-//            ]);
-//        }
         return $this->repository->create($data);
     }
 
     /**
      * @param array $data
      * @param $id
-     * @return \Infrastructure\Exceptions\CustomException|\Infrastructure\Exceptions\ResourceNotFoundException
+     * @return CustomException|ResourceNotFoundException
      */
-    public function update(array $data, int $id)
+    public function update(array $data, string $id)
     {
         $item = $this->repository->findById($id);
+
         if (!$item) {
             return new ResourceNotFoundException();
         }
-        // Proceed AI request
-        $response = $this->sendPUTRequest($this->getAIUrl($item->mongo_id), $data, $this->getDefaultHeaders());
-        if (!$response->status) {
-            return new CustomException('AI_FAILED', $response->statusCode, (object)[
-                'message' => $response->message,
-            ]);
-        }
+
         return $this->repository->updateBy(['id' => $id], $data);
     }
 
     /**
      * @param $id
-     * @return \Infrastructure\Exceptions\CustomException|\Infrastructure\Exceptions\ResourceNotFoundException
+     * @return CustomException|ResourceNotFoundException
      */
     public function delete($id)
     {
         $item = $this->repository->findById($id);
+
         if (!$item) {
             return new ResourceNotFoundException();
-        }
-        // Proceed AI request
-        $response = $this->sendDELETERequest($this->getAIUrl($item->mongo_id), [], $this->getDefaultHeaders());
-        if (!$response->status) {
-            return new CustomException('AI_FAILED', $response->statusCode, (object)[
-                'message' => $response->message,
-            ]);
         }
 
         return $this->repository->deleteBy(['id' => $id]);
@@ -86,9 +70,9 @@ abstract class BaseService
     }
 
     /**
-     * @return \Illuminate\Support\Collection
+     * @return Collection
      */
-    public function listAll()
+    public function listAll(): Collection
     {
         return $this->repository->listBy([], false);
     }
@@ -96,18 +80,18 @@ abstract class BaseService
     /**
      * @param array|\Closure $condition
      * @param bool $shouldPaginate
-     * @return \Illuminate\Support\Collection
+     * @return Collection
      */
-    public function listBy($condition, $shouldPaginate = false)
+    public function listBy($condition, $shouldPaginate = false): Collection
     {
         return $this->repository->listBy($condition, $shouldPaginate);
     }
 
     /**
-     * @param int $id
-     * @return \Illuminate\Database\Eloquent\Model|\Infrastructure\Exceptions\ResourceNotFoundException
+     * @param string $id
+     * @return Model|ResourceNotFoundException
      */
-    public function findById(int $id)
+    public function findById(string $id)
     {
         $item = $this->repository->findById($id);
 

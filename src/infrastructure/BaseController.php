@@ -4,8 +4,12 @@ namespace Infrastructure;
 
 use App\Traits\RequestAPI;
 use App\Traits\ResponseTrait;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\MessageBag;
+use Illuminate\View\View;
 use Infrastructure\Exceptions\CustomException;
 use Infrastructure\Requests\BaseCRUDRequest;
 use Infrastructure\Exceptions\ResourceNotFoundException;
@@ -36,7 +40,7 @@ class BaseController
     }
 
     /**
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return Factory|View
      */
     public function index()
     {
@@ -48,7 +52,7 @@ class BaseController
     }
 
     /**
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return Factory|View
      */
     public function create()
     {
@@ -56,8 +60,8 @@ class BaseController
     }
 
     /**
-     * @param \Infrastructure\Requests\BaseCRUDRequest $request
-     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+     * @param BaseCRUDRequest $request
+     * @return RedirectResponse|JsonResponse
      */
     public function store(BaseCRUDRequest $request)
     {
@@ -75,9 +79,9 @@ class BaseController
 
     /**
      * @param int $id
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return Factory|View
      */
-    public function edit($id)
+    public function edit(string $id)
     {
         $item = $this->service->findById($id);
 
@@ -90,9 +94,9 @@ class BaseController
     }
 
     /**
-     * @param \Infrastructure\Requests\BaseCRUDRequest $request
+     * @param BaseCRUDRequest $request
      * @param $id
-     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+     * @return RedirectResponse|JsonResponse
      */
     public function update(BaseCRUDRequest $request, $id)
     {
@@ -107,12 +111,12 @@ class BaseController
         if ($request->ajax()) {
             return $this->success($result);
         }
-        return redirect()->route($this->route);
+        return redirect()->back();
     }
 
     /**
      * @param $id
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function delete($id)
     {
@@ -127,7 +131,7 @@ class BaseController
     /**
      * @param \Infrastructure\Exceptions\CustomException $result
      * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
+     * @return JsonResponse|RedirectResponse
      */
     protected function returnFailedResult(CustomException $result, Request $request)
     {

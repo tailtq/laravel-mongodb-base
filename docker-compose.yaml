@@ -14,9 +14,9 @@ services:
             - ./deployment/configs/php/php.ini:/usr/local/etc/php/conf.d/php.ini
 
             - ./deployment/configs/supervisor/run-echo-server.conf:/etc/supervisor/conf.d/run-echo-server.conf
-            - ./deployment/configs/supervisor/redis-listen-progress.conf:/etc/supervisor/conf.d/redis-listen-progress.conf
-            - ./deployment/configs/supervisor/redis-listen-tracking-process.conf:/etc/supervisor/conf.d/redis-listen-tracking-process.conf
-            - ./deployment/configs/supervisor/redis-listen-clustering-process.conf:/etc/supervisor/conf.d/redis-listen-clustering-process.conf
+#            - ./deployment/configs/supervisor/redis-listen-progress.conf:/etc/supervisor/conf.d/redis-listen-progress.conf
+#            - ./deployment/configs/supervisor/redis-listen-tracking-process.conf:/etc/supervisor/conf.d/redis-listen-tracking-process.conf
+#            - ./deployment/configs/supervisor/redis-listen-clustering-process.conf:/etc/supervisor/conf.d/redis-listen-clustering-process.conf
 
 #            - ./deployment/configs/crontab.conf:/etc/crontabs/root
             - ./deployment/configs/nginx/nginx-host.conf:/etc/nginx/sites-enabled/default.conf

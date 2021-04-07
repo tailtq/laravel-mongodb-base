@@ -2,8 +2,8 @@
 
 namespace Modules\Identity\Services;
 
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Storage;
 use Infrastructure\BaseService;
 use Infrastructure\Exceptions\BaseException;
 use Infrastructure\Exceptions\CustomException;
@@ -14,7 +14,7 @@ class IdentityService extends BaseService
 {
     /**
      * IdentityService constructor.
-     * @param \Modules\Identity\Repositories\IdentityRepository $repository
+     * @param IdentityRepository $repository
      */
     public function __construct(IdentityRepository $repository)
     {
@@ -23,7 +23,7 @@ class IdentityService extends BaseService
 
     /**
      * @param array $data
-     * @return array|bool|\Infrastructure\Exceptions\CustomException|int
+     * @return array|bool|CustomException|\stdClass
      */
     public function createAndSync(array $data)
     {
@@ -32,6 +32,7 @@ class IdentityService extends BaseService
             'name'        => $data['name'],
             'status'      => !empty($data['status']) ? 'tracking' : 'untracking',
             'card_number' => $data['card_number'],
+            'info'        => Arr::get($data, 'info'),
             'images'      => Arr::pluck($data['images'], 'url'),
         ], $this->getDefaultHeaders());
 
@@ -40,42 +41,29 @@ class IdentityService extends BaseService
                 'message' => $response->message,
             ]);
         }
-        // reload pickle file
-        $this->sendGETRequest($this->getAIUrl(), $this->getDefaultHeaders());
-        $data = array_merge($data, [
-            'mongo_id' => $response->body->_id,
-            'status'   => !empty($data['status']) ? 'tracking' : 'untracking',
-            'images'   => json_encode(array_map(function ($index, $element) use ($response) {
-                return [
-                    'url'      => $element['url'],
-                    'mongo_id' => $response->body->facial_data[$index]->face_id
-                ];
-            }, array_keys($data['images']), $data['images'])),
-        ]);
-
-        return $this->repository->create($data);
+        return $response->body;
     }
 
     /**
      * @param array $data
-     * @param $id
-     * @return \Infrastructure\Exceptions\CustomException|\Infrastructure\Exceptions\ResourceNotFoundException
+     * @param string $id
+     * @return CustomException|ResourceNotFoundException|\stdClass
      */
-    public function update(array $data, int $id)
+    public function update(array $data, string $id)
     {
         $item = $this->repository->findById($id);
         if (!$item) {
             return new ResourceNotFoundException();
         }
-        $oldImages = $item->images;
         $newImages = Arr::where($data['images'], function ($image) {
-            return empty($image['mongo_id']);
+            return empty($image['exist']);
         });
         // Proceed AI request
-        $response = $this->sendPUTRequest($this->getAIUrl($item->mongo_id), [
+        $response = $this->sendPUTRequest($this->getAIUrl($item->id), [
             'name'        => $data['name'],
             'status'      => !empty($data['status']) ? 'tracking' : 'untracking',
             'card_number' => $data['card_number'],
+            'info'        => Arr::get($data, 'info'),
             'images'      => Arr::pluck($newImages, 'url'),
         ], $this->getDefaultHeaders());
 
@@ -86,38 +74,31 @@ class IdentityService extends BaseService
         }
         $this->sendGETRequest($this->getAIUrl(), $this->getDefaultHeaders());
 
-        foreach ($newImages as $index => $image) {
-            array_push($oldImages, [
-                'mongo_id' => $response->body->facial_data[$index]['face_id'],
-                'url'      => $image['url']
-            ]);
-        }
-
-        return $this->repository->updateBy(['id' => $id], [
-            'name'        => $data['name'],
-            'status'      => !empty($data['status']) ? 'tracking' : 'untracking',
-            'info'        => $data['info'],
-            'card_number' => $data['card_number'],
-            'images'      => json_encode($oldImages),
-        ]);
+        return $response->body;
     }
 
     /**
      * @param $id
-     * @return \Illuminate\Http\RedirectResponse|\Infrastructure\Exceptions\BaseException|\Infrastructure\Exceptions\CustomException|\Infrastructure\Exceptions\ResourceNotFoundException
+     * @return RedirectResponse|BaseException|CustomException|ResourceNotFoundException
      */
     public function delete($id)
     {
-        $result = parent::delete($id);
-        $location = config('constants.minio_folder') . '/' . $id;
+        $item = $this->repository->findById($id);
 
-        if ($result instanceof BaseException) {
-            return $result;
+        if (!$item) {
+            return new ResourceNotFoundException();
         }
-        if (Storage::disk('minio')->exists($location)) {
-            Storage::disk('minio')->deleteDir($location);
+        // Proceed AI request
+        $response = $this->sendDELETERequest($this->getAIUrl($item->id), [], $this->getDefaultHeaders());
+
+        if (!$response->status) {
+            return new CustomException('AI_FAILED', $response->statusCode, (object)[
+                'message' => $response->message,
+            ]);
         }
-        return $result;
+        $this->sendGETRequest($this->getAIUrl(), $this->getDefaultHeaders());
+
+        return $response->body;
     }
 
     /**

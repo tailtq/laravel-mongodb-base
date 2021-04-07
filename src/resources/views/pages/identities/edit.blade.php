@@ -89,18 +89,18 @@
                                     </div>
 
                                     <div class="images-visualization row my-4">
-                                        @foreach ($item->images as $index => $image)
+                                        @foreach ($item->matching_face_ids as $index => $image)
                                             <div class="col-md-4 mb-2">
-                                                <img src="{{ $image['url'] }}" alt="" class="img-fluid">
+                                                <img src="{{ $image['original_url'] }}" alt="" class="img-fluid">
                                             </div>
                                         @endforeach
                                     </div>
 
                                     <div class="image-links">
-                                        @foreach ($item->images as $index => $image)
+                                        @foreach ($item->matching_face_ids as $index => $image)
                                             <div>
-                                                <input type="hidden" name="images[{{ $index }}][mongo_id]" value="{{ $image['mongo_id'] }}">
-                                                <input type="hidden" name="images[{{ $index }}][url]" value="{{ $image['url'] }}">
+                                                <input type="hidden" name="images[{{ $index }}][exist]" value="true">
+                                                <input type="hidden" name="images[{{ $index }}][url]" value="{{ $image['original_url'] }}">
                                             </div>
                                         @endforeach
                                     </div>
@@ -116,7 +116,7 @@
                                     <div class="form-check form-check-flat form-check-primary">
                                         <label class="form-check-label">
                                             <input type="checkbox" class="form-check-input" name="status"
-                                                    {{ old('info', $item->status === 'tracking') ? 'checked' : '' }}
+                                                    {{ old('status', $item->status === 'tracking') ? 'checked' : '' }}
                                             >
                                             Theo dõi
                                             <i class="input-frame"></i>

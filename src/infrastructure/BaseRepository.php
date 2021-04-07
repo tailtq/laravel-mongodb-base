@@ -4,6 +4,7 @@ namespace Infrastructure;
 
 use App\Helpers\CommonHelper;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use MongoDB\BSON\UTCDateTime;
@@ -11,7 +12,7 @@ use MongoDB\BSON\UTCDateTime;
 class BaseRepository
 {
     /**
-     * @var \Illuminate\Database\Eloquent\Model $model ;
+     * @var Model $model ;
      */
     protected $model;
 
@@ -25,7 +26,8 @@ class BaseRepository
     public function listBy(
         $condition = [],
         $shouldPaginate = true,
-        array $paginationOptions = ['perPage' => 10]
+        array $paginationOptions = ['perPage' => 10],
+        array $orderBy = [['created_at', 'desc']]
     )
     {
         $query = gettype($condition) == 'object'
@@ -35,23 +37,28 @@ class BaseRepository
         if (!$shouldPaginate) {
             return $query->get();
         }
+        if (count($orderBy) > 0) {
+            foreach ($orderBy as [$column, $ascendingTYpe]) {
+                $query = $query->orderBy($column, $ascendingTYpe);
+            }
+        }
         return $query->paginate($paginationOptions['perPage']);
     }
 
     /**
-     * @param int $id
+     * @param string $id
      * @param array $columns
      * @param array $relations
-     * @return \Illuminate\Database\Eloquent\Model
+     * @return Model
      */
-    public function findById(int $id, array $columns = ['*'], array $relations = [])
+    public function findById(string $id, array $columns = ['*'], array $relations = [])
     {
         return $this->model->select($columns)->with($relations)->find($id);
     }
 
     /**
      * @param array|\Closure $condition
-     * @return \Illuminate\Database\Eloquent\Model
+     * @return Model
      */
     public function findBy($condition)
     {
