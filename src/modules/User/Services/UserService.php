@@ -11,7 +11,7 @@ class UserService extends BaseService
 {
     /**
      * UserService constructor.
-     * @param \Modules\User\Repositories\UserRepository $repository
+     * @param UserRepository $repository
      */
     public function __construct(UserRepository $repository)
     {
@@ -20,30 +20,14 @@ class UserService extends BaseService
 
     /**
      * @param array $data
-     * @return \Illuminate\Http\RedirectResponse|\Infrastructure\Exceptions\CustomException
+     * @param bool $id
+     * @return array|bool|int
      */
-    public function create(array $data, $id = false)
+    public function createAndSync(array $data, $id = false)
     {
-        $response = $this->sendPOSTRequest($this->getAIUrl('register'), $data, [
-            'X-API-KEY' => config('app.ai_api_key')
-        ]);
-        if (!$response->status) {
-            return new CustomException('AI_FAILED', $response->statusCode, (object)[
-                'message' => $response->message,
-            ]);
-        }
-        $data['mongo_id'] = $response->body->_id;
         $data['password'] = Hash::make($data['password']);
 
         return $this->repository->create($data);
     }
 
-    /**
-     * @param string|null $additionalPath
-     * @return string
-     */
-    protected function getAIUrl(string $additionalPath = null)
-    {
-        return config('app.ai_server') . '/users' . ($additionalPath ? "/$additionalPath" : '');
-    }
 }

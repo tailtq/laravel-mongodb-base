@@ -19,7 +19,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'mongo_id', 'name', 'email', 'password',
+        'name', 'email', 'password',
     ];
 
     /**

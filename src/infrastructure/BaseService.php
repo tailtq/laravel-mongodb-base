@@ -17,7 +17,10 @@ abstract class BaseService
      */
     protected $repository;
 
-    abstract protected function getAIUrl(string $mongoId = null);
+    protected function getAIUrl(string $mongoId = null)
+    {
+        return;
+    }
 
     // View handler function
     /**
@@ -42,7 +45,7 @@ abstract class BaseService
             return new ResourceNotFoundException();
         }
 
-        return $this->repository->updateBy(['id' => $id], $data);
+        return $this->repository->updateBy(['_id' => $id], $data);
     }
 
     /**
@@ -57,7 +60,7 @@ abstract class BaseService
             return new ResourceNotFoundException();
         }
 
-        return $this->repository->deleteBy(['id' => $id]);
+        return $this->repository->deleteBy(['_id' => $id]);
     }
 
     // Base functions

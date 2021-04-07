@@ -72,10 +72,6 @@ class BaseRepository
      */
     public function create(array $data, bool $indexedReturningId = false)
     {
-        if (!empty($data['password'])) {
-            $data['password'] = \Hash::make($data['password']);
-        }
-
         if (CommonHelper::isAssociativeArray($data)) {
             $data['created_at'] = dateNow();
             $data['updated_at'] = dateNow();
