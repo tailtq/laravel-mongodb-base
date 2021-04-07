@@ -2,7 +2,7 @@
   "_args": [
     [
       "font-awesome@4.7.0",
-      "/Users/tailtq/Code/php/ai-application/src"
+      "/home/tailtq/Code/php/web-face-reg-from-id-card/src"
     ]
   ],
   "_from": "font-awesome@4.7.0",
@@ -26,7 +26,7 @@
   ],
   "_resolved": "https://registry.npmjs.org/font-awesome/-/font-awesome-4.7.0.tgz",
   "_spec": "4.7.0",
-  "_where": "/Users/tailtq/Code/php/ai-application/src",
+  "_where": "/home/tailtq/Code/php/web-face-reg-from-id-card/src",
   "author": {
     "name": "Dave Gandy",
     "email": "dave@fontawesome.io",

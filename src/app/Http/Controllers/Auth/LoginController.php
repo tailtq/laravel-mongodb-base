@@ -7,7 +7,6 @@ use App\Traits\RequestAPI;
 use Auth;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
-use Modules\Camera\Models\Camera;
 
 class LoginController extends Controller
 {
@@ -57,15 +56,14 @@ class LoginController extends Controller
             return $this->sendLockoutResponse($request);
         }
 
-//        $token = $this->loginAIServer($request);
-
         $credentials = [
             'email' => $request->email,
             'password' => $request->password
         ];
+        $token = $this->loginAIServer($request);
 
         if(Auth::attempt($credentials)) {
-//            session(['ai_token' => $token]);
+            session(['ai_token' => $token]);
             return $this->sendLoginResponse($request);
         }
 

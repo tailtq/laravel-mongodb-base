@@ -29,7 +29,7 @@ RUN supervisord -c /etc/supervisor/supervisord.conf
 RUN chown -R root:root /var/www
 #USER www-data
 
-RUN chmod -R 755 /var/www
+RUN chmod -R 777 /var/www
 
 #CMD ["redis-server"]
 #
