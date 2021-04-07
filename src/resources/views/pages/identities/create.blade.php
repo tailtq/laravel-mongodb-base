@@ -98,7 +98,8 @@
 
                                 <div class="form-check form-check-flat form-check-primary">
                                     <label class="form-check-label">
-                                        <input type="checkbox" class="form-check-input" name="status">
+                                        <input type="checkbox" class="form-check-input" name="status"
+                                               {{ old('status') ? 'checked' : '' }}>
                                         Theo dõi
                                         <i class="input-frame"></i>
                                     </label>

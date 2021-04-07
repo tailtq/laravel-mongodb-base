@@ -32,32 +32,32 @@ class ListenClusteringProcess extends Command
     protected $description = 'Listen clustering process from AI server';
 
     /**
-     * @var \Modules\Identity\Services\IdentityService $identityService
+     * @var IdentityService $identityService
      */
     protected $identityService;
 
     /**
-     * @var \Modules\Process\Services\ProcessService $processService
+     * @var ProcessService $processService
      */
     protected $processService;
 
     /**
-     * @var \Modules\Process\Services\ClusterService $clusterService
+     * @var ClusterService $clusterService
      */
     protected $clusterService;
 
     /**
-     * @var \Modules\Process\Services\ObjectService $objectService
+     * @var ObjectService $objectService
      */
     protected $objectService;
 
     /**
      * Create a new command instance.
      *
-     * @param \Modules\Identity\Services\IdentityService $identityService
-     * @param \Modules\Process\Services\ProcessService $processService
-     * @param \Modules\Process\Services\ClusterService $clusterService
-     * @param \Modules\Process\Services\ObjectService $objectService
+     * @param IdentityService $identityService
+     * @param ProcessService $processService
+     * @param ClusterService $clusterService
+     * @param ObjectService $objectService
      */
     public function __construct(
         IdentityService $identityService,
