@@ -27,7 +27,7 @@ class UserSeeder extends Seeder
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
-            'created_at' => new MongoDB\BSON\UTCDateTime(dateNow())
+            'created_at' => dateNow()
         ]);
     }
 }
