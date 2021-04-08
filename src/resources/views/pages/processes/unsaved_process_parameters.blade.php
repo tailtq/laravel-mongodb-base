@@ -29,7 +29,7 @@
 
                             <div class="form-group">
                                 <label>Camera *</label>
-                                <select name="camera_id" class="form-control" data-type="number" required>
+                                <select name="camera" class="form-control" data-type="number" required>
                                     <option value="0">Chọn camera</option>
 
                                     @foreach($cameras as $camera)
@@ -46,7 +46,7 @@
 
                                 <div class="input-group mb-3">
                                     <input type="text" class="form-control dropzone-field required"
-                                           placeholder="Nhập video" name="video_url">
+                                           placeholder="Nhập video" name="url">
 
                                     <div class="input-group-append">
                                         <a class="btn btn-primary"

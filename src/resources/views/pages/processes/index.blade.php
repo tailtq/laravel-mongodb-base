@@ -126,8 +126,8 @@
 
             $('select[name="process_type"]').on('change', function () {
                 const type = $(this).find('option:selected').val();
-                const $cameraElement = $('select[name="camera_id"]');
-                const $videoUrl = $('input[name="video_url"]');
+                const $cameraElement = $('select[name="camera"]');
+                const $videoUrl = $('input[name="url"]');
                 const $startedAt = $('input[name="started_at"]');
 
                 if (type === 'camera') {

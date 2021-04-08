@@ -2,13 +2,14 @@
 
 namespace Modules\Process\Services;
 
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\UploadedFile;
 use Modules\Process\Events\ProgressChange;
 use App\Traits\AnalysisTrait;
 use App\Traits\HandleUploadFile;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Infrastructure\BaseService;
 use Infrastructure\Exceptions\BaseException;
 use Infrastructure\Exceptions\CustomException;
@@ -16,21 +17,22 @@ use Infrastructure\Exceptions\ResourceNotFoundException;
 use Modules\Camera\Services\CameraService;
 use Modules\Process\Models\Process;
 use Modules\Process\Repositories\ProcessRepository;
+use MongoDB\BSON\ObjectID;
 
 class ProcessService extends BaseService
 {
     use AnalysisTrait, HandleUploadFile;
 
-    /** @var \Modules\Camera\Services\CameraService $cameraService */
+    /** @var CameraService $cameraService */
     protected $cameraService;
 
-    /*** @var \Modules\Process\Services\ObjectService $objectService */
+    /*** @var ObjectService $objectService */
     protected $objectService;
 
     /**
      * ProcessService constructor.
-     * @param \Modules\Process\Repositories\ProcessRepository $repository
-     * @param \Modules\Camera\Services\CameraService $cameraService
+     * @param ProcessRepository $repository
+     * @param CameraService $cameraService
      */
     public function __construct(ProcessRepository $repository, CameraService $cameraService)
     {
@@ -59,7 +61,7 @@ class ProcessService extends BaseService
 
     /**
      * @param $id
-     * @return array|\Infrastructure\Exceptions\ResourceNotFoundException
+     * @return array|ResourceNotFoundException
      */
     public function getDetailPageData($id)
     {
@@ -68,8 +70,6 @@ class ProcessService extends BaseService
         if ($item instanceof ResourceNotFoundException) {
             return $item;
         }
-        $processData = $this->sendGETRequest($this->getAIUrl($item->mongo_id), [], $this->getDefaultHeaders());
-        $item->config = $processData->status ? $processData->body->config : null;
 
         return array_merge([
             'item' => $item,
@@ -79,11 +79,11 @@ class ProcessService extends BaseService
 
     /**
      * @param array $data
-     * @return array|bool|\Infrastructure\Exceptions\CustomException|int
+     * @return array|bool|CustomException|int
      */
     public function createAndSync(array $data)
     {
-        $cameraId = Arr::get($data, 'camera_id');
+        $cameraId = Arr::get($data, 'camera');
         $camera = $cameraId ? $this->cameraService->findById($cameraId) : null;
         $camera = !($camera instanceof ResourceNotFoundException) ? $camera : null;
 
@@ -92,9 +92,9 @@ class ProcessService extends BaseService
             : null;
 
         $response = $this->sendPOSTRequest($this->getAIUrl(), [
-            'camera' => $camera ? $camera->mongo_id : null,
+            'camera' => $camera ? $camera->idString : null,
             'name' => $data['name'],
-            'url' => $camera ? null : $data['video_url'],
+            'url' => $camera ? null : $data['url'],
             'status' => Process::STATUS['ready'],
             'started_at' => $startedAt,
             'detection_scale' => (float)$data['detection_scale'],
@@ -112,6 +112,8 @@ class ProcessService extends BaseService
             'write_video_step' => (int)$data['write_video_step'],
             'write_data_step' => (int)$data['write_data_step'],
             'regions' => $data['regions'],
+            'thumbnail' => $data['thumbnail'],
+            'description' => $data['description'],
         ], $this->getDefaultHeaders());
 
         if (!$response->status) {
@@ -119,33 +121,23 @@ class ProcessService extends BaseService
                 'message' => $response->message,
             ]);
         }
-        return $this->repository->create([
-            'user_id' => Auth::id(),
-            'camera_id' => $camera ? $camera->id : null,
-            'name' => $data['name'],
-            'thumbnail' => $data['thumbnail'],
-            'video_url' => $camera ? null : $data['video_url'],
-            'description' => $data['description'],
-            'status' => Process::STATUS['ready'],
-            'mongo_id' => $response->body->_id,
-            'total_time' => $camera ? -1 : $response->body->total_time,
-            'total_frames' => $camera ? -1 : $response->body->total_frames,
-            'fps' => $response->body->fps,
-        ]);
+
+        return $response->body->_id;
     }
 
     /**
      * @param $id
-     * @return \Infrastructure\Exceptions\CustomException|\Infrastructure\Exceptions\ResourceNotFoundException|int
+     * @return CustomException|ResourceNotFoundException|int
      */
     public function startProcess($id)
     {
-        $result = $this->callAIService($id, 'start', 'GET');
+        $result = $this->callAIService($id, 'start');
 
         if ($result instanceof BaseException) {
             return $result;
         }
-        return $this->repository->updateBy(['id' => $id], [
+
+        return $this->repository->updateBy(['_id' => new ObjectID($id)], [
             'detecting_start_time' => Carbon::now(),
             'status' => Process::STATUS['detecting'],
         ]);
@@ -153,16 +145,16 @@ class ProcessService extends BaseService
 
     /**
      * @param $id
-     * @return \Infrastructure\Exceptions\CustomException|\Infrastructure\Exceptions\ResourceNotFoundException|int
+     * @return CustomException|ResourceNotFoundException|int
      */
     public function stopProcess($id)
     {
-        $result = $this->callAIService($id, 'stop', 'GET');
+        $result = $this->callAIService($id, 'stop');
 
         if ($result instanceof BaseException) {
             return $result;
         }
-        $result = $this->repository->updateBy(['id' => $id], [
+        $result = $this->repository->updateBy(['_id' => new ObjectID($id)], [
             'status' => Process::STATUS['stopped'],
             'done_time' => Carbon::now(),
             'detecting_end_time' => Carbon::now(),
@@ -187,7 +179,7 @@ class ProcessService extends BaseService
         if (!$process) {
             return new ResourceNotFoundException();
         }
-        $path = $additionalPath ? "$process->mongo_id/$additionalPath" : $process->mongo_id;
+        $path = $additionalPath ? "$process->idString/$additionalPath" : $process->idString;
         $response = $this->{"send{$method}Request"}(
             $this->getAIUrl($path), [], $this->getDefaultHeaders()
         );
@@ -201,7 +193,7 @@ class ProcessService extends BaseService
 
     /**
      * @param $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function getObjects($id)
     {
@@ -212,29 +204,27 @@ class ProcessService extends BaseService
 
     /**
      * @param $id
-     * @return bool|\Infrastructure\Exceptions\CustomException|\Infrastructure\Exceptions\ResourceNotFoundException
+     * @return bool|CustomException|ResourceNotFoundException
      */
     public function delete($id)
     {
-        $this->setObjectService();
         $result = $this->callAIService($id, null, 'DELETE');
 
         if ($result instanceof ResourceNotFoundException) {
             return $result;
         }
-        $this->objectService->deleteBy(['process_id' => $id]);
-        $this->repository->deleteBy(['id' => $id]);
 
         return true;
     }
 
     /**
      * @param $id
-     * @return \Illuminate\Database\Eloquent\Model|\Infrastructure\Exceptions\ResourceNotFoundException
+     * @return Model|ResourceNotFoundException
      */
-    public function getProcessDetail(int $id)
+    public function getProcessDetail(string $id)
     {
-        $item = $this->repository->getDetailWithStatistic($id, ['camera']);
+        $item = $this->repository->getDetailWithStatistic($id, ['cameraRelation']);
+
         if (!$item) {
             return new ResourceNotFoundException();
         }
@@ -242,15 +232,16 @@ class ProcessService extends BaseService
             $item->detecting_duration = $this->parseTime($item->detecting_start_time, $item->detecting_end_time);
             $item->total_duration = $this->parseTime($item->detecting_start_time, $item->done_time);
         }
+
         return $item;
     }
 
     /**
      * @param array $ids
      * @param string $searchType
-     * @param \Illuminate\Http\UploadedFile|null $file
+     * @param UploadedFile|null $file
      * @param int|null $objectId
-     * @return \Infrastructure\Exceptions\ResourceNotFoundException|mixed
+     * @return ResourceNotFoundException|mixed
      */
     public function searchFace(array $ids, string $searchType, $file = null, $objectId = null)
     {

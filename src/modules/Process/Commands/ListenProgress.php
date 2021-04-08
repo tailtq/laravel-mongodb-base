@@ -80,7 +80,7 @@ class ListenProgress extends Command
                 $updateData = [];
 
                 if ($event->status === 'rendered') {
-                    $videoResult = object_get($event, 'video_url');
+                    $videoResult = object_get($event, 'url');
                     $updateData['video_result'] = $videoResult;
                     $data['video_result'] = $videoResult;
                 }

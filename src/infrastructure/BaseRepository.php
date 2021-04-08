@@ -53,7 +53,7 @@ class BaseRepository
      */
     public function findById(string $id, array $columns = ['*'], array $relations = [])
     {
-        return $this->model->select($columns)->with($relations)->find($id);
+        return $this->model->with($relations)->find($id);
     }
 
     /**
@@ -102,7 +102,7 @@ class BaseRepository
      */
     public function updateBy($condition, array $data)
     {
-        $data['updated_at'] = Carbon::now()->format('Y-m-d H:i:s');
+        $data['updated_at'] = dateNow();
 
         return $this->model->where($condition)->update($data);
     }

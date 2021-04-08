@@ -47,7 +47,7 @@ class MediaController extends BaseController
      */
     public function createThumbnail(Request $request)
     {
-        $result = $this->service->createThumbnail($request->get('video_url'));
+        $result = $this->service->createThumbnail($request->get('url'));
 
         if ($result instanceof CustomException) {
             return $this->returnFailedResult($result, $request);

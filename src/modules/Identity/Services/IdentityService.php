@@ -21,6 +21,11 @@ class IdentityService extends BaseService
         $this->repository = $repository;
     }
 
+    public function paginate()
+    {
+        return $this->repository->listBy(['type' => 'known']);
+    }
+
     /**
      * @param array $data
      * @return array|bool|CustomException|\stdClass
