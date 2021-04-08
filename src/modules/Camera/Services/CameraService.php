@@ -15,13 +15,4 @@ class CameraService extends BaseService
     {
         $this->repository = $repository;
     }
-
-    /**
-     * @param string|null $mongoId
-     * @return string
-     */
-    protected function getAIUrl(string $mongoId = null)
-    {
-        return config('app.ai_server') . '/cameras' . ($mongoId ? "/$mongoId" : '');
-    }
 }
