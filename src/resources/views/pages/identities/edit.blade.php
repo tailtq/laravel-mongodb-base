@@ -89,20 +89,24 @@
                                     </div>
 
                                     <div class="images-visualization row my-4">
-                                        @foreach ($item->matching_face_ids as $index => $image)
-                                            <div class="col-md-4 mb-2">
-                                                <img src="{{ $image['original_url'] }}" alt="" class="img-fluid">
-                                            </div>
-                                        @endforeach
+                                        @if(!empty($item->matching_face_ids))
+                                            @foreach ($item->matching_face_ids as $index => $image)
+                                                <div class="col-md-4 mb-2">
+                                                    <img src="{{ $image['original_url'] }}" alt="" class="img-fluid">
+                                                </div>
+                                            @endforeach
+                                        @endif
                                     </div>
 
                                     <div class="image-links">
-                                        @foreach ($item->matching_face_ids as $index => $image)
-                                            <div>
-                                                <input type="hidden" name="images[{{ $index }}][exist]" value="true">
-                                                <input type="hidden" name="images[{{ $index }}][url]" value="{{ $image['original_url'] }}">
-                                            </div>
-                                        @endforeach
+                                        @if(!empty($item->matching_face_ids))
+                                            @foreach ($item->matching_face_ids as $index => $image)
+                                                <div>
+                                                    <input type="hidden" name="images[{{ $index }}][exist]" value="true">
+                                                    <input type="hidden" name="images[{{ $index }}][url]" value="{{ $image['original_url'] }}">
+                                                </div>
+                                            @endforeach
+                                        @endif
                                     </div>
 
                                     @error('images')

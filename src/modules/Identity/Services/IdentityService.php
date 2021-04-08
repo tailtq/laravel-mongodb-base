@@ -88,6 +88,7 @@ class IdentityService extends BaseService
         if (!$item) {
             return new ResourceNotFoundException();
         }
+
         // Proceed AI request
         $response = $this->sendDELETERequest($this->getAIUrl($item->id), [], $this->getDefaultHeaders());
 
