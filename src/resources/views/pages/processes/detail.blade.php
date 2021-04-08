@@ -32,8 +32,7 @@
         <div class="card-body w-100">
             <div class="d-flex justify-content-md-between align-items-center mb-3">
                 <h5 class="card-title process"
-                    data-id="{{ $item->id }}"
-                    data-mongo-id="{{ $item->mongo_id }}">
+                    data-id="{{ $item->id }}">
                     {{ $item->name }}
                     &nbsp;
                     <span class="
@@ -265,8 +264,8 @@
         const frameDrop = {{ object_get($item->config, 'frame_drop', 1) }};
         const fps = Math.round(parseInt('{{ $item->fps }}', 10) / frameDrop);
         // const renderHour = totalFrames / fps / 3600 >= 1;
-        const renderHour = parseInt('{{ $item->camera_id ? 1 : 0 }}');
-        const isRealtime = parseInt('{{ $item->camera_id ? 1 : 0 }}');
+        const renderHour = parseInt('{{ $item->cameraRelation ? 1 : 0 }}');
+        const isRealtime = parseInt('{{ $item->cameraRelation ? 1 : 0 }}');
         let globalStatus = '{{ $item->status }}';
 
         isDrawing = false;

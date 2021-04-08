@@ -25,15 +25,14 @@ class Process extends BaseModel
      * @var array
      */
     protected $fillable = [
-        'camera_id',
+        'camera',
         'name',
-        'video_url',
+        'url',
         'description',
         'status',
         'user_id',
         'thumbnail',
         'mongo_id',
-        'total_time',
         'total_frames',
         'fps',
     ];
@@ -42,8 +41,8 @@ class Process extends BaseModel
         'images' => 'array',
     ];
 
-    public function camera()
+    public function cameraRelation()
     {
-        return $this->belongsTo(Camera::class);
+        return $this->belongsTo(Camera::class, 'camera', '_id');
     }
 }

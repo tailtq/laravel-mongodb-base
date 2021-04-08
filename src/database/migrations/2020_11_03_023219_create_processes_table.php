@@ -30,8 +30,7 @@ class CreateProcessesTable extends Migration
             $table->text('description')->nullable();
             $table->string('status')->default('ready'); // ready, running, paused, stopped
             $table->integer('fps')->default(1);
-            $table->integer('total_time')->default(0);
-            $table->integer('total_frames')->default(0);
+            $table->integer('total_frames')->nullable();
             $table->string('video_detecting_result')->nullable();
             $table->string('video_result')->nullable();
             $table->dateTime('detecting_start_time')->nullable();

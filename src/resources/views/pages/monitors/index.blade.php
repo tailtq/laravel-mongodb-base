@@ -122,7 +122,7 @@
                  data-total-objects="{{ $process->total_objects }}"
                  data-total-identified="{{ $process->total_identified }}"
                  data-total-unidentified="{{ $process->total_unidentified }}">
-                @if ($process->camera_id)
+                @if ($process->camera)
                     <div class="monitor-icon__group" title="Live">
                         <i class="monitor-icon mdi mdi-access-point"></i>
                     </div>
@@ -278,7 +278,7 @@
                                  data-total-objects="${process.total_objects}"
                                  data-total-identified="${process.total_identified}"
                                  data-total-unidentified="${process.total_unidentified}">
-                                ${process.camera_id ? `
+                                ${process.camera ? `
                                     <div class="monitor-icon__group" title="Live">
                                         <i class="monitor-icon mdi mdi-access-point"></i>
                                     </div>

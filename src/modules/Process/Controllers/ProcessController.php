@@ -2,7 +2,12 @@
 
 namespace Modules\Process\Controllers;
 
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Redirector;
+use Illuminate\View\View;
 use Infrastructure\BaseController;
 use Infrastructure\Exceptions\CustomException;
 use Infrastructure\Exceptions\ResourceNotFoundException;
@@ -13,7 +18,7 @@ class ProcessController extends BaseController
 {
     /**
      * ProcessController constructor.
-     * @param \Modules\Process\Services\ProcessService $service
+     * @param ProcessService $service
      */
     public function __construct(ProcessService $service)
     {
@@ -22,7 +27,7 @@ class ProcessController extends BaseController
     }
 
     /**
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return Factory|View
      */
     public function index()
     {
@@ -33,7 +38,7 @@ class ProcessController extends BaseController
 
     /**
      * @param $id
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return Factory|View
      */
     public function show($id)
     {
@@ -46,8 +51,8 @@ class ProcessController extends BaseController
     }
 
     /**
-     * @param \Modules\Process\Requests\CreateProcessRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param CreateProcessRequest $request
+     * @return JsonResponse
      */
     public function storeNew(CreateProcessRequest $request)
     {
@@ -62,7 +67,7 @@ class ProcessController extends BaseController
 
     /**
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function startProcess(Request $request)
     {
@@ -78,7 +83,7 @@ class ProcessController extends BaseController
 
     /**
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function stopProcess(Request $request)
     {
@@ -94,7 +99,7 @@ class ProcessController extends BaseController
 
     /**
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function renderVideo(Request $request)
     {
@@ -110,7 +115,7 @@ class ProcessController extends BaseController
 
     /**
      * @param int $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function getObjects($id)
     {
@@ -121,7 +126,7 @@ class ProcessController extends BaseController
 
     /**
      * @param $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function getDetailAfterSuccessOrStop($id)
     {
@@ -135,7 +140,7 @@ class ProcessController extends BaseController
 
     /**
      * @param $id
-     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @return RedirectResponse|Redirector
      */
     public function exportBeforeGrouping($id)
     {
@@ -151,7 +156,7 @@ class ProcessController extends BaseController
 
     /**
      * @param $id
-     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @return RedirectResponse|Redirector
      */
     public function exportAfterGrouping($id)
     {
@@ -166,8 +171,8 @@ class ProcessController extends BaseController
     }
 
     /**
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param Request $request
+     * @return JsonResponse
      */
     public function searchFace(Request $request)
     {

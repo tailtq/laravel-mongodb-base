@@ -25,7 +25,7 @@ class ProcessCreateRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'video_url' => 'string|max:255',
+            'url' => 'string|max:255',
             'description' => 'nullable|string',
             'detection_scale' => 'numeric',
             'frame_drop' => 'numeric',
