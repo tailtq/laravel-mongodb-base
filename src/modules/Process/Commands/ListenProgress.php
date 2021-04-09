@@ -5,7 +5,7 @@ namespace Modules\Process\Commands;
 use Infrastructure\Exceptions\ResourceNotFoundException;
 use Modules\Process\Events\ObjectVideoRendered;
 use Modules\Process\Events\ProgressChange;
-use App\Models\Process;
+use Modules\Process\Models\Process;
 use App\Traits\RequestAPI;
 use Carbon\Carbon;
 use Illuminate\Console\Command;

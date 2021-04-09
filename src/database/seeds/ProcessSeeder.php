@@ -2,7 +2,7 @@
 
 use Faker\Factory;
 use Carbon\Carbon;
-use App\Models\Process;
+use Modules\Process\Models\Process;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
