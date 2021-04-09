@@ -29,5 +29,4 @@ class UserService extends BaseService
 
         return $this->repository->create($data);
     }
-
 }

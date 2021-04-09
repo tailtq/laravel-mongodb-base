@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Traits\MongoDB;
 use App\Traits\ResponseTrait;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -11,5 +12,5 @@ use App\Traits\HandleUploadFile;
 
 class Controller extends BaseController
 {
-    use AuthorizesRequests, DispatchesJobs, ValidatesRequests, HandleUploadFile, ResponseTrait;
+    use AuthorizesRequests, DispatchesJobs, ValidatesRequests, HandleUploadFile, ResponseTrait, MongoDB;
 }
