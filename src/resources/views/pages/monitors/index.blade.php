@@ -133,7 +133,7 @@
                 @endif
 
                 <video class="videoElement w-100" controls
-                       resource="{{ env('STREAMING_SERVER') }}/{{ $process->mongo_id }}.flv">
+                       resource="{{ env('STREAMING_SERVER') }}/{{ $process->id }}.flv">
                 </video>
 
                 <table class="table table-bordered">
@@ -289,7 +289,7 @@
                                 `}
 
                                 <video class="videoElement w-100" controls
-                                       resource="{{ env('STREAMING_SERVER') }}/${process.mongo_id}.flv">
+                                       resource="{{ env('STREAMING_SERVER') }}/${process.id}.flv">
                                 </video>
 
                                 <table class="table table-bordered">

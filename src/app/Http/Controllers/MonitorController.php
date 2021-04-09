@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Process;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\View\View;
+use Modules\Process\Models\Process;
 use App\Traits\AnalysisTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,7 +14,7 @@ class MonitorController extends Controller
     use AnalysisTrait;
 
     /**
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return Factory|View
      */
     public function index()
     {

@@ -276,7 +276,7 @@
         const flvPlayer = flvjs.createPlayer({
             type: 'flv',
             isLive: true,
-            url: '{{ env('STREAMING_SERVER') }}/{{ $item->mongo_id }}.flv'
+            url: '{{ env('STREAMING_SERVER') }}/{{ $item->id }}.flv'
         });
         flvPlayer.attachMediaElement(videoElement);
 

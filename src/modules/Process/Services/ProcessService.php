@@ -151,7 +151,7 @@ class ProcessService extends BaseService
     {
         $result = $this->callAIService($id, 'stop');
 
-        if ($result instanceof BaseException) {
+        if ($result instanceof BaseException && ($result->getData()->message != 'process_not_found' || $result->getData()->message != 'Thread is not active')) {
             return $result;
         }
         $result = $this->repository->updateBy(['_id' => new ObjectID($id)], [
@@ -179,7 +179,7 @@ class ProcessService extends BaseService
         if (!$process) {
             return new ResourceNotFoundException();
         }
-        $path = $additionalPath ? "$process->idString/$additionalPath" : $process->idString;
+        $path = $additionalPath ? "$process->id/$additionalPath" : $process->id;
         $response = $this->{"send{$method}Request"}(
             $this->getAIUrl($path), [], $this->getDefaultHeaders()
         );
@@ -199,7 +199,7 @@ class ProcessService extends BaseService
     {
         $this->setObjectService();
 
-        return $this->objectService->getObjectsByProcess($id);
+        return $this->objectService->getObjectsByProcess(new ObjectID($id));
     }
 
     /**
