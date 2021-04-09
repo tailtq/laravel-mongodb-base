@@ -32,7 +32,7 @@ trait MongoDB
     {
         $collection = $this->getCollection($this->collectionName);
 
-        return iterator_to_array($collection->find($condition));
+        return $this->iterateToObjects($collection->find($condition));
     }
 
     /**
@@ -44,6 +44,17 @@ trait MongoDB
     {
         $collection = $this->getCollection($this->collectionName);
 
-        return iterator_to_array($collection->aggregate($conditionArr, $options));
+        return $this->iterateToObjects($collection->aggregate($conditionArr, $options));
+    }
+
+    private function iterateToObjects($results)
+    {
+        $newResults = [];
+
+        foreach ($results as $result) {
+            $newResults[] = \MongoDB\BSON\toPHP(\MongoDB\BSON\fromPHP($result));
+        }
+
+        return $newResults;
     }
 }
