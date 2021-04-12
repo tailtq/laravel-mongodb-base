@@ -97,7 +97,6 @@ $('.render-video__btn').click(function (e) {
 });
 
 function renderIdentity(matchingFaceIds, id) {
-    console.log(matchingFaceIds);
     return matchingFaceIds ? `
         <a href="${matchingFaceIds[0].original_url}" data-lightbox="object-${id}">
             <img src="${matchingFaceIds[0].original_url}" style="width: inherit; height: 60px;" alt="">
@@ -291,7 +290,7 @@ Echo.channel(`process.${processId}.analysis`).listen('.Modules\\Process\\Events\
         total_objects: totalObjects,
         total_identified: totalIdentified,
         total_unidentified: totalUnidentified,
-    } = res.data;
+    } = res.data.statistic;
 
     $('td.statistic__total-appearances').html(totalAppearances);
     $('td.statistic__total-objects').html(totalObjects);

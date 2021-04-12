@@ -6,7 +6,6 @@ use Infrastructure\Exceptions\ResourceNotFoundException;
 use Modules\Identity\Services\IdentityService;
 use Modules\Process\Events\AnalysisProceeded;
 use Modules\Process\Events\ObjectsAppear;
-use App\Traits\AnalysisTrait;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
@@ -16,8 +15,6 @@ use Modules\Process\Services\ProcessService;
 
 class ListenTrackingProcess extends Command
 {
-    use AnalysisTrait;
-
     /**
      * The name and signature of the console command.
      *

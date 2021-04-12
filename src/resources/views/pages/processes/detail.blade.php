@@ -116,19 +116,19 @@
                     <table class="table table-bordered statistical-table">
                         <tr>
                             <th>Số lượt người xuất hiện</th>
-                            <td class="statistic__total-appearances" width="30%">{{ $item->total_appearances }}</td>
+                            <td class="statistic__total-appearances" width="30%">{{ $item->statistic['total_appearances'] }}</td>
                         </tr>
                         <tr>
                             <th>Số người</th>
-                            <td class="statistic__total-objects" width="30%">{{ $item->total_objects }}</td>
+                            <td class="statistic__total-objects" width="30%">{{ $item->statistic['total_objects'] }}</td>
                         </tr>
                         <tr>
                             <th>Số người phát hiện được danh tính</th>
-                            <td class="statistic__total-identified" width="30%">{{ $item->total_identified }}</td>
+                            <td class="statistic__total-identified" width="30%">{{ $item->statistic['total_identified'] }}</td>
                         </tr>
                         <tr>
                             <th>Số người không phát hiện được danh tính</th>
-                            <td class="statistic__total-unidentified" width="30%">{{ $item->total_unidentified }}</td>
+                            <td class="statistic__total-unidentified" width="30%">{{ $item->statistic['total_unidentified'] }}</td>
                         </tr>
                         <tr>
                             <th>Thời gian nhận diện</th>

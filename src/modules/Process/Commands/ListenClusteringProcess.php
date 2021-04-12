@@ -5,7 +5,6 @@ namespace Modules\Process\Commands;
 use Modules\Identity\Services\IdentityService;
 use Modules\Process\Events\AnalysisProceeded;
 use Modules\Process\Events\ClusteringProceeded;
-use App\Traits\AnalysisTrait;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Redis;
@@ -15,8 +14,6 @@ use Modules\Process\Services\ProcessService;
 
 class ListenClusteringProcess extends Command
 {
-    use AnalysisTrait;
-
     /**
      * The name and signature of the console command.
      *

@@ -9,7 +9,7 @@ use MongoDB\BSON\ObjectId;
 
 class ObjectRepository extends BaseRepository
 {
-    protected $generalGroupingFields = [
+    protected $groupingFieldsByPerson = [
         '_id' => '$_id',
         'identity' => ['$first' => '$identity'],
         'process' => ['$first' => '$process'],
@@ -66,10 +66,10 @@ class ObjectRepository extends BaseRepository
                 'preserveNullAndEmptyArrays' => True
             ]],
             ['$match' => $condition],
-            ['$group' => $this->generalGroupingFields],
             ['$sort' => [
                 'track_id' => 1
-            ]]
+            ]],
+            ['$group' => $this->groupingFieldsByPerson],
         ]);
     }
 
@@ -116,18 +116,26 @@ class ObjectRepository extends BaseRepository
     }
 
     /**
-     * @param $conditions
-     * @param array $additionalOperations
-     * @return array
+     * Break this main query down for reusing in multiple places
+     * @param array $conditions
+     * @return mixed
      */
-    protected function queryWithGeneralInfo($conditions, array $additionalOperations = []): array
+    protected function getJoiningPersonQuery(array $conditions, $identityType = false)
     {
-        return $this->aggregate(array_merge($additionalOperations, [
+        $identityCondition = [];
+
+        if ($identityType == 'no_identity') {
+            $identityCondition['identity'] = ['$exists' => false];
+            $conditions = array_merge($conditions, $identityCondition);
+        }
+        [$groupingField1, $groupingField2] = $this->getDuringGroupingFields();
+
+        return array_merge([
             ['$lookup' => [
                 'from' => 'identities',
                 'localField' => 'identity',
                 'foreignField' => '_id',
-                'as' => 'identity'
+                'as' => 'identity',
             ]],
             ['$unwind' => [
                 'path' => '$identity',
@@ -142,7 +150,10 @@ class ObjectRepository extends BaseRepository
                         'from' => 'clusters',
                         'let' => ['cluster_id' => '$cluster'],
                         'pipeline' => [
-                            ['$match' => ['$expr' => ['$eq' => ['$_id', '$$cluster_id']]]],
+                            ['$match' => array_merge([
+                                '$expr' => ['$eq' => ['$_id', '$$cluster_id']]], $identityCondition),
+                                // identity condition here
+                            ],
                             ['$lookup' => [
                                 'from' => 'identities',
                                 'let' => ['identity_id' => '$identity'],
@@ -170,10 +181,105 @@ class ObjectRepository extends BaseRepository
                 'preserveNullAndEmptyArrays' => True
             ]],
             ['$match' => $conditions],
-            ['$group' => $this->generalGroupingFields],
             ['$sort' => [
                 'track_id' => 1
-            ]]
-        ]));
+            ]],
+            ['$group' => $groupingField1],
+            ['$group' => $groupingField2]
+        ]);
+    }
+
+    /**
+     * @param $conditions
+     * @param array $additionalOperations
+     * @return array
+     */
+    protected function queryWithGeneralInfo($conditions, array $additionalOperations = []): array
+    {
+        return $this->aggregate($this->getJoiningPersonQuery($conditions));
+    }
+
+    /**
+     * @param array $condition
+     * @return array
+     */
+    public function getStatisticByProcesses(array $processIds): array
+    {
+        $condition = ['process' => ['$in' => $processIds]];
+
+        $batches = [
+            $this->aggregate([
+                ['$match' => $condition],
+                ['$group' => [
+                    '_id' => '$process',
+                    'total_appearances' => ['$sum' => 1]
+                ]],
+            ]),
+            $this->aggregate(array_merge($this->getJoiningPersonQuery($condition), [
+                ['$group' => [
+                    '_id' => '$process',
+                    'total_objects' => ['$sum' => 1]
+                ]],
+            ])),
+            $this->aggregate(array_merge($this->getJoiningPersonQuery($condition, 'no_identity'), [
+                ['$group' => [
+                    '_id' => '$process',
+                    'total_unidentified' => ['$sum' => 1]
+                ]],
+            ])),
+        ];
+        $newFormats = [];
+
+        // Map keys of 3 queries together
+        foreach ($batches as $batch) {
+            foreach($batch as $process) {
+                $id = null;
+
+                foreach ((array)$process as $key => $value) {
+                    if ($key == '_id') {
+                        $id = $value = (string) $value;
+                        $newFormats[$id] = empty($newFormats[$id]) ? [] : $newFormats[$id];
+                    } else if ($key == 'total_unidentified') {
+                        $newFormats[$id]['total_identified'] = $newFormats[$id]['total_objects'] - $value;
+                    }
+                    $newFormats[$id][$key] = $value;
+                }
+            }
+        }
+        // Initialize statistic for processes having no objects
+        foreach ($processIds as $processId) {
+            $key = (string) $processId;
+
+            if (!empty($newFormats[$key])) {
+                continue;
+            }
+            $newFormats[$key] = [
+                '_id' => $key,
+                'total_appearances' => 0,
+                'total_objects' => 0,
+                'total_identified' => 0,
+                'total_unidentified' => 0,
+            ];
+        }
+
+        return array_values($newFormats);
+    }
+
+    /**
+     * Regrouping for complex query
+     * @return array[]
+     */
+    public function getDuringGroupingFields(): array
+    {
+        $newFields = $this->groupingFieldsByPerson;
+        $newFields['_id'] = ['$ifNull' => ['$cluster_elements.cluster._id', '$_id']];
+        $newFields['original_id'] = ['$first' => '$_id'];
+
+        $newFields2 = $this->groupingFieldsByPerson;
+        $newFields2['_id'] = '$original_id';
+        $newFields2['cluster_elements'] = ['$first' => '$cluster_elements'];
+        $newFields2['original_id'] = ['$first' => '$original_id'];
+
+        return [$newFields, $newFields2];
     }
 }

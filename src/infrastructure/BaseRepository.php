@@ -30,8 +30,7 @@ class BaseRepository
         $shouldPaginate = true,
         array $paginationOptions = ['perPage' => 10],
         array $orderBy = [['created_at', 'desc']]
-    )
-    {
+    ) {
         $query = gettype($condition) == 'object'
             ? $condition($this->model)
             : $this->model->where($condition);

@@ -118,10 +118,10 @@
         @foreach ($processes as $process)
             <div class="monitor-block mb-3"
                  data-id="{{ $process->id }}"
-                 data-total-appearances="{{ $process->total_appearances }}"
-                 data-total-objects="{{ $process->total_objects }}"
-                 data-total-identified="{{ $process->total_identified }}"
-                 data-total-unidentified="{{ $process->total_unidentified }}">
+                 data-total-appearances="{{ $process->statistic['total_appearances'] }}"
+                 data-total-objects="{{ $process->statistic['total_objects'] }}"
+                 data-total-identified="{{ $process->statistic['total_identified'] }}"
+                 data-total-unidentified="{{ $process->statistic['total_unidentified'] }}">
                 @if ($process->camera)
                     <div class="monitor-icon__group" title="Live">
                         <i class="monitor-icon mdi mdi-access-point"></i>
@@ -151,14 +151,14 @@
                                 <i class="mdi mdi-walk"></i>
                             </b>
                         </td>
-                        <td class="statistic__total-appearances">{{ $process->total_appearances }}</td>
+                        <td class="statistic__total-appearances">{{ $process->statistic['total_appearances'] }}</td>
 
                         <td class="text-center" title="Số người">
                             <b class="display-5">
                                 <i class="mdi mdi-account-group"></i>
                             </b>
                         </td>
-                        <td class="statistic__total-objects">{{ $process->total_objects }}</td>
+                        <td class="statistic__total-objects">{{ $process->statistic['total_objects'] }}</td>
                     </tr>
 
                     <tr>
@@ -167,14 +167,14 @@
                                 <i class="mdi mdi-card-account-details"></i>
                             </b>
                         </td>
-                        <td class="statistic__total-identified">{{ $process->total_identified }}</td>
+                        <td class="statistic__total-identified">{{ $process->statistic['total_identified'] }}</td>
 
                         <td class="text-center" title="Số người không phát hiện được danh tính">
                             <b class="display-5">
                                 <i class="mdi mdi-account-question"></i>
                             </b>
                         </td>
-                        <td class="statistic__total-unidentified">{{ $process->total_unidentified }}</td>
+                        <td class="statistic__total-unidentified">{{ $process->statistic['total_unidentified'] }}</td>
                     </tr>
                     </tbody>
                 </table>
@@ -232,7 +232,7 @@
                         total_objects: totalObjects,
                         total_identified: totalIdentified,
                         total_unidentified: totalUnidentified,
-                    } = process;
+                    } = process.statistic;
 
                     if (!processes[processId]) {
                         loadNewProcesses(Object.keys(processes).map(e => parseInt(e)));
@@ -266,18 +266,18 @@
                 success: function (res) {
                     res.data.forEach((process) => {
                         processes[process.id] = {
-                            totalAppearances: process.total_appearances,
-                            totalObjects: process.total_objects,
-                            totalIdentified: process.total_identified,
-                            totalUnidentified: process.total_unidentified,
+                            totalAppearances: process.statistic.total_appearances,
+                            totalObjects: process.statistic.total_objects,
+                            totalIdentified: process.statistic.total_identified,
+                            totalUnidentified: process.statistic.total_unidentified,
                         };
                         $('.monitor-manager').append(`
                             <div class="monitor-block mb-3"
                                  data-id="${process.id}"
-                                 data-total-appearances="${process.total_appearances}"
-                                 data-total-objects="${process.total_objects}"
-                                 data-total-identified="${process.total_identified}"
-                                 data-total-unidentified="${process.total_unidentified}">
+                                 data-total-appearances="${process.statistic.total_appearances}"
+                                 data-total-objects="${process.statistic.total_objects}"
+                                 data-total-identified="${process.statistic.total_identified}"
+                                 data-total-unidentified="${process.statistic.total_unidentified}">
                                 ${process.camera ? `
                                     <div class="monitor-icon__group" title="Live">
                                         <i class="monitor-icon mdi mdi-access-point"></i>
@@ -307,14 +307,14 @@
                                                     <i class="mdi mdi-walk"></i>
                                                 </b>
                                             </td>
-                                            <td class="statistic__total-appearances">${process.total_appearances}</td>
+                                            <td class="statistic__total-appearances">${process.statistic.total_appearances}</td>
 
                                             <td class="text-center" title="Số người">
                                                 <b class="display-5">
                                                     <i class="mdi mdi-account-group"></i>
                                                 </b>
                                             </td>
-                                            <td class="statistic__total-objects">${process.total_objects}</td>
+                                            <td class="statistic__total-objects">${process.statistic.total_objects}</td>
                                         </tr>
 
                                         <tr>
@@ -323,14 +323,14 @@
                                                     <i class="mdi mdi-card-account-details"></i>
                                                 </b>
                                             </td>
-                                            <td class="statistic__total-identified">${process.total_identified}</td>
+                                            <td class="statistic__total-identified">${process.statistic.total_identified}</td>
 
                                             <td class="text-center" title="Số người không phát hiện được danh tính">
                                                 <b class="display-5">
                                                     <i class="mdi mdi-account-question"></i>
                                                 </b>
                                             </td>
-                                            <td class="statistic__total-unidentified">${process.total_unidentified}</td>
+                                            <td class="statistic__total-unidentified">${process.statistic.total_unidentified}</td>
                                         </tr>
                                     </tbody>
                                 </table>

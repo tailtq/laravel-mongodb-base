@@ -130,6 +130,15 @@ class ObjectService extends BaseService
     }
 
     /**
+     * @param array $ids
+     * @return array
+     */
+    public function getStatisticByProcesses(array $ids): array
+    {
+        return $this->repository->getStatisticByProcesses($ids);
+    }
+
+    /**
      * @param $objects
      * @return mixed
      */

@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\UploadedFile;
 use Modules\Process\Events\ProgressChange;
-use App\Traits\AnalysisTrait;
 use App\Traits\HandleUploadFile;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
@@ -21,7 +20,7 @@ use MongoDB\BSON\ObjectID;
 
 class ProcessService extends BaseService
 {
-    use AnalysisTrait, HandleUploadFile;
+    use HandleUploadFile;
 
     /** @var CameraService $cameraService */
     protected $cameraService;
@@ -65,11 +64,13 @@ class ProcessService extends BaseService
      */
     public function getDetailPageData($id)
     {
-        $item = $this->getProcessDetail($id);
+        $item = $this->repository->findById($id);
 
         if ($item instanceof ResourceNotFoundException) {
             return $item;
         }
+        $this->setObjectService();
+        $item->statistic = $this->objectService->getStatisticByProcesses([new ObjectId($id)])[0];
 
         return array_merge([
             'item' => $item,
@@ -223,7 +224,7 @@ class ProcessService extends BaseService
      */
     public function getProcessDetail(string $id)
     {
-        $item = $this->repository->getDetailWithStatistic($id, ['cameraRelation']);
+        $item = $this->repository->findById($id, ['*'], ['cameraRelation']);
 
         if (!$item) {
             return new ResourceNotFoundException();
@@ -232,6 +233,8 @@ class ProcessService extends BaseService
             $item->detecting_duration = $this->parseTime($item->detecting_start_time, $item->detecting_end_time);
             $item->total_duration = $this->parseTime($item->detecting_start_time, $item->done_time);
         }
+        $this->setObjectService();
+        $item->statistic = $this->objectService->getStatisticByProcesses([new ObjectId($id)])[0];
 
         return $item;
     }
@@ -276,6 +279,27 @@ class ProcessService extends BaseService
         }
 
         return $this->objectService->getObjectsAfterSearchFace($response->body, $processes->count() > 0);
+    }
+
+    public function getDetectingProcess(array $ignoredIds = [])
+    {
+        $this->setObjectService();
+
+        $processes = $this->repository->listBy(function ($query) use ($ignoredIds) {
+            return $query->where('status', Process::STATUS['detecting'])
+                         ->whereNotIn('id', $ignoredIds);
+        }, false);
+        $ids = $processes->pluck('_id')->toArray();
+        $statistics = $this->objectService->getStatisticByProcesses($ids);
+
+        foreach ($processes as $process) {
+            foreach ($statistics as $statistic) {
+                if ($statistic['_id'] == $process->idString)
+                $process->statistic = $statistic;
+            }
+        }
+
+        return $processes;
     }
 
     /**
