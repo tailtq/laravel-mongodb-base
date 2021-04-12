@@ -40,21 +40,20 @@ class ObjectService extends BaseService
      */
     public function getObjectsAfterSearchFace(array $searchedObjects, bool $findWithProcess)
     {
-        $mongoIds = Arr::pluck($searchedObjects, 'object_id');
-
-        $objects = $this->repository->getObjectsAfterSearchFace($mongoIds);
+        $ids = Arr::pluck($searchedObjects, 'object_id');
+        $objects = $this->repository->getObjectsAfterSearchFace($ids);
         $objects = self::blendObjectsIdentity($objects);
         $objects = $this->assignAppearances($objects, $findWithProcess);
 
         foreach ($objects as &$object) {
             $object->confidence_rate = null;
             foreach ($searchedObjects as $searchedObject) {
-                if ($searchedObject->object_id == $object->mongo_id) {
+                if ($searchedObject->object_id == (string) $object->_id) {
                     $object->distance = $searchedObject->search_distance;
                 }
             }
         }
-        $objects = array_values($objects->sortBy('distance')->toArray());
+        $objects = array_values(collect($objects)->sortBy('distance')->toArray());
 
         return $objects;
     }
@@ -95,7 +94,7 @@ class ObjectService extends BaseService
             return new ResourceNotFoundException();
         }
         $url = config('app.ai_server') . '/processes/faces/rendering';
-        $payload = ['object_id' => $object->mongo_id];
+        $payload = ['object_id' => $object->idString];
         $response = $this->sendPOSTRequest($url, $payload, $this->getDefaultHeaders());
 
         if (!$response->status) {
@@ -115,14 +114,14 @@ class ObjectService extends BaseService
     public function assignAppearances($objects, $findWithProcess = true)
     {
         foreach ($objects as $object) {
-            if ($object->cluster_id) {
-                $object->appearances = $this->repository->listBy(function ($query) use ($object, $findWithProcess) {
-                    $query = $query->where('cluster_id', $object->cluster_id);
-                    if ($findWithProcess) {
-                        $query = $query->where('process_id', $object->process_id);
-                    }
-                    return $query;
-                }, false);
+            if (count($object->cluster_elements)) {
+                $conditions = [
+                    'cluster_elements.cluster' => $object->cluster_elements[0]->cluster->_id,
+                ];
+                if ($findWithProcess) {
+                    $conditions['process'] = $object->process;
+                }
+                $object->appearances = $this->repository->getAppearances($conditions);
             } else {
                 $object->appearances = [clone $object];
             }
@@ -136,13 +135,8 @@ class ObjectService extends BaseService
      */
     public static function blendObjectsIdentity($objects)
     {
-        $objects = $objects->map(function ($object) {
-            return (object) $object->toArray();
-        });
-        foreach ($objects as &$object) {
-            $object->identity_id = $object->identity_id ?: $object->cluster_identity_id;
-            $object->identity_name = $object->identity_name ?: $object->cluster_identity_name;
-            $object->identity_images = $object->identity_images ?: $object->cluster_identity_images;
+        foreach ($objects as $object) {
+            $object->identity = !empty($object->identity) ? $object->identity : ($object->cluster_elements[0]->cluster->identity ?? null);
         }
         return $objects;
     }

@@ -12,5 +12,5 @@ use App\Traits\HandleUploadFile;
 
 class Controller extends BaseController
 {
-    use AuthorizesRequests, DispatchesJobs, ValidatesRequests, HandleUploadFile, ResponseTrait, MongoDB;
+    use AuthorizesRequests, DispatchesJobs, ValidatesRequests, HandleUploadFile, ResponseTrait;
 }

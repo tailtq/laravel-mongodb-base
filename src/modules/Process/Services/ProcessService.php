@@ -151,7 +151,7 @@ class ProcessService extends BaseService
     {
         $result = $this->callAIService($id, 'stop');
 
-        if ($result instanceof BaseException && ($result->getData()->message != 'process_not_found' || $result->getData()->message != 'Thread is not active')) {
+        if ($result instanceof BaseException && $result->getData()->message != 'process_not_found' && $result->getData()->message != 'Thread is not active') {
             return $result;
         }
         $result = $this->repository->updateBy(['_id' => new ObjectID($id)], [
@@ -261,10 +261,10 @@ class ProcessService extends BaseService
         } else {
             $object = $this->objectService->findById($objectId);
 
-            if (!$object) {
-                return new ResourceNotFoundException();
+            if ($object instanceof ResourceNotFoundException) {
+                return $object;
             }
-            $payload['object_id'] = $object->mongo_id;
+            $payload['object_id'] = (string)$object->id;
         }
         $response = $this->sendPOSTRequest(
             $this->getAIUrl('faces/searching'), $payload, $this->getDefaultHeaders()

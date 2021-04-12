@@ -1,8 +1,8 @@
-function renderIdentityName(identityName, confidenceRate) {
-    if (!identityName) {
-        return null;
+function renderIdentityName(identity, confidenceRate) {
+    if (!identity || identity.type === 'unknown') {
+        return 'Không xác định';
     }
-    return identityName;
+    return identity.name;
 }
 
 function buildTimeRanges(appearances) {
@@ -15,22 +15,19 @@ function buildTimeRanges(appearances) {
         let time = '';
 
         if (isRealtime) {
-            const timeFrom = new Date(value.time_from);
-            const timeTo = new Date(value.time_from);
+            const timeFrom = new Date(value.from_time);
+            const timeTo = new Date(value.to_time);
             time += `${addZero(timeFrom.getHours())}:${addZero(timeFrom.getMinutes())}:${addZero(timeFrom.getSeconds())}`;
             time += ` - ${addZero(timeTo.getHours())}:${addZero(timeTo.getMinutes())}:${addZero(timeTo.getSeconds())}`;
         } else {
-            time = getTimeString(value.frame_from, value.frame_to, fps, renderHour);
+            time = getTimeString(value.from_frame, value.to_frame, fps, renderHour);
         }
 
-        value.images = JSON.parse(value.images);
-        value.body_images = value.body_images ? JSON.parse(value.body_images) : [];
-
-        value.images.forEach((image) => {
+        value.avatars.forEach((image) => {
             imageHTML += `<img class="original-avatar" src="${image}" alt="">`;
         });
-        value.body_images.forEach((body) => {
-            bodyHTML += `<img class="original-body" src="${body}" alt="">`;
+        (value.body_ids || []).forEach((body) => {
+            bodyHTML += `<img class="original-body" src="${body.url}" alt="">`;
         });
         // TODO: Generate HTML and CSS content
         timeRanges += `
@@ -39,11 +36,10 @@ function buildTimeRanges(appearances) {
                     data-html="true"
                     data-toggle="popover"
                     data-placement="top"
-                    data-id="${value.id}"
+                    data-id="${value._id}"
                     data-track-id="${value.track_id}"
-                    data-identity-id="${value.identity_id}"
-                    data-cluster-id="${value.cluster_id}"
-                    data-mongo-id="${value.mongo_id}"
+                    data-identity-id="${value.identity}"
+                    data-cluster-id="${value.cluster}"
                     data-content='<div>${clusteringType}<div class="text-center">${imageHTML}</div><div class="text-center">${bodyHTML}</div></div>'
                     data-trigger="focus">${time}</button> &nbsp;
         `;

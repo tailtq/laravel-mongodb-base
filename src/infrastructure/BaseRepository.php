@@ -3,14 +3,15 @@
 namespace Infrastructure;
 
 use App\Helpers\CommonHelper;
-use Carbon\Carbon;
+use App\Traits\MongoDB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use MongoDB\BSON\UTCDateTime;
 
 class BaseRepository
 {
+    use MongoDB;
+
     /**
      * @var Model $model ;
      */
@@ -21,6 +22,7 @@ class BaseRepository
         // dynamically switch between Eloquent and Query Builder
         // clone $this->model when using
         $this->model = app($model);
+        $this->collectionName = $this->model->getTable();
     }
 
     public function listBy(

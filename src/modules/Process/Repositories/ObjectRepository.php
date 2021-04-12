@@ -5,17 +5,24 @@ namespace Modules\Process\Repositories;
 use Illuminate\Support\Facades\DB;
 use Infrastructure\BaseRepository;
 use Modules\Process\Models\TrackedObject;
+use MongoDB\BSON\ObjectId;
 
 class ObjectRepository extends BaseRepository
 {
-    protected $generalInfoColumns = [
-        'objects.*',
-        'OI.id as identity_id',
-        'OI.name as identity_name',
-        'OI.images as identity_images',
-        'CI.id as cluster_identity_id',
-        'CI.name as cluster_identity_name',
-        'CI.images as cluster_identity_images',
+    protected $generalGroupingFields = [
+        '_id' => '$_id',
+        'identity' => ['$first' => '$identity'],
+        'process' => ['$first' => '$process'],
+        'track_id' => ['$first' => '$track_id'],
+        'body_ids' => ['$first' => '$body_ids'],
+        'face_ids' => ['$first' => '$face_ids'],
+        'avatars' => ['$first' => '$avatars'],
+        'confidence_rate' => ['$first' => '$confidence_rate'],
+        'from_frame' => ['$first' => '$from_frame'],
+        'from_time' => ['$first' => '$from_time'],
+        'to_frame' => ['$first' => '$to_frame'],
+        'to_time' => ['$first' => '$to_time'],
+        'cluster_elements' => ['$push' => '$cluster_elements'],
     ];
 
     /**
@@ -32,40 +39,55 @@ class ObjectRepository extends BaseRepository
      */
     public function getObjectsByProcess($processId)
     {
-        // TODO: Add pagination
+        return $this->queryWithGeneralInfo([
+            'process' => $processId,
+            '$or' => [
+                ['cluster_elements.ref_object' => null],
+                ['cluster_elements' => null]
+            ],
+        ]);
+    }
 
-        return $this->joinGeneralTables()
-            ->where('objects.process_id', $processId)
-            ->whereIn('objects.id', function ($query) use ($processId) {
-                $query->select(DB::raw('MIN(O.id)'))
-                    ->from('objects AS O')
-                    ->where('O.process_id', $processId)
-                    ->groupBy(DB::raw('IFNULL(O.cluster_id, UUID())'));
-            })
-            ->select($this->generalInfoColumns)
-            ->get();
+    /**
+     * @param $condition
+     * @return array
+     */
+    public function getAppearances($condition): array
+    {
+        return $this->aggregate([
+            ['$lookup' => [
+                'from' => 'cluster_elements',
+                'localField' => '_id',
+                'foreignField' => 'object',
+                'as' => 'cluster_elements',
+            ]],
+            ['$unwind' => [
+                'path' => '$cluster_elements',
+                'preserveNullAndEmptyArrays' => True
+            ]],
+            ['$match' => $condition],
+            ['$group' => $this->generalGroupingFields],
+            ['$sort' => [
+                'track_id' => 1
+            ]]
+        ]);
     }
 
     /**
      * @param array $objectMongoIds
      * @return mixed
      */
-    public function getObjectsAfterSearchFace(array $objectMongoIds)
+    public function getObjectsAfterSearchFace(array $ids)
     {
-        $columns = array_merge($this->generalInfoColumns, [
-            'processes.name as process_name',
-        ]);
+//        $columns = array_merge($this->generalInfoColumns, [
+//            'processes.name as process_name',
+//        ]);
 
-        return $this->joinGeneralTables()
-            ->join('processes', 'objects.process_id', 'processes.id')
-            ->whereIn('objects.id', function ($query) use ($objectMongoIds) {
-                $query->select(DB::raw('MIN(O.id)'))
-                    ->from('objects AS O')
-                    ->whereIn('O.mongo_id', $objectMongoIds)
-                    ->groupBy(DB::raw('IFNULL(O.cluster_id, UUID())'));
-            })
-            ->select($columns)
-            ->get();
+        $ids = array_map(function ($id) {
+            return new ObjectId($id);
+        }, $ids);
+
+        return $this->queryWithGeneralInfo(['_id' => ['$in' => $ids]]);
     }
 
     /**
@@ -94,12 +116,64 @@ class ObjectRepository extends BaseRepository
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Model
+     * @param $conditions
+     * @param array $additionalOperations
+     * @return array
      */
-    protected function joinGeneralTables()
+    protected function queryWithGeneralInfo($conditions, array $additionalOperations = []): array
     {
-        return $this->model->leftJoin('clusters', 'objects.cluster_id', 'clusters.id')
-            ->leftJoin('identities as CI', 'clusters.identity_id', 'CI.id')
-            ->leftJoin('identities as OI', 'objects.identity_id', 'OI.id');
+        return $this->aggregate(array_merge($additionalOperations, [
+            ['$lookup' => [
+                'from' => 'identities',
+                'localField' => 'identity',
+                'foreignField' => '_id',
+                'as' => 'identity'
+            ]],
+            ['$unwind' => [
+                'path' => '$identity',
+                'preserveNullAndEmptyArrays' => True
+            ]],
+            ['$lookup' => [
+                'from' => 'cluster_elements',
+                'let' => ['object_id' => '$_id'],
+                'pipeline' => [
+                    ['$match' => ['$expr' => ['$eq' => ['$object', '$$object_id']]]],
+                    ['$lookup' => [
+                        'from' => 'clusters',
+                        'let' => ['cluster_id' => '$cluster'],
+                        'pipeline' => [
+                            ['$match' => ['$expr' => ['$eq' => ['$_id', '$$cluster_id']]]],
+                            ['$lookup' => [
+                                'from' => 'identities',
+                                'let' => ['identity_id' => '$identity'],
+                                'pipeline' => [
+                                    ['$match' => ['$expr' => ['$eq' => ['$_id', '$$identity_id']]]],
+                                ],
+                                'as' => 'identity'
+                            ]],
+                            ['$unwind' => [
+                                'path' => '$identity',
+                                'preserveNullAndEmptyArrays' => True
+                            ]],
+                        ],
+                        'as' => 'cluster'
+                    ]],
+                    ['$unwind' => [
+                        'path' => '$cluster',
+                        'preserveNullAndEmptyArrays' => True
+                    ]]
+                ],
+                'as' => 'cluster_elements'
+            ]],
+            ['$unwind' => [
+                'path' => '$cluster_elements',
+                'preserveNullAndEmptyArrays' => True
+            ]],
+            ['$match' => $conditions],
+            ['$group' => $this->generalGroupingFields],
+            ['$sort' => [
+                'track_id' => 1
+            ]]
+        ]));
     }
 }

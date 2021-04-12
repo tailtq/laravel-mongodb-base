@@ -96,12 +96,11 @@ $('.render-video__btn').click(function (e) {
     });
 });
 
-function renderIdentity(images, id) {
-    images = images ? JSON.parse(images) : null;
-
-    return images ? `
-        <a href="${images[0].url}" data-lightbox="object-${id}">
-            <img src="${images[0].url}" style="width: inherit; height: 60px;" alt="">
+function renderIdentity(matchingFaceIds, id) {
+    console.log(matchingFaceIds);
+    return matchingFaceIds ? `
+        <a href="${matchingFaceIds[0].original_url}" data-lightbox="object-${id}">
+            <img src="${matchingFaceIds[0].original_url}" style="width: inherit; height: 60px;" alt="">
         </a>
     ` : ``;
 }
@@ -114,21 +113,19 @@ function addZero(i) {
 }
 
 function renderBlock(object, appearances = []) {
-    const avatar = JSON.parse(object.images)[0];
+    const avatar = object.avatars[0];
 
     return (`
-        <tr data-id="${object.id}"
+        <tr data-id="${object._id}"
             data-track-id="${object.track_id}"
-            data-identity-id="${object.identity_id}"
-            data-cluster-id="${object.cluster_id}"
-            data-mongo-id="${object.mongo_id}"
-            ${!object.identity_id && $('[name="hide-unknown"]').is(':checked') ? 'style="display: none"' : ''}>
+            data-identity-id="${object.identity?._id}"
+            ${!object.identity && $('[name="hide-unknown"]').is(':checked') ? 'style="display: none"' : ''}>
             <td class="text-center">${object.track_id}</td>
             <td class="text-center">
                 ${avatar ? `<img src="${avatar}" alt="image" style="width: inherit; height: 60px;">` : ''}
             </td>
-            <td class="text-center">${renderIdentity(object.identity_images, object.id)}</td>
-            <td>${renderIdentityName(object.identity_name, object.confidence_rate) || 'Không xác định'}</td>
+            <td class="text-center">${renderIdentity(object.identity?.matching_face_ids, object.id)}</td>
+            <td>${renderIdentityName(object.identity, object.confidence_rate)}</td>
             <td>
                 ${buildTimeRanges(appearances)}
             </td>
@@ -165,7 +162,7 @@ function renderBlockInOrder(html, order, trackIds) {
 }
 
 function renderObjectWithIdentity($element, object) {
-    $element.attr('data-identity-id', object.identity_id).removeAttr('style');
+    $element.attr('data-identity-id', object.identity?._id).removeAttr('style');
     $element.find('td:nth-child(3)').html(renderIdentity(object.identity_images, object.id, object.confidence_rate));
     $element.find('td:nth-child(4)').text(renderIdentityName(object.identity_name, object.confidence_rate));
     $element.find('td:nth-child(6)').html(`
@@ -238,7 +235,7 @@ Echo.channel(`process.${processId}.objects`).listen('.Modules\\Process\\Events\\
         if (trackIds.indexOf(object.track_id) >= 0) {
             const $element = $(`.socket-render tbody tr[data-track-id="${object.track_id}"]`);
 
-            if (object.frame_to) {
+            if (object.to_frame) {
                 $(`.socket-render tbody tr[data-track-id="${object.track_id}"] td:nth-child(5)`).html(
                     buildTimeRanges([object])
                 );

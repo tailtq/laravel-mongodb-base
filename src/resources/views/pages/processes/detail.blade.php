@@ -83,9 +83,6 @@
 
                     <div class="dropdown" style="display: inline-block">
                         <button class="btn btn-primary dropdown-toggle export-statistic__btn"
-                                @if($item->status != 'done' && $item->status != 'stopped')
-                                disabled
-                                @endif
                                 type="button"
                                 id="dropdownMenuButton"
                                 data-toggle="dropdown"

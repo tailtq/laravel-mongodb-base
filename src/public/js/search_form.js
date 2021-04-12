@@ -25,16 +25,14 @@ function handleSearch(res) {
         return;
     }
     data.forEach((element) => {
-        element.images = JSON.parse(element.images);
-
         $('.search-face__result .list-unstyled').append(`
-            <li class="media d-block d-sm-flex mb-3 align-items-center" data-id="${element.id}">
-                <img src="${element.images[0]}" class="mb-3 mb-sm-0 mr-3 img-fluid" style="height: 80px;">
+            <li class="media d-block d-sm-flex mb-3 align-items-center" data-id="${element._id}">
+                <img src="${element.avatars[0]}" class="mb-3 mb-sm-0 mr-3 img-fluid" style="height: 80px;">
 
                 <div class="media-body">
                     <p class="mt-0 mb-1">
                         <b>
-                            ${renderIdentityName(element.identity_name, element.confidence_rate) || 'Không xác định'}
+                            ${renderIdentityName(element.identity, element.confidence_rate)}
                         </b>
                     </p>
                     <div>
@@ -42,7 +40,7 @@ function handleSearch(res) {
                         ${buildTimeRanges(element.appearances)}
                     </div>
                 </div>
-                
+
                 <div class="d-flex flex-column">
                     <a href="#"
                        data-video-result="${element.video_result || ''}"
@@ -53,7 +51,7 @@ function handleSearch(res) {
                         <i class="mdi mdi-account-search"></i>
                     </a>
                 </div>
-            </li>      
+            </li>
         `);
     });
     reloadIcons();

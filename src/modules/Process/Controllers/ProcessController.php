@@ -11,8 +11,11 @@ use Illuminate\View\View;
 use Infrastructure\BaseController;
 use Infrastructure\Exceptions\CustomException;
 use Infrastructure\Exceptions\ResourceNotFoundException;
+use League\Fractal\Resource\Collection;
+use League\Fractal\Resource\ResourceAbstract;
 use Modules\Process\Requests\CreateProcessRequest;
 use Modules\Process\Services\ProcessService;
+use Modules\Process\Transformers\ObjectTransformer;
 
 class ProcessController extends BaseController
 {
@@ -120,8 +123,10 @@ class ProcessController extends BaseController
     public function getObjects($id)
     {
         $objects = $this->service->getObjects($id);
+        $objects = new Collection($objects, new ObjectTransformer());
+        $objects = $this->fractal->createData($objects); // Transform data
 
-        return $this->success($objects);
+        return $this->success($objects->toArray()['data']);
     }
 
     /**
@@ -186,7 +191,9 @@ class ProcessController extends BaseController
         if ($objects instanceof ResourceNotFoundException) {
             return $this->error('RESOURCE_NOT_FOUND', 404);
         }
+        $objects = new Collection($objects, new ObjectTransformer());
+        $objects = $this->fractal->createData($objects); // Transform data
 
-        return $this->success($objects);
+        return $this->success($objects->toArray()['data']);
     }
 }

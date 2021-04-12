@@ -133,7 +133,7 @@ class ListenClusteringProcess extends Command
             $process = $this->processService->getProcessDetail($processId);
 
             $processesNewFormat[] = $process;
-            $groupedObjects = $this->objectService->assignAppearances($groupedObjects);
+//            $groupedObjects = $this->objectService->assignAppearances($groupedObjects);
 
             // publish objects to process detail
             broadcast(new ClusteringProceeded([

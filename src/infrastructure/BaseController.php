@@ -13,6 +13,7 @@ use Illuminate\View\View;
 use Infrastructure\Exceptions\CustomException;
 use Infrastructure\Requests\BaseCRUDRequest;
 use Infrastructure\Exceptions\ResourceNotFoundException;
+use League\Fractal\Manager;
 
 class BaseController
 {
@@ -22,6 +23,8 @@ class BaseController
      * @var \Infrastructure\BaseService $service;
      */
     protected $service;
+
+    protected $fractal;
 
     /**
      * @var string $moduleName
@@ -37,6 +40,7 @@ class BaseController
     {
         $this->moduleName = $moduleName;
         $this->route = $route;
+        $this->fractal = new Manager();
     }
 
     /**
