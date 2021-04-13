@@ -165,9 +165,7 @@ class ObjectRepository extends BaseRepository
      */
     public function getStatisticByProcesses(array $processIds): array
     {
-        $condition = [
-            'process' => ['$in' => $processIds],
-        ];
+        $condition = ['process' => ['$in' => $processIds]];
         $batches = [
             $this->aggregate([
                 ['$match' => $condition],

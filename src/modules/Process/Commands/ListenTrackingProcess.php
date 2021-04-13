@@ -50,7 +50,6 @@ class ListenTrackingProcess extends Command
     public function handle()
     {
         Redis::subscribe('process', function ($data) {
-            Log::info("Tracking ---------------------- " . $data);
             $data = json_decode(json_decode($data));
 
             if (!$data) {

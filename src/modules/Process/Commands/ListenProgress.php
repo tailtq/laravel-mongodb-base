@@ -69,8 +69,6 @@ class ListenProgress extends Command
             $process = $this->processService->findBy(['_id' => new ObjectId($event->process_id)], 'error');
 
             if (!($process instanceof ResourceNotFoundException)) {
-                Log::info(json_encode($event));
-
                 if ($event->status === 'rendered' && !empty($event->mongo_id)) {
                     $this->getRenderingObjectEvent($event, $process);
                     return;
@@ -136,7 +134,7 @@ class ListenProgress extends Command
         ];
         $this->sendPOSTRequest($url, $payload, $this->getDefaultHeaders());
 
-        Log::info("Clustering: $url");
+        Log::info("Clustering at the end ------------------");
     }
 
     public function getRenderingObjectEvent($event, $process)

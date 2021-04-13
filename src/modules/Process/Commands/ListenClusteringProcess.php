@@ -61,7 +61,8 @@ class ListenClusteringProcess extends Command
     public function handle()
     {
         Redis::subscribe('clustering', function ($clusters) {
-            Log::info("Clustering ---------------------- " . $clusters);
+            Log::info("Run clustering ----------------------");
+
             $clusters = json_decode($clusters);
 
             if (!$clusters) {
