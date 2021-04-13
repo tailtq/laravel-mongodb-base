@@ -61,14 +61,6 @@
                                 </div>
                             </div>
 
-                            <div class="form-group d-none">
-                                <label>Ngày bắt đầu</label>
-                                <input class="form-control mb-4 mb-md-0"
-                                       name="started_at"
-                                       data-inputmask="'alias': 'datetime'"
-                                       data-inputmask-inputformat="HH:MM dd-mm-yyyy" />
-                            </div>
-
                             <div class="collapse form-group" id="collapseDropzone">
                                 <div class="card card-body">
                                     <div class="dropzone"></div>
@@ -77,6 +69,14 @@
                                 <div class="text-center mt-3">
                                     <button class="btn btn-primary dropzone-submit">Tải lên</button>
                                 </div>
+                            </div>
+
+                            <div class="form-group d-none">
+                                <label>Ngày bắt đầu</label>
+                                <input class="form-control mb-4 mb-md-0"
+                                       name="started_at"
+                                       data-inputmask="'alias': 'datetime'"
+                                       data-inputmask-inputformat="HH:MM dd-mm-yyyy" />
                             </div>
 
                             <div class="form-group">

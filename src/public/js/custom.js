@@ -193,12 +193,11 @@ function initWizardForProcess() {
 }
 
 function initDropzone() {
-    if (!$.fn.dropzone || typeof Dropzone == 'undefined') return;
-    if ($('.dropzone:not(.search-face__dropzone)').length === 0) return;
+    if (!$.fn.dropzone || typeof Dropzone == 'undefined' || $('.dropzone:not(.search-face__dropzone)').length === 0) return;
 
     const uploadImg = $('.dropzone:not(.search-face__dropzone)').data('type') === 'image';
 
-    const dropzone = new Dropzone('.dropzone', {
+    const dropzone = new Dropzone('.dropzone:not(.search-face__dropzone)', {
         url: '/medias',
         paramName: 'files',
         uploadMultiple: uploadImg,

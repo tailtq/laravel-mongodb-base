@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\MessageBag;
 use Illuminate\View\View;
+use Infrastructure\Exceptions\BaseException;
 use Infrastructure\Exceptions\CustomException;
 use Infrastructure\Requests\BaseCRUDRequest;
 use Infrastructure\Exceptions\ResourceNotFoundException;
@@ -20,7 +21,7 @@ class BaseController
     use RequestAPI, ResponseTrait;
 
     /**
-     * @var \Infrastructure\BaseService $service;
+     * @var BaseService $service;
      */
     protected $service;
 
@@ -133,11 +134,11 @@ class BaseController
     }
 
     /**
-     * @param \Infrastructure\Exceptions\CustomException $result
-     * @param \Illuminate\Http\Request $request
+     * @param CustomException $result
+     * @param Request $request
      * @return JsonResponse|RedirectResponse
      */
-    protected function returnFailedResult(CustomException $result, Request $request)
+    protected function returnFailedResult(BaseException $result, Request $request)
     {
         if ($request->ajax()) {
             return $this->error($result->getData()->message, $result->getCode());

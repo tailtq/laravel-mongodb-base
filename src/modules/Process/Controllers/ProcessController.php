@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
 use Illuminate\View\View;
 use Infrastructure\BaseController;
+use Infrastructure\Exceptions\BadRequestException;
 use Infrastructure\Exceptions\CustomException;
 use Infrastructure\Exceptions\ResourceNotFoundException;
 use League\Fractal\Resource\Collection;

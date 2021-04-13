@@ -5,6 +5,7 @@ namespace Modules\Process\Services;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\UploadedFile;
+use Infrastructure\Exceptions\BadRequestException;
 use Modules\Process\Events\ProgressChange;
 use App\Traits\HandleUploadFile;
 use Carbon\Carbon;
@@ -130,6 +131,15 @@ class ProcessService extends BaseService
      */
     public function startProcess($id)
     {
+        $process = $this->repository->findById($id);
+
+        if (!$process) {
+            return new ResourceNotFoundException();
+        } else if ($process->status === Process::STATUS['stopped'] || $process->status === Process::STATUS['done']) {
+            return new CustomException('process_is_done_or_stopped', 400, (object)[
+                'message' => 'Tiến trình đã dừng'
+            ]);
+        }
         $result = $this->callAIService($id, 'start');
 
         if ($result instanceof BaseException) {
@@ -199,7 +209,7 @@ class ProcessService extends BaseService
 
     /**
      * @param $id
-     * @return bool|CustomException|ResourceNotFoundException
+     * @return bool|ResourceNotFoundException
      */
     public function delete($id)
     {

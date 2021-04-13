@@ -2,10 +2,7 @@
 
 namespace Modules\Process\Commands;
 
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use League\Fractal\Manager;
-use League\Fractal\Resource\Collection as FractalCollection;
 use Modules\Process\Events\AnalysisProceeded;
 use Modules\Process\Events\ClusteringProceeded;
 use Illuminate\Console\Command;
@@ -13,7 +10,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Redis;
 use Modules\Process\Services\ObjectService;
 use Modules\Process\Services\ProcessService;
-use Modules\Process\Transformers\ObjectTransformer;
 use MongoDB\BSON\ObjectId;
 
 class ListenClusteringProcess extends Command
@@ -49,17 +45,14 @@ class ListenClusteringProcess extends Command
      *
      * @param ProcessService $processService
      * @param ObjectService $objectService
-     * @param Manager $fractal
      */
     public function __construct(
         ProcessService $processService,
-        ObjectService $objectService,
-        Manager $fractal
+        ObjectService $objectService
     ) {
         parent::__construct();
         $this->processService = $processService;
         $this->objectService = $objectService;
-        $this->fractal = $fractal;
     }
 
     /**
@@ -93,10 +86,6 @@ class ListenClusteringProcess extends Command
      */
     public function publishClusteringDataToEachProcess(array $objects)
     {
-        $objects = new FractalCollection($objects, new ObjectTransformer());
-        $objects = $this->fractal->createData($objects); // Transform data
-        $objects = $objects->toArray()['data'];
-
         $processesNewFormat = [];
         $processes = collect($objects)->groupBy('process');
 
@@ -107,10 +96,7 @@ class ListenClusteringProcess extends Command
             $processesNewFormat[] = $process;
 
             // publish objects to process detail
-            broadcast(new ClusteringProceeded([
-                'statistic' => $process,
-                'grouped_objects' => $groupedObjects,
-            ], "process.$processIdString.cluster"));
+            broadcast(new ClusteringProceeded($process, $groupedObjects, "process.$processIdString.cluster"));
         }
         // publish statistical numbers to monitoring page
         broadcast(new AnalysisProceeded($processesNewFormat));

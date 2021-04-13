@@ -80,7 +80,6 @@ $('.render-video__btn').click(function (e) {
             processId: processId
         }),
         success: function (res) {
-            console.log(res);
             Toast.fire({
                 type: 'success',
                 title: res.data
@@ -329,8 +328,8 @@ Echo.channel(`process.${processId}.progress`).listen('.Modules\\Process\\Events\
         $('.export-statistic__btn').removeAttr('disabled');
         $('.render-video__btn').removeAttr('disabled');
         $('.render-single-object').removeAttr('style');
-        flvPlayer.destroy();
         renderTime();
+        stopVLC();
     } else if (status === 'detecting' || status === 'rendering') {
         const $element = $(`.progress-bar__${status}`);
 
@@ -338,7 +337,7 @@ Echo.channel(`process.${processId}.progress`).listen('.Modules\\Process\\Events\
         $element.attr('aria-valuenow', progress);
         $element.text(`${progress}%`);
     } else if (status === 'error') {
-        flvPlayer.destroy();
+        stopVLC();
     } else if (status === 'rendered') {
         $('.render-video__btn')
             .addClass('btn-success')
@@ -355,13 +354,13 @@ Echo.channel(`process.${processId}.progress`).listen('.Modules\\Process\\Events\
 Echo.channel(`process.${processId}.objects`).listen('.Modules\\Process\\Events\\ObjectVideoRendered', function (res) {
     const { data } = res;
 
-    $(`.socket-render tbody tr[data-id="${data.id}"] td:last-child a`)
+    $(`.socket-render tbody tr[data-id="${data._id}"] td:last-child a`)
         .html('<i class="mdi mdi-play"></i>')
         .addClass('text-success')
         .removeClass('disabled')
         .blur()
         .data('video-result', data.video_result);
-    $(`.search-face__result li[data-id="${data.id}"] a.render-single-object`)
+    $(`.search-face__result li[data-id="${data._id}"] a.render-single-object`)
         .html('<i class="mdi mdi-play"></i>')
         .addClass('text-success')
         .removeClass('disabled')
@@ -383,6 +382,14 @@ $('[name="hide-unknown"]').on('change', function () {
         $undefined.fadeIn(1000);
     }
 });
+
+function stopVLC() {
+    try {
+        flvPlayer.destroy();
+    } catch (e) {
+        console.log(`Stop FLC failed: ${e.message}`);
+    }
+}
 
 $(document).ready(function () {
     renderData();

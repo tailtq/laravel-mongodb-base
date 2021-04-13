@@ -81,7 +81,7 @@ class ListenProgress extends Command
                     $videoResult = object_get($event, 'url');
                     $updateData['video_result'] = $videoResult;
                 }
-                if ($event->status === Process::STATUS['detecting'] && $event->progress != $process->progress) {
+                if ($event->status === Process::STATUS['detecting'] && $event->progress > 0 && $event->progress != $process->progress) {
                     $updateData['detecting_progress'] = $event->progress;
                 }
                 if ($process->status !== Process::STATUS['done']

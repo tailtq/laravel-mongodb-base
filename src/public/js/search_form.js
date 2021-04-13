@@ -1,6 +1,5 @@
 Dropzone.autoDiscover = false;
 
-
 function addSpinningIcon(self, isBtn) {
     if (isBtn) {
         $(self).attr('disabled', true);

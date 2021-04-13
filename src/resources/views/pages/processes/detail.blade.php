@@ -113,7 +113,7 @@
                 <div class="w-100 ml-4">
                     <h5 class="mt-1 mb-2">Thống kê</h5>
 
-                    <table class="table table-bordered statistical-table">
+                    <table class="table table-bordered">
                         <tr>
                             <th>Số lượt người xuất hiện</th>
                             <td class="statistic__total-appearances" width="30%">{{ $item->statistic['total_appearances'] }}</td>
@@ -211,7 +211,7 @@
 
                 <div class="mb-4 socket-render">
                     <div class="pt-3">
-                        <table class="table table-responsive table-bordered">
+                        <table class="table table-bordered">
                             <thead>
                             <tr>
                                 <th width="5%" class="text-center">Id</th>

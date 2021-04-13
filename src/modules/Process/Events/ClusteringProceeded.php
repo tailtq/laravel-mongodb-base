@@ -8,6 +8,9 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use League\Fractal\Manager;
+use League\Fractal\Resource\Collection;
+use Modules\Process\Transformers\ObjectTransformer;
 
 class ClusteringProceeded implements ShouldBroadcast
 {
@@ -16,6 +19,7 @@ class ClusteringProceeded implements ShouldBroadcast
     private $processId;
     private $data;
     private $channel;
+    private $fractal;
 
     /**
      * Create a new event instance.
@@ -23,16 +27,20 @@ class ClusteringProceeded implements ShouldBroadcast
      * @param $data
      * @param string $channel
      */
-    public function __construct($data, $channel = 'monitor.clustering')
+    public function __construct($process, $groupedObjects, $channel = 'monitor.clustering')
     {
-        $this->data = $data;
+        $this->fractal = app(Manager::class);
         $this->channel = $channel;
+        $this->data = [
+            'process' => $process,
+            'grouped_objects' => $groupedObjects
+        ];
     }
 
     /**
      * Get the channels the event should broadcast on.
      *
-     * @return \Illuminate\Broadcasting\Channel|array
+     * @return Channel
      */
     public function broadcastOn()
     {
@@ -41,6 +49,10 @@ class ClusteringProceeded implements ShouldBroadcast
 
     public function broadcastWith()
     {
+        $objects = new Collection($this->data['grouped_objects'], new ObjectTransformer());
+        $objects = $this->fractal->createData($objects); // Transform data
+        $this->data['grouped_objects'] = $objects->toArray()['data'];
+
         return [
             'data' => $this->data,
         ];

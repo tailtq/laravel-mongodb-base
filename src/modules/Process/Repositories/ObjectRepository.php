@@ -39,13 +39,7 @@ class ObjectRepository extends BaseRepository
      */
     public function listObjectsByProcess($processId)
     {
-        return $this->queryWithGeneralInfo([
-            'process' => $processId,
-            '$or' => [
-                ['cluster_elements.ref_object' => null],
-                ['cluster_elements' => null]
-            ],
-        ]);
+        return $this->aggregate($this->getFirstAppearancePeopleQuery(['process' => $processId]));
     }
 
     /**
@@ -54,7 +48,7 @@ class ObjectRepository extends BaseRepository
      */
     public function listFirstObjectsByIds(array $ids): array
     {
-        return $this->queryWithGeneralInfo(['_id' => ['$in' => $ids]]);
+        return $this->aggregate($this->getFirstAppearancePeopleQuery(['_id' => ['$in' => $ids]]));
     }
 
     /**
@@ -90,8 +84,12 @@ class ObjectRepository extends BaseRepository
      * @param bool $identityType
      * @return array
      */
-    protected function getJoiningPersonQuery(array $conditions, $identityType = false): array
+    protected function getFirstAppearancePeopleQuery(array $conditions, $identityType = false): array
     {
+        $conditions['$or'] = [
+            ['cluster_elements.ref_object' => null],
+            ['cluster_elements' => null]
+        ];
         $identityCondition = [];
 
         if ($identityType == 'no_identity') {
@@ -120,8 +118,7 @@ class ObjectRepository extends BaseRepository
                         'from' => 'clusters',
                         'let' => ['cluster_id' => '$cluster'],
                         'pipeline' => [
-                            ['$match' => array_merge([
-                                '$expr' => ['$eq' => ['$_id', '$$cluster_id']]], $identityCondition),
+                            ['$match' => array_merge(['$expr' => ['$eq' => ['$_id', '$$cluster_id']]], $identityCondition),
                                 // identity condition here
                             ],
                             ['$lookup' => [
@@ -163,23 +160,14 @@ class ObjectRepository extends BaseRepository
     }
 
     /**
-     * @param $conditions
-     * @param array $additionalOperations
-     * @return array
-     */
-    protected function queryWithGeneralInfo($conditions, array $additionalOperations = []): array
-    {
-        return $this->aggregate($this->getJoiningPersonQuery($conditions));
-    }
-
-    /**
      * @param array $processIds
      * @return array
      */
     public function getStatisticByProcesses(array $processIds): array
     {
-        $condition = ['process' => ['$in' => $processIds]];
-
+        $condition = [
+            'process' => ['$in' => $processIds],
+        ];
         $batches = [
             $this->aggregate([
                 ['$match' => $condition],
@@ -188,13 +176,13 @@ class ObjectRepository extends BaseRepository
                     'total_appearances' => ['$sum' => 1]
                 ]],
             ]),
-            $this->aggregate(array_merge($this->getJoiningPersonQuery($condition), [
+            $this->aggregate(array_merge($this->getFirstAppearancePeopleQuery($condition), [
                 ['$group' => [
                     '_id' => '$process',
                     'total_objects' => ['$sum' => 1]
                 ]],
             ])),
-            $this->aggregate(array_merge($this->getJoiningPersonQuery($condition, 'no_identity'), [
+            $this->aggregate(array_merge($this->getFirstAppearancePeopleQuery($condition, 'no_identity'), [
                 ['$group' => [
                     '_id' => '$process',
                     'total_unidentified' => ['$sum' => 1]

@@ -8,14 +8,19 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use League\Fractal\Manager;
+use League\Fractal\Resource\Collection;
+use League\Fractal\Resource\ResourceAbstract;
+use Modules\Process\Transformers\ObjectTransformer;
 
 class ObjectsAppear implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     private $processId;
-    private $data;
+    private $objects;
     private $channel;
+    private $fractal;
 
     /**
      * Create a new event instance.
@@ -24,10 +29,11 @@ class ObjectsAppear implements ShouldBroadcast
      * @param $data
      * @param string $channel
      */
-    public function __construct($processId, $data, $channel = 'monitor.tracking')
+    public function __construct($processId, $objects, $channel = 'monitor.tracking')
     {
+        $this->fractal = app(Manager::class);
         $this->processId = $processId;
-        $this->data = $data;
+        $this->objects = $objects;
         $this->channel = $channel;
     }
 
@@ -43,9 +49,13 @@ class ObjectsAppear implements ShouldBroadcast
 
     public function broadcastWith()
     {
+        $objects = new Collection($this->objects, new ObjectTransformer());
+        $objects = $this->fractal->createData($objects); // Transform data
+        $this->objects = $objects->toArray()['data'];
+
         return [
             'processId' => $this->processId,
-            'data' => $this->data,
+            'data' => $this->objects,
         ];
     }
 }
