@@ -2,6 +2,7 @@
 
 namespace Modules\Process\Services;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
 use Infrastructure\BaseService;
 use Infrastructure\Exceptions\CustomException;
@@ -12,7 +13,7 @@ class ObjectService extends BaseService
 {
     /**
      * ObjectService constructor.
-     * @param \Modules\Process\Repositories\ObjectRepository $repository
+     * @param ObjectRepository $repository
      */
     public function __construct(ObjectRepository $repository)
     {
@@ -22,11 +23,11 @@ class ObjectService extends BaseService
     /**
      * Get first object of multiple clusters in a process
      * @param $processId
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function getObjectsByProcess($processId)
     {
-        $objects = $this->repository->getObjectsByProcess($processId);
+        $objects = $this->repository->listObjectsByProcess($processId);
         $objects = self::blendObjectsIdentity($objects);
         $objects = $this->assignAppearances($objects);
 
@@ -41,7 +42,11 @@ class ObjectService extends BaseService
     public function getObjectsAfterSearchFace(array $searchedObjects, bool $findWithProcess)
     {
         $ids = Arr::pluck($searchedObjects, 'object_id');
-        $objects = $this->repository->getObjectsAfterSearchFace($ids);
+        $ids = array_map(function ($id) {
+            return new ObjectId($id);
+        }, $ids);
+
+        $objects = $this->repository->listFirstObjectsByIds($ids);
         $objects = self::blendObjectsIdentity($objects);
         $objects = $this->assignAppearances($objects, $findWithProcess);
 
@@ -59,32 +64,21 @@ class ObjectService extends BaseService
     }
 
     /**
-     * @param $mongoIds
-     * @return mixed
-     */
-    public function getFirstObjectsByMongoIds($mongoIds)
-    {
-        $objects = $this->repository->getFirstObjectsByMongoIds($mongoIds);
-        $objects = self::blendObjectsIdentity($objects);
-
-        return $objects;
-    }
-
-    /**
      * @param $ids
      * @return mixed
      */
-    public function getObjectsByIds($ids)
+    public function listFirstObjectsByIds($ids)
     {
-        $objects = $this->repository->getObjectsByIds($ids);
+        $objects = $this->repository->listFirstObjectsByIds($ids);
         $objects = self::blendObjectsIdentity($objects);
+        $objects = $this->assignAppearances($objects);
 
         return $objects;
     }
 
     /**
      * @param $id
-     * @return bool|\Infrastructure\Exceptions\CustomException|\Infrastructure\Exceptions\ResourceNotFoundException
+     * @return bool|CustomException|ResourceNotFoundException
      */
     public function startRendering($id)
     {

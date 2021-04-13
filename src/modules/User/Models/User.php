@@ -2,7 +2,6 @@
 
 namespace Modules\User\Models;
 
-use Carbon\Carbon;
 use Illuminate\Notifications\Notifiable;
 use Jenssegers\Mongodb\Auth\User as Authenticatable;
 

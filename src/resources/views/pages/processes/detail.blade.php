@@ -185,11 +185,11 @@
                 <div class="progress">
                     <div class="progress-bar progress-bar-striped progress-bar__detecting"
                          role="progressbar"
-                         style="width: {{ $detectingPercentage }}%"
-                         aria-valuenow="{{ $detectingPercentage }}"
+                         style="width: {{ $item->detecting_progress ?? 0 }}%"
+                         aria-valuenow="{{ $item->detecting_progress ?? 0 }}"
                          aria-valuemin="0"
                          aria-valuemax="100">
-                        {{ $detectingPercentage }}%
+                        {{ $item->detecting_progress }}%
                     </div>
                 </div>
 
@@ -197,11 +197,11 @@
                 <div class="progress">
                     <div class="progress-bar progress-bar-striped bg-warning progress-bar__rendering"
                          role="progressbar"
-                         style="width: {{ $renderingPercentage }}%"
-                         aria-valuenow="{{ $renderingPercentage }}"
+                         style="width: {{ $item->video_result ? 100 : 0 }}%"
+                         aria-valuenow="{{ $item->video_result ? 100 : 0 }}"
                          aria-valuemin="0"
                          aria-valuemax="100">
-                        {{ $renderingPercentage }}%
+                        {{ $item->video_result ? 100 : 0 }}%
                     </div>
                 </div>
             </div>

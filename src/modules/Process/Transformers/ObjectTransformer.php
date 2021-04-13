@@ -3,6 +3,7 @@
 namespace Modules\Process\Transformers;
 
 use League\Fractal\TransformerAbstract;
+use MongoDB\BSON\ObjectId;
 
 class ObjectTransformer extends TransformerAbstract
 {
@@ -26,7 +27,7 @@ class ObjectTransformer extends TransformerAbstract
     {
         return [
             '_id' => (string) $object->_id,
-            'identity' => $object->identity,
+            'identity' => $object->identity instanceof ObjectId ? (string) $object->identity : $object->identity,
             'process' => (string) $object->process,
             'track_id' => $object->track_id,
             'body_ids' => $object->body_ids ?? [],

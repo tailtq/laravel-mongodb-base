@@ -38,8 +38,7 @@ function buildTimeRanges(appearances) {
                     data-placement="top"
                     data-id="${value._id}"
                     data-track-id="${value.track_id}"
-                    data-identity-id="${value.identity}"
-                    data-cluster-id="${value.cluster}"
+                    data-identity-id="${value.identity?._id}"
                     data-content='<div>${clusteringType}<div class="text-center">${imageHTML}</div><div class="text-center">${bodyHTML}</div></div>'
                     data-trigger="focus">${time}</button> &nbsp;
         `;

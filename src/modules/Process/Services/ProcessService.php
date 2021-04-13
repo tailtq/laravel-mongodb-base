@@ -64,18 +64,16 @@ class ProcessService extends BaseService
      */
     public function getDetailPageData($id)
     {
-        $item = $this->repository->findById($id);
+        $item = $this->getProcessDetail($id);
 
         if ($item instanceof ResourceNotFoundException) {
             return $item;
         }
-        $this->setObjectService();
-        $item->statistic = $this->objectService->getStatisticByProcesses([new ObjectId($id)])[0];
 
         return array_merge([
             'item' => $item,
             'cameras' => $this->cameraService->listAll(),
-        ], $this->getProgressing($item));
+        ]);
     }
 
     /**
@@ -128,7 +126,7 @@ class ProcessService extends BaseService
 
     /**
      * @param $id
-     * @return CustomException|ResourceNotFoundException|int
+     * @return bool|CustomException|ResourceNotFoundException
      */
     public function startProcess($id)
     {
@@ -138,10 +136,11 @@ class ProcessService extends BaseService
             return $result;
         }
 
-        return $this->repository->updateBy(['_id' => new ObjectID($id)], [
-            'detecting_start_time' => Carbon::now(),
+        broadcast(new ProgressChange($id, [
             'status' => Process::STATUS['detecting'],
-        ]);
+        ]));
+
+        return true;
     }
 
     /**
@@ -155,11 +154,6 @@ class ProcessService extends BaseService
         if ($result instanceof BaseException && $result->getData()->message != 'process_not_found' && $result->getData()->message != 'Thread is not active') {
             return $result;
         }
-        $result = $this->repository->updateBy(['_id' => new ObjectID($id)], [
-            'status' => Process::STATUS['stopped'],
-            'done_time' => Carbon::now(),
-            'detecting_end_time' => Carbon::now(),
-        ]);
         broadcast(new ProgressChange($id, [
             'status' => Process::STATUS['stopped'],
         ]));
@@ -309,22 +303,12 @@ class ProcessService extends BaseService
      */
     private function parseTime($timeFrom, $timeTo)
     {
-        return ($timeFrom && $timeTo) ? Carbon::parse($timeFrom)->diff($timeTo)->format('%I:%S') : '';
-    }
+        $timeFrom = $timeFrom->toDateTime()->format('Y-m-d H:i:s');
+        $timeTo = $timeTo->toDateTime()->format('Y-m-d H:i:s');
 
-    /**
-     * @param $process
-     * @return array
-     */
-    private function getProgressing($process)
-    {
-        $detectingPercentage = ($process->status === 'done') ? 100 : 0;
-        $renderingPercentage = $process->video_result ? 100 : 0;
-
-        return [
-            'detectingPercentage' => $detectingPercentage,
-            'renderingPercentage' => $renderingPercentage
-        ];
+        return ($timeFrom && $timeTo)
+            ? Carbon::parse($timeFrom)->diff($timeTo)->format('%I:%S')
+            : '';
     }
 
     /**

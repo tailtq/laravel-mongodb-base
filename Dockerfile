@@ -29,7 +29,8 @@ RUN supervisord -c /etc/supervisor/supervisord.conf
 RUN chown -R root:root /var/www
 #USER www-data
 
-RUN chmod -R 777 /var/www
+#RUN ls /var/www/app
+#CMD chmod -R 777 /var/www/app/storage/logs
 
 #CMD ["redis-server"]
 #

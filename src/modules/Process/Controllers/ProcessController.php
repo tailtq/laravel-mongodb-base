@@ -12,7 +12,6 @@ use Infrastructure\BaseController;
 use Infrastructure\Exceptions\CustomException;
 use Infrastructure\Exceptions\ResourceNotFoundException;
 use League\Fractal\Resource\Collection;
-use League\Fractal\Resource\ResourceAbstract;
 use Modules\Process\Requests\CreateProcessRequest;
 use Modules\Process\Services\ProcessService;
 use Modules\Process\Transformers\ObjectTransformer;

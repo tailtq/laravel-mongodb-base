@@ -86,7 +86,7 @@ abstract class CRUDController extends Controller
     {
         $item = $this->model::findOrFail($id);
         $data = $request->validated();
-        $response = $this->sendPUTRequest($this->getAIUrl($item->mongo_id), $data, $this->getDefaultHeaders());
+        $response = $this->sendPUTRequest($this->getAIUrl($item->idString), $data, $this->getDefaultHeaders());
 
         if (!$response->status) {
             $messageBag = new MessageBag();
@@ -112,7 +112,7 @@ abstract class CRUDController extends Controller
     public function delete($id)
     {
         $item = $this->model::findOrFail($id);
-        $response = $this->sendDELETERequest($this->getAIUrl($item->mongo_id), [], $this->getDefaultHeaders());
+        $response = $this->sendDELETERequest($this->getAIUrl($item->idString), [], $this->getDefaultHeaders());
 
         if (!$response->status) {
             abort(500, $response->message);

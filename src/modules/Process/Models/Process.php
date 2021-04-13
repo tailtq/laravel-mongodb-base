@@ -35,6 +35,7 @@ class Process extends BaseModel
         'mongo_id',
         'total_frames',
         'fps',
+        'detecting_progress',
     ];
 
     protected $casts = [

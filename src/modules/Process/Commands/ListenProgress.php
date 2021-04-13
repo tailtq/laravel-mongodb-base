@@ -7,14 +7,12 @@ use Modules\Process\Events\ObjectVideoRendered;
 use Modules\Process\Events\ProgressChange;
 use Modules\Process\Models\Process;
 use App\Traits\RequestAPI;
-use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
-use Modules\Process\Services\ClusterService;
 use Modules\Process\Services\ObjectService;
 use Modules\Process\Services\ProcessService;
+use MongoDB\BSON\ObjectId;
 
 class ListenProgress extends Command
 {
@@ -35,20 +33,20 @@ class ListenProgress extends Command
     protected $description = 'Listen status and progress event from AI';
 
     /**
-     * @var \Modules\Process\Services\ObjectService $objectService
+     * @var ObjectService $objectService
      */
     protected $objectService;
 
     /**
-     * @var \Modules\Process\Services\ProcessService $processService
+     * @var ProcessService $processService
      */
     protected $processService;
 
     /**
      * Create a new command instance.
      *
-     * @param \Modules\Process\Services\ProcessService $processService
-     * @param \Modules\Process\Services\ObjectService $objectService
+     * @param ProcessService $processService
+     * @param ObjectService $objectService
      */
     public function __construct(ProcessService $processService, ObjectService $objectService)
     {
@@ -68,7 +66,7 @@ class ListenProgress extends Command
             if (!$event) {
                 return;
             }
-            $process = $this->processService->findBy(['mongo_id' => $event->process_id]);
+            $process = $this->processService->findBy(['_id' => new ObjectId($event->process_id)], 'error');
 
             if (!($process instanceof ResourceNotFoundException)) {
                 Log::info(json_encode($event));
@@ -82,44 +80,48 @@ class ListenProgress extends Command
                 if ($event->status === 'rendered') {
                     $videoResult = object_get($event, 'url');
                     $updateData['video_result'] = $videoResult;
-                    $data['video_result'] = $videoResult;
+                }
+                if ($event->status === Process::STATUS['detecting'] && $event->progress != $process->progress) {
+                    $updateData['detecting_progress'] = $event->progress;
                 }
                 if ($process->status !== Process::STATUS['done']
-//                    && $process->status !== Process::STATUS['stopped']
+                    && $process->status !== Process::STATUS['stopped']
                     && $process->status != $event->status
                     && in_array($event->status, array_values(Process::STATUS))) {
                     $updateData['status'] = $event->status;
 
+                    if ($event->status === Process::STATUS['detecting']) {
+                        $updateData['detecting_start_time'] = dateNow();
+                    }
                     if ($event->status === Process::STATUS['detected']) {
-                        $updateData['detecting_end_time'] = Carbon::now();
+                        $updateData['detecting_end_time'] = dateNow();
                     }
                     if ($event->status === Process::STATUS['done']) {
-                        $updateData['done_time'] = Carbon::now();
+                        $updateData['done_time'] = dateNow();
                     }
-//                    if ($event->status === Process::STATUS['stopped']) {
-//                        $updateData['detecting_end_time'] = Carbon::now();
-//                        $updateData['done_time'] = Carbon::now();
-//                    }
+                    if ($event->status === Process::STATUS['stopped']) {
+                        $updateData['detecting_end_time'] = dateNow();
+                        $updateData['done_time'] = dateNow();
+                    }
                 }
                 if (count($updateData) > 0) {
-                    $this->processService->updateBy(['id' => $process->id], $updateData);
-                    $process = $this->processService->findById($process->id);
-
-                    $event->status = $process->status;
+                    $this->processService->updateBy(['_id' => $process->_id], $updateData);
+                    $process = $this->processService->findById($process->_id);
                 }
-
+                // just for publishing, not saving data
+                if ($event->status === 'rendering' || $event->status === 'rendered') {
+                    $process->status = $event->status;
+                }
                 $data = [
-                    'id' => $process->id,
-                    'status' => $event->status,
-                    'video_result' => $process->video_result,
+                    '_id' => $process->idString,
+                    'status' => $process->status,
                     'progress' => $event->progress ?? 0,
-                    'frame_index' => $event->frame_index ?? null,
+                    'video_result' => $process->video_result,
                 ];
-                broadcast(new ProgressChange($process->id, $data));
+                broadcast(new ProgressChange($process->idString, $data));
 
-//                if ($process->status === Process::STATUS['detected'] || $process->status === Process::STATUS['stopped']) {
-                if ($process->status === Process::STATUS['detected']) {
-                    $this->runClustering($process->mongo_id);
+                if ($event->status === Process::STATUS['detected'] || $event->status === Process::STATUS['stopped']) {
+                    $this->runClustering($process->idString);
                 }
             }
         });
@@ -139,11 +141,13 @@ class ListenProgress extends Command
 
     public function getRenderingObjectEvent($event, $process)
     {
-        $this->objectService->updateBy(['mongo_id' => $event->mongo_id], [
+        $condition = ['_id' => new ObjectId($event->mongo_id)];
+
+        $this->objectService->updateBy($condition, [
             'video_result' => $event->url,
         ]);
-        $object = $this->objectService->findBy(['mongo_id' => $event->mongo_id]);
+        $object = $this->objectService->findBy($condition);
 
-        broadcast(new ObjectVideoRendered($process->id, $object));
+        broadcast(new ObjectVideoRendered($process->idString, $object));
     }
 }

@@ -37,7 +37,7 @@ class ObjectRepository extends BaseRepository
      * @param $processId
      * @return mixed
      */
-    public function getObjectsByProcess($processId)
+    public function listObjectsByProcess($processId)
     {
         return $this->queryWithGeneralInfo([
             'process' => $processId,
@@ -46,6 +46,15 @@ class ObjectRepository extends BaseRepository
                 ['cluster_elements' => null]
             ],
         ]);
+    }
+
+    /**
+     * @param array $ids
+     * @return array
+     */
+    public function listFirstObjectsByIds(array $ids): array
+    {
+        return $this->queryWithGeneralInfo(['_id' => ['$in' => $ids]]);
     }
 
     /**
@@ -70,57 +79,18 @@ class ObjectRepository extends BaseRepository
                 'track_id' => 1
             ]],
             ['$group' => $this->groupingFieldsByPerson],
+            ['$sort' => [
+                'track_id' => 1
+            ]],
         ]);
     }
-
-    /**
-     * @param array $objectMongoIds
-     * @return mixed
-     */
-    public function getObjectsAfterSearchFace(array $ids)
-    {
-//        $columns = array_merge($this->generalInfoColumns, [
-//            'processes.name as process_name',
-//        ]);
-
-        $ids = array_map(function ($id) {
-            return new ObjectId($id);
-        }, $ids);
-
-        return $this->queryWithGeneralInfo(['_id' => ['$in' => $ids]]);
-    }
-
-    /**
-     * @param $objectMongoIds
-     * @return mixed
-     */
-    public function getFirstObjectsByMongoIds($objectMongoIds)
-    {
-        return $this->joinGeneralTables()
-            ->whereIn('objects.id', function ($query) use ($objectMongoIds) {
-                $query->select([DB::raw('MIN(id)')])
-                    ->from('objects')
-                    ->whereIn('mongo_id', $objectMongoIds)
-                    ->groupBy(['cluster_id', 'process_id']);
-            })
-            ->select($this->generalInfoColumns)
-            ->get();
-    }
-
-    public function getObjectsByIds($ids)
-    {
-        return $this->joinGeneralTables()
-            ->whereIn('objects.id', $ids)
-            ->select($this->generalInfoColumns)
-            ->get();
-    }
-
     /**
      * Break this main query down for reusing in multiple places
      * @param array $conditions
-     * @return mixed
+     * @param bool $identityType
+     * @return array
      */
-    protected function getJoiningPersonQuery(array $conditions, $identityType = false)
+    protected function getJoiningPersonQuery(array $conditions, $identityType = false): array
     {
         $identityCondition = [];
 
@@ -185,7 +155,10 @@ class ObjectRepository extends BaseRepository
                 'track_id' => 1
             ]],
             ['$group' => $groupingField1],
-            ['$group' => $groupingField2]
+            ['$group' => $groupingField2],
+            ['$sort' => [
+                'track_id' => 1
+            ]],
         ]);
     }
 
@@ -200,7 +173,7 @@ class ObjectRepository extends BaseRepository
     }
 
     /**
-     * @param array $condition
+     * @param array $processIds
      * @return array
      */
     public function getStatisticByProcesses(array $processIds): array

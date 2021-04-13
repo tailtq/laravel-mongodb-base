@@ -2,15 +2,19 @@
 
 namespace Modules\Process\Commands;
 
-use Modules\Identity\Services\IdentityService;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+use League\Fractal\Manager;
+use League\Fractal\Resource\Collection as FractalCollection;
 use Modules\Process\Events\AnalysisProceeded;
 use Modules\Process\Events\ClusteringProceeded;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Redis;
-use Modules\Process\Services\ClusterService;
 use Modules\Process\Services\ObjectService;
 use Modules\Process\Services\ProcessService;
+use Modules\Process\Transformers\ObjectTransformer;
+use MongoDB\BSON\ObjectId;
 
 class ListenClusteringProcess extends Command
 {
@@ -29,44 +33,33 @@ class ListenClusteringProcess extends Command
     protected $description = 'Listen clustering process from AI server';
 
     /**
-     * @var IdentityService $identityService
-     */
-    protected $identityService;
-
-    /**
      * @var ProcessService $processService
      */
     protected $processService;
-
-    /**
-     * @var ClusterService $clusterService
-     */
-    protected $clusterService;
 
     /**
      * @var ObjectService $objectService
      */
     protected $objectService;
 
+    protected $fractal;
+
     /**
      * Create a new command instance.
      *
-     * @param IdentityService $identityService
      * @param ProcessService $processService
-     * @param ClusterService $clusterService
      * @param ObjectService $objectService
+     * @param Manager $fractal
      */
     public function __construct(
-        IdentityService $identityService,
         ProcessService $processService,
-        ClusterService $clusterService,
-        ObjectService $objectService
+        ObjectService $objectService,
+        Manager $fractal
     ) {
         parent::__construct();
-        $this->identityService = $identityService;
         $this->processService = $processService;
-        $this->clusterService = $clusterService;
         $this->objectService = $objectService;
+        $this->fractal = $fractal;
     }
 
     /**
@@ -75,85 +68,51 @@ class ListenClusteringProcess extends Command
     public function handle()
     {
         Redis::subscribe('clustering', function ($clusters) {
+            Log::info("Clustering ---------------------- " . $clusters);
             $clusters = json_decode($clusters);
 
             if (!$clusters) {
                 return;
             }
-            $totalMongoIds = [];
-            $clusterMongoIds = Arr::pluck($clusters, '_id');
-            $existingClusters = $this->clusterService->listBy(function ($query) use ($clusterMongoIds) {
-                return $query->whereIn('mongo_id', $clusterMongoIds);
-            }, false);
+            $totalIds = [];
 
-            $this->objectService->updateMany('mongo_id', $this->getClusteringTypes($clusters));
-
-            foreach ($clusters as &$cluster) {
-                $existingCluster = Arr::first($existingClusters, function ($existingCluster) use ($cluster) {
-                    return $existingCluster->mongo_id == $cluster->_id;
-                });
-                if (!$existingCluster) {
-                    $identity = null;
-
-                    if (object_get($cluster, 'identity')) {
-                        $identity = $this->identityService->findBy(['mongo_id' => $cluster->identity]);
-                    }
-                    $cluster->id = $this->clusterService->create([
-                        'identity_id' => $identity ? $identity->id : null,
-                        'mongo_id' => $cluster->_id,
-                    ]);
-                } else {
-                    $cluster->id = $existingCluster->id;
-                }
-                $objectMongoIds = Arr::pluck($cluster->objects, 'object');
-
-                $this->objectService->updateBy(function ($query) use ($objectMongoIds) {
-                    return $query->whereIn('mongo_id', $objectMongoIds);
-                }, ['cluster_id' => $cluster->id]);
-
-                $totalMongoIds = array_merge($totalMongoIds, $objectMongoIds);
+            foreach ($clusters as $cluster) {
+                $ids = Arr::pluck($cluster->objects, 'object');
+                $ids = array_map(function ($id) {
+                    return new ObjectId($id);
+                }, $ids);
+                $totalIds = array_merge($totalIds, $ids);
             }
-            $objects = $this->objectService->getFirstObjectsByMongoIds($totalMongoIds);
+            $objects = $this->objectService->listFirstObjectsByIds($totalIds);
             $this->publishClusteringDataToEachProcess($objects);
         });
     }
 
     /**
-     * @param $objects \Illuminate\Support\Collection
+     * @param array $objects
      */
-    public function publishClusteringDataToEachProcess($objects)
+    public function publishClusteringDataToEachProcess(array $objects)
     {
+        $objects = new FractalCollection($objects, new ObjectTransformer());
+        $objects = $this->fractal->createData($objects); // Transform data
+        $objects = $objects->toArray()['data'];
+
         $processesNewFormat = [];
-        $processes = $objects->groupBy('process_id');
+        $processes = collect($objects)->groupBy('process');
 
         foreach ($processes as $processId => $groupedObjects) {
-            $process = $this->processService->getProcessDetail($processId);
+            $processIdString = (string) $processId;
 
+            $process = $this->processService->getProcessDetail($processId);
             $processesNewFormat[] = $process;
-//            $groupedObjects = $this->objectService->assignAppearances($groupedObjects);
 
             // publish objects to process detail
             broadcast(new ClusteringProceeded([
                 'statistic' => $process,
                 'grouped_objects' => $groupedObjects,
-            ], "process.$processId.cluster"));
+            ], "process.$processIdString.cluster"));
         }
         // publish statistical numbers to monitoring page
         broadcast(new AnalysisProceeded($processesNewFormat));
-    }
-
-    public function getClusteringTypes($clusters)
-    {
-        $data = [];
-
-        foreach ($clusters as $cluster) {
-            foreach ($cluster->objects as $obj) {
-                $data[] = [
-                    'mongo_id' => $obj->object,
-                    'clustering_type' => $obj->type
-                ];
-            }
-        }
-        return $data;
     }
 }

@@ -1,7 +1,6 @@
 <?php
 
 use Faker\Factory;
-use Carbon\Carbon;
 use Modules\Process\Models\Process;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -27,7 +26,7 @@ class ProcessSeeder extends Seeder
                 'thumbnail' => 'https://i.imgur.com/MwFcNqZ.png',
                 'description' => $faker->realText(50),
                 'status' => Process::STATUS['stopped'],
-                'created_at' => Carbon::now()
+                'created_at' => dateNow()
             ]);
         }
 

@@ -1,4 +1,3 @@
-let currentFrame = 0;
 let trackIds = [];
 
 // global variables are defined at detail.blade.php
@@ -256,6 +255,8 @@ Echo.channel(`process.${processId}.objects`).listen('.Modules\\Process\\Events\\
 });
 
 Echo.channel(`process.${processId}.cluster`).listen('.Modules\\Process\\Events\\ClusteringProceeded', (res) => {
+    console.log(res);
+
     res.data.grouped_objects.forEach((object) => {
         const $element = $(`.socket-render tbody tr[data-track-id="${object.track_id}"]`);
 
@@ -285,6 +286,7 @@ Echo.channel(`process.${processId}.cluster`).listen('.Modules\\Process\\Events\\
 });
 
 Echo.channel(`process.${processId}.analysis`).listen('.Modules\\Process\\Events\\AnalysisProceeded', (res) => {
+    console.log(res.data.statistic);
     const {
         total_appearances: totalAppearances,
         total_objects: totalObjects,
@@ -304,14 +306,10 @@ Echo.channel(`process.${processId}.progress`).listen('.Modules\\Process\\Events\
         status,
         progress,
         video_result: videoResult,
-        frame_index: frameIndex,
     } = res.data;
 
     globalStatus = status;
 
-    if (!isNaN(frameIndex)) {
-        currentFrame = frameIndex;
-    }
     if (allStatus[status]) {
         const $processStatus = $('.process__status');
         $processStatus.text(allStatus[status]);
@@ -327,11 +325,11 @@ Echo.channel(`process.${processId}.progress`).listen('.Modules\\Process\\Events\
                 title: 'Tiến trình đã hoàn thành',
             });
         }
-        flvPlayer.destroy();
-
+        $('.btn-stop').attr('disabled', true);
         $('.export-statistic__btn').removeAttr('disabled');
         $('.render-video__btn').removeAttr('disabled');
         $('.render-single-object').removeAttr('style');
+        flvPlayer.destroy();
         renderTime();
     } else if (status === 'detecting' || status === 'rendering') {
         const $element = $(`.progress-bar__${status}`);
