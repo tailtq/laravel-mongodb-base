@@ -7,8 +7,8 @@ services:
         ports:
             - 9005:80
             - 6001:6001
-        depends_on:
-            - db
+#        depends_on:
+#            - db
         volumes:
             - ./src:/var/www/app
             - ./deployment/configs/php/php.ini:/usr/local/etc/php/conf.d/php.ini
