@@ -8,26 +8,23 @@ class GenerateModule extends Command
 {
     /**
      * The name and signature of the console command.
-     *
      * @var string
      */
     protected $signature = 'module:generate {moduleName} {moduleNamePlural}
-                                            {--sourceDirectory=app/Templates}
+                                            {--sourceDirectory=infrastructures/Templates}
                                             {--destinationDirectory=modules}';
 
     /**
      * The console command description.
-     *
      * @var string
      */
     protected $description = 'Generate new module.
                         Ex: `php artisan module:generate Process Processes
-                                --sourceDirectory=app/Templates
+                                --sourceDirectory=infrastructures/Templates
                                 --destinationDirectory=modules`';
 
     /**
      * Create a new command instance.
-     *
      * @return void
      */
     public function __construct()
@@ -70,7 +67,7 @@ class GenerateModule extends Command
      * @param $moduleNamePlural
      * @return string
      */
-    private function addModuleName($filePath, $moduleName, $moduleNamePlural)
+    private function addModuleName($filePath, $moduleName, $moduleNamePlural): string
     {
         $file = fopen($filePath, 'r');
         $content = fread($file, filesize($filePath));
@@ -84,10 +81,10 @@ class GenerateModule extends Command
 
     /**
      * Make directories recursively if not exists, then save file
-     * @param $filePath
-     * @param $content
+     * @param string $filePath
+     * @param string $content
      */
-    private function mkdirMkFileSaveContent($filePath, $content)
+    private function mkdirMkFileSaveContent(string $filePath, string $content)
     {
         $paths = explode('/', $filePath);
         unset($paths[count($paths) - 1]);
@@ -100,8 +97,8 @@ class GenerateModule extends Command
     }
 
     /**
-     * @param $filePath
-     * @param $content
+     * @param string $filePath
+     * @param string $content
      */
     private function saveFile(string $filePath, string $content)
     {

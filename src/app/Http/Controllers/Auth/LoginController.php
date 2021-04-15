@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Traits\RequestAPI;
+use Infrastructure\Traits\RequestAPI;
 use Auth;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
@@ -60,31 +60,13 @@ class LoginController extends Controller
             'email' => $request->email,
             'password' => $request->password
         ];
-        $token = $this->loginAIServer($request);
 
         if(Auth::attempt($credentials)) {
-            session(['ai_token' => $token]);
             return $this->sendLoginResponse($request);
         }
 
         $this->incrementLoginAttempts($request);
 
         return $this->sendFailedLoginResponse($request);
-    }
-
-    protected function loginAIServer(Request $request)
-    {
-        $data = $request->only(['email', 'password']);
-
-        $response = $this->sendPOSTRequest(config('app.ai_server') . '/users/login', [], [
-            'X-API-KEY' => config('app.ai_api_key'),
-            'Authorization' => 'Basic ' . base64_encode($data['email'] . ':' . $data['password'])
-        ]);
-
-        if (!$response->status) {
-            return $this->sendFailedLoginResponse($request);
-        }
-
-        return $response->body->token;
     }
 }

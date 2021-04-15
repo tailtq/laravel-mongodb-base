@@ -20,11 +20,6 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
 
 Route::group(['middleware' => ['auth'], 'namespace' => 'App\Http\Controllers'], function () {
     Route::get('/', 'DashboardController@index')->name('dashboard.index');
-
-    Route::group(['prefix' => '/monitors'], function () {
-        Route::get('/', 'MonitorController@index')->name('monitors');
-        Route::post('/new-processes', 'MonitorController@getNewProcesses')->name('monitors.new-processes');
-    });
 });
 
 // 404 for undefined routes

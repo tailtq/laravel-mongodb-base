@@ -66,11 +66,11 @@ return [
 
         'minio' => [
             'driver' => 's3',
-            'key' => config('constants.minio_access_key'),
-            'secret' => config('constants.minio_secret_key'),
+            'key' => env('MINIO_ACCESS_KEY'),
+            'secret' => env('MINIO_SECRET_KEY'),
             'region' => '',
-            'bucket' => config('constants.minio_bucket'),
-            'endpoint' => config('constants.minio_endpoint'),
+            'bucket' => env('MINIO_BUCKET'),
+            'endpoint' => env('MINIO_ENDPOINT'),
             'use_path_style_endpoint' => true,
         ],
 

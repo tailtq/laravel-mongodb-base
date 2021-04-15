@@ -2,8 +2,8 @@
 
 namespace Infrastructure;
 
-use App\Traits\RequestAPI;
-use App\Traits\ResponseTrait;
+use Infrastructure\Traits\RequestAPI;
+use Infrastructure\Traits\ResponseTrait;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;

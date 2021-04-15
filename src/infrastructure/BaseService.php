@@ -2,7 +2,7 @@
 
 namespace Infrastructure;
 
-use App\Traits\RequestAPI;
+use Infrastructure\Traits\RequestAPI;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Infrastructure\Exceptions\CustomException;
@@ -16,11 +16,6 @@ abstract class BaseService
      * @var BaseRepository $repository;
      */
     protected $repository;
-
-    protected function getAIUrl(string $mongoId = null)
-    {
-        return;
-    }
 
     // View handler function
     /**

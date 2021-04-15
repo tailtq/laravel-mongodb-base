@@ -175,10 +175,8 @@ return [
         App\Providers\EventServiceProvider::class,
 
         Modules\Camera\CameraServiceProvider::class,
-        Modules\Identity\IdentityServiceProvider::class,
         Modules\User\UserServiceProvider::class,
         Modules\Media\MediaServiceProvider::class,
-        Modules\Process\ProcessServiceProvider::class,
 
         // initialize last to ignore 404 error
         App\Providers\RouteServiceProvider::class,
@@ -233,8 +231,4 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
     ],
-
-    'ai_server' => env('AI_SERVER', 'http://14.241.120.239:12003/api'),
-
-    'ai_api_key' => env('API_X_API_KEY', '7mM9NvYR7SfmIjejJQFcpw'),
 ];

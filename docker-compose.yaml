@@ -5,24 +5,21 @@ services:
         build: .
         restart: always
         ports:
-            - 9005:80
+            - 9006:80
             - 6001:6001
 #        depends_on:
 #            - db
         volumes:
             - ./src:/var/www/app
             - ./deployment/configs/php/php.ini:/usr/local/etc/php/conf.d/php.ini
-
             - ./deployment/configs/supervisor/run-echo-server.conf:/etc/supervisor/conf.d/run-echo-server.conf
-            - ./deployment/configs/supervisor/redis-listen-progress.conf:/etc/supervisor/conf.d/redis-listen-progress.conf
-            - ./deployment/configs/supervisor/redis-listen-tracking-process.conf:/etc/supervisor/conf.d/redis-listen-tracking-process.conf
-            - ./deployment/configs/supervisor/redis-listen-clustering-process.conf:/etc/supervisor/conf.d/redis-listen-clustering-process.conf
-
+            - ./deployment/configs/supervisor/redis-listen-event.conf:/etc/supervisor/conf.d/redis-listen-event.conf
 #            - ./deployment/configs/crontab.conf:/etc/crontabs/root
             - ./deployment/configs/nginx/nginx-host.conf:/etc/nginx/sites-enabled/default.conf
             - ./deployment/configs/nginx/nginx.conf:/etc/nginx/nginx.conf
         environment:
             - PHP_MEM_LIMIT=2048M
+
 #    db:
 #        image: mongo
 #        restart: always

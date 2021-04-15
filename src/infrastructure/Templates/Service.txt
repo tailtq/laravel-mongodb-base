@@ -1,0 +1,18 @@
+<?php
+
+namespace Modules\{{moduleName}}\Services;
+
+use Infrastructure\BaseService;
+use Modules\{{moduleName}}\Repositories\{{moduleName}}Repository;
+
+class {{moduleName}}Service extends BaseService
+{
+    /**
+     * {{moduleName}}Service constructor.
+     * @param \Modules\{{moduleName}}\Repositories\{{moduleName}}Repository $repository
+     */
+    public function __construct({{moduleName}}Repository $repository)
+    {
+        $this->repository = $repository;
+    }
+}

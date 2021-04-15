@@ -2,6 +2,8 @@
 
 namespace Modules\Media\Controllers;
 
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Infrastructure\BaseController;
@@ -14,7 +16,7 @@ class MediaController extends BaseController
 {
     /**
      * MediaController constructor.
-     * @param \Modules\Media\Services\MediaService $service
+     * @param MediaService $service
      */
     public function __construct(MediaService $service)
     {
@@ -23,8 +25,8 @@ class MediaController extends BaseController
     }
 
     /**
-     * @param \Modules\Media\Requests\CreateMediaRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param CreateMediaRequest $request
+     * @return JsonResponse
      */
     public function storeNew(CreateMediaRequest $request)
     {
@@ -42,8 +44,8 @@ class MediaController extends BaseController
     }
 
     /**
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
+     * @param Request $request
+     * @return JsonResponse|RedirectResponse
      */
     public function createThumbnail(Request $request)
     {

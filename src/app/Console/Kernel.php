@@ -3,7 +3,7 @@
 namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
-use Modules\Process\Commands\ListenProgress;
+use Modules\Process\Commands\ListenEvent;
 use Modules\Process\Commands\ListenTrackingProcess;
 use Modules\Process\Commands\ListenClusteringProcess;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -17,7 +17,7 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         ListenClusteringProcess::class,
-        ListenProgress::class,
+        ListenEvent::class,
         ListenTrackingProcess::class,
     ];
 

@@ -2,7 +2,7 @@
 
 namespace Modules\Media\Requests;
 
-use App\Http\Requests\BaseCRUDRequest;
+use Infrastructure\Requests\BaseCRUDRequest;;
 
 class CreateMediaRequest extends BaseCRUDRequest
 {

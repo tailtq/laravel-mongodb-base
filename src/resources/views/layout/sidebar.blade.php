@@ -28,31 +28,10 @@
                 </a>
             </li>
 
-            <li class="nav-item {{ active_class(['identities', 'identities/*']) }}">
-                <a class="nav-link" href="{{ route('identities') }}">
-                    <i class="link-icon" data-feather="user"></i>
-                    <span class="link-title">Quản lý định danh</span>
-                </a>
-            </li>
-
             <li class="nav-item {{ active_class(['cameras', 'cameras/*']) }}">
                 <a class="nav-link" href="{{ route('cameras') }}">
                     <i class="mdi mdi-cctv link-icon"></i>
                     <span class="link-title">Quản lý camera</span>
-                </a>
-            </li>
-
-            <li class="nav-item {{ active_class(['monitors', 'monitors/*']) }}">
-                <a class="nav-link" href="{{ route('monitors') }}">
-                    <i class="mdi mdi-monitor-eye link-icon"></i>
-                    <span class="link-title">Màn hình giám sát</span>
-                </a>
-            </li>
-
-            <li class="nav-item {{ active_class(['processes', 'processes/*']) }}">
-                <a class="nav-link" href="{{ route('processes') }}">
-                    <i class="link-icon" data-feather="activity"></i>
-                    <span class="link-title">Thực thi nhận diện</span>
                 </a>
             </li>
 

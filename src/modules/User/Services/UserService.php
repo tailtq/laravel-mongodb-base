@@ -4,7 +4,6 @@ namespace Modules\User\Services;
 
 use Illuminate\Support\Facades\Hash;
 use Infrastructure\BaseService;
-use Infrastructure\Exceptions\CustomException;
 use Modules\User\Repositories\UserRepository;
 
 class UserService extends BaseService

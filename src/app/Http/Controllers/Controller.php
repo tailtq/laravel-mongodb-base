@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Traits\MongoDB;
-use App\Traits\ResponseTrait;
+use Infrastructure\Traits\MongoDB;
+use Infrastructure\Traits\ResponseTrait;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
-use App\Traits\HandleUploadFile;
+use Infrastructure\Traits\HandleUploadFile;
 
 class Controller extends BaseController
 {

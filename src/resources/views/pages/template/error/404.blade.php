@@ -1,4 +1,4 @@
-@extends('layout.master2')
+@extends('layout.auth-master')
 
 @section('content')
 <div class="page-content d-flex align-items-center justify-content-center">

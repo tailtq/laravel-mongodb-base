@@ -2,8 +2,8 @@
 
 namespace Infrastructure;
 
-use App\Helpers\CommonHelper;
-use App\Traits\MongoDB;
+use Infrastructure\Helpers\CommonHelper;
+use Infrastructure\Traits\MongoDB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +20,6 @@ class BaseRepository
     public function __construct(string $model)
     {
         // dynamically switch between Eloquent and Query Builder
-        // clone $this->model when using
         $this->model = app($model);
         $this->collectionName = $this->model->getTable();
     }
