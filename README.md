@@ -1,43 +1,25 @@
-# LARAVEL RESTFul APIs Boilerplate
+# Laravel Mongodb Application
 
-## About
+## Setup steps
 
-The boilerplate has been build with a purpose to help developers develop an API module quickly.
+### Prerequisites
 
-## Feature supports
+- Docker
+- Docker-compose
+- NodeJS
+- Npm
 
+1. Clone source from repository url
 
-## Framework & Package we used
+2. Run docker-compose: `docker-comopse up -d`
 
-**framework**
-
-- Laravel 7.4
-
-**packages**
-
-- Passports
-
-- laravel-json-api
-
-- laravel-permission
-
-
-## Setup & Run
-
-**setup**
-
-1. Install package passport 
-
-```
-php artisan passport:install
-
+3. Install Laravel packages:
+```shell
+docker-compose exec api bash
+composer update
+exit
 ```
 
-After running this command, add the Laravel\Passport\HasApiTokens trait to your App\User model.
+4. Create `.env` from `.env.example` and make sure all the variables are correct
 
-Next, you should call the Passport::routes method within the boot method of your AuthServiceProvider
-
-Finally, in your config/auth.php configuration file, you should set the driver option of the api authentication guard to passport.
-
-
-## Contributing
+5. Build CSS and JS: `npm run production`
